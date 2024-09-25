@@ -8,6 +8,7 @@ namespace KOIFARMSHOP.Common
 {
     public class Const
     {
+        public static string APIEndPoint = "https://localhost:7176/api/";
         #region Error Codes
 
         public static int ERROR_EXCEPTION = -4;
