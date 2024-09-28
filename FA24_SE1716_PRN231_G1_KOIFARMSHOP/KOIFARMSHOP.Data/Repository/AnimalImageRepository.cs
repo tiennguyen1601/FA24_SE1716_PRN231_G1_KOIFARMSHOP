@@ -13,5 +13,6 @@ namespace KOIFARMSHOP.Data.Repository
     {
         public AnimalImageRepository() { }
         public AnimalImageRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
+
     }
 }

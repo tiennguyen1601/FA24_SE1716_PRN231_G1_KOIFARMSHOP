@@ -13,5 +13,6 @@ namespace KOIFARMSHOP.Data.Repository
     {
         public ConsignmentRepository() { }
         public ConsignmentRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
+
     }
 }

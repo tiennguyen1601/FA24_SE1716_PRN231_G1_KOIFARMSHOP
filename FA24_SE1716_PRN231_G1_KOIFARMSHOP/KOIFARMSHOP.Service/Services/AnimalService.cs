@@ -50,7 +50,7 @@ namespace KOIFARMSHOP.Service.Services
             try
             {
                 int result = -1;
-                var animalTmp = _unitOfWork.AnimalRepository.GetByIdAsync(animal.AnimalId);
+                var animalTmp = await _unitOfWork.AnimalRepository.GetByIdAsync(animal.AnimalId);
                 if (animalTmp != null)
                 {
                     #region Business Rule
@@ -60,7 +60,7 @@ namespace KOIFARMSHOP.Service.Services
 
                     if (result > 0)
                     {
-                        return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
+                        return new BusinessResult(Const.SUCCESS_UPDATE_CODE, Const.SUCCESS_UPDATE_MSG, new List<Animal>());
                     }
                     else
                     {
