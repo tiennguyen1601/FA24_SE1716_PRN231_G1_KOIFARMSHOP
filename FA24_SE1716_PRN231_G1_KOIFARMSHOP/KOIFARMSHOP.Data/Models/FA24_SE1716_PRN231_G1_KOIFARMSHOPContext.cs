@@ -313,7 +313,6 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
             entity.Property(e => e.Brand).HasMaxLength(100);
-            entity.Property(e => e.BulkDiscount).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")

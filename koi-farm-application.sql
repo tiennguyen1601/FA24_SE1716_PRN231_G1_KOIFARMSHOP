@@ -51,7 +51,6 @@ CREATE TABLE Products (
     Brand NVARCHAR(100),
     Weight DECIMAL(18, 2),
     Discount DECIMAL(5, 2),
-    BulkDiscount DECIMAL(5, 2),
     ExpiryDate DATE,
     ManufacturingDate DATE,
     CategoryID INT FOREIGN KEY REFERENCES Category(CategoryID),
