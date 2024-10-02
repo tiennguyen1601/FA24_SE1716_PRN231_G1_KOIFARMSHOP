@@ -2,6 +2,7 @@ using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +18,14 @@ builder.Services.AddScoped<IConsignmentService, ConsignmentService>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<IBusinessResult, BusinessResult>();
 builder.Services.AddDbContext<FA24_SE1716_PRN231_G1_KOIFARMSHOPContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
-
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

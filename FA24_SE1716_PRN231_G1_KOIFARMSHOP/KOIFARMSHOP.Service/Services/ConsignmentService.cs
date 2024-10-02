@@ -26,7 +26,7 @@ namespace KOIFARMSHOP.Service.Services
         }
         public async Task<IBusinessResult> GetAll()
         {
-            var list = await _unitOfWork.ConsignmentRepository.GetAllAsync();
+            var list = await _unitOfWork.ConsignmentRepository.GetAllDetail();
             var filteredList = list.Where(c => c.Status != "Deleted").ToList();
             if (list == null)
             {
@@ -41,7 +41,7 @@ namespace KOIFARMSHOP.Service.Services
         {
             #region Business rule
             #endregion
-            var list = await _unitOfWork.ConsignmentRepository.GetByIdAsync(id);
+            var list = await _unitOfWork.ConsignmentRepository.GetByIdDetail(id);
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Consignment>());

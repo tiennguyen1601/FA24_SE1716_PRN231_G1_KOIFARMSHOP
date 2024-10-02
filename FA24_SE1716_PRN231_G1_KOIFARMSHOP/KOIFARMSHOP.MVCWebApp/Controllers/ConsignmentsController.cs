@@ -49,27 +49,31 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Consignments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            var consignment = new Consignment();
             using (var httpClient = new HttpClient())
             {
-                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Consignments/" + id))
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Consignments/" + id))
                 {
-                    if (respone.IsSuccessStatusCode)
+                    if (response.IsSuccessStatusCode)
                     {
-                        var content = await respone.Content.ReadAsStringAsync();
+                        var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
                         if (result != null && result.Data != null)
                         {
-                            var data = JsonConvert.DeserializeObject<Consignment>(result.Data.ToString());
-                            return View(data);
+                            consignment = JsonConvert.DeserializeObject<Consignment>(result.Data.ToString());
                         }
                     }
-
                 }
             }
 
-            return View(new Consignment());
+            ViewData["AnimalId"] = new SelectList(_context.Animals, "AnimalId", "AnimalId", consignment.AnimalId);
+            ViewData["CustomerName"] = new SelectList(_context.Customers, "CustomerId", "Name", consignment.CustomerId);
+            ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId", consignment.OrderId);
+
+            return View(consignment);
         }
+
 
         // GET: Consignments/Create
         public IActionResult Create()
