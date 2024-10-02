@@ -29,18 +29,21 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             using (var httpClient = new HttpClient())
             {
                 using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals"))
+                {
                 { 
                     if (respone.IsSuccessStatusCode)
                     {
                         var content = await respone.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
+                        if (result != null && result.Data != null)
                         if(result != null && result.Data != null)
                         {
                             var data = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
                             return View(data);
                         }
                     }
+
             
                 }
             }
@@ -89,11 +92,17 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
 
         // GET: Animals/Create
+        public async Task<IActionResult> Create()
+        {
+            var animals = new List<Animal>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals"))
         public async  Task<IActionResult> Create()
         {
-            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+                ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
                 ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-               return View();
+                return View();
         }
 
 
@@ -126,6 +135,36 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         var content = await respone.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
+                        if (result != null && result.Data != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
+                            return View(data);
+                        }
+                    }
+
+                }
+            }
+            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+
+            return View(new List<Animal>());
+        }
+
+        // POST: Animals/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
+        {
+
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(animal);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
                         if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
                         {
                             savaStatus = true;
@@ -185,6 +224,23 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return View(animal);
         }
 
+        // GET: Animals/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var animal = await _context.Animals.FindAsync(id);
+            if (animal == null)
+            {
+                return NotFound();
+            }
+            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
+            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
+            return View(animal);
+        }
 
         // POST: Animals/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -193,6 +249,53 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
         {
+            if (id != animal.AnimalId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(animal);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!AnimalExists(animal.AnimalId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
+            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
+            return View(animal);
+        }
+
+        // GET: Animals/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var animal = await _context.Animals
+                .Include(a => a.CreatedByNavigation)
+                .Include(a => a.ModifiedByNavigation)
+                .FirstOrDefaultAsync(m => m.AnimalId == id);
+            if (animal == null)
+            {
+                return NotFound();
+            }
+
             
 
             bool updateStatus = false;
@@ -260,6 +363,14 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var animal = await _context.Animals.FindAsync(id);
+            if (animal != null)
+            {
+                _context.Animals.Remove(animal);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
             bool deleteStatus = false;
 
             using (var httpClient = new HttpClient())
@@ -297,6 +408,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             return _context.Animals.Any(e => e.AnimalId == id);
         }
-
+        
     }
 }
+

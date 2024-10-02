@@ -3,14 +3,18 @@ using KOIFARMSHOP.Data;
 using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data.Models;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IAnimalService
     {
         Task<IBusinessResult> GetAll();
-        Task<IBusinessResult> GetByID(int id);
+        Task<IBusinessResult> GetByID(string id);
         Task<IBusinessResult> Save(Animal animal);
         Task<IBusinessResult> DeleteByID(int id);
+        Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
+
+
     }
     public class AnimalService : IAnimalService
     {
@@ -19,22 +23,23 @@ namespace KOIFARMSHOP.Service.Services
         {
             _unitOfWork ??= new UnitOfWork();
         }
-        public async Task<IBusinessResult> GetAll() {
+        public async Task<IBusinessResult> GetAll()
+        {
             var list = await _unitOfWork.AnimalRepository.GetAllAsync();
             if (list == null)
             {
-                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG,new List<Animal>());
+                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
             }
             else
             {
                 return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
             }
         }
-        public async Task<IBusinessResult> GetByID(int id)
+        public async Task<IBusinessResult> GetByID(string id)
         {
             #region Business rule
             #endregion
-            var list = await _unitOfWork.AnimalRepository.GetByIdAsync(id);
+            var list = _unitOfWork.AnimalImageRepository.GetByIdAsync(id);
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
@@ -50,7 +55,7 @@ namespace KOIFARMSHOP.Service.Services
             try
             {
                 int result = -1;
-                var animalTmp = await _unitOfWork.AnimalRepository.GetByIdAsync(animal.AnimalId);
+                var animalTmp = _unitOfWork.AnimalRepository.GetByIdAsync(animal.AnimalId);
                 if (animalTmp != null)
                 {
                     #region Business Rule
@@ -60,7 +65,7 @@ namespace KOIFARMSHOP.Service.Services
 
                     if (result > 0)
                     {
-                        return new BusinessResult(Const.SUCCESS_UPDATE_CODE, Const.SUCCESS_UPDATE_MSG, new List<Animal>());
+                        return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
                     }
                     else
                     {
@@ -87,14 +92,16 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-        public async Task<IBusinessResult> DeleteByID(int id)
+        public async Task<IBusinessResult> DeleteByID(string id)
         {
             try
             {
                 var animalById = await _unitOfWork.AnimalRepository.GetByIdAsync(id);
-                if (animalById == null) {
+                if (animalById == null)
+                {
                     return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new Animal());
-                }else
+                }
+                else
                 {
                     var result = await _unitOfWork.AnimalRepository.RemoveAsync(animalById);
                     if (result)
@@ -106,8 +113,68 @@ namespace KOIFARMSHOP.Service.Services
                         return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animalById);
                     }
                 }
-            }catch (Exception ex) { return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString()); }
+            }
+            catch (Exception ex) { return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString()); }
         }
 
+        public async Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds)
+        {
+            try
+            {
+                // Fetch koi fish details for all provided IDs
+                var koiFishList = new List<Animal>();
+                foreach (var koiFishId in koiFishIds)
+                {
+                    var koiFish = await _unitOfWork.AnimalRepository.GetByIdAsync(koiFishId);
+                    if (koiFish != null)
+                    {
+                        koiFishList.Add(koiFish);
+                    }
+                }
+
+                // Check if we have enough data to compare
+                if (koiFishList.Count < 2)
+                {
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, "At least two koi fish are required for comparison.", koiFishList);
+                }
+
+                // Check if we have enough data to compare
+                if (koiFishList.Count < 2)
+                {
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, "At least two koi fish are required for comparison.", koiFishList);
+                }
+
+                // Sort the koi fish by price in ascending order
+                koiFishList = koiFishList.OrderBy(k => k.Price).ToList();
+
+                // Create a comparison message
+                string comparisonMessage = "Comparison of Koi Fish Prices:\n";
+                for (int i = 0; i < koiFishList.Count - 1; i++)
+                {
+                    var currentKoiFish = koiFishList[i];
+                    var nextKoiFish = koiFishList[i + 1];
+                    if (currentKoiFish.Price < nextKoiFish.Price)
+                    {
+                        comparisonMessage += $"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) is more expensive than koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species}).\n";
+                    }
+                    else if (currentKoiFish.Price == nextKoiFish.Price)
+                    {
+                        comparisonMessage += $"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) has the same price as koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species}).\n";
+                    }
+                }
+
+                // Return the list of koi fish with comparison message
+                var result = new
+                {
+                    KoiFishList = koiFishList,
+                    ComparisonMessage = comparisonMessage
+                };
+                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, result);
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
+            }
+        }
     }
 }
