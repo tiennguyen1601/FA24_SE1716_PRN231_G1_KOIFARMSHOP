@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 //Dependency Injection
 builder.Services.AddScoped<FA24_SE1716_PRN231_G1_KOIFARMSHOPContext>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<IConsignmentService, ConsignmentService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
