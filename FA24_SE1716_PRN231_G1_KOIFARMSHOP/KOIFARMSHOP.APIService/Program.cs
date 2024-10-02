@@ -1,6 +1,7 @@
 using KOIFARMSHOP.Data;
 using KOIFARMSHOP.Data.Mapper;
 using KOIFARMSHOP.Data.Models;
+using KOIFARMSHOP.Service;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Services.CloudinaryServices;
