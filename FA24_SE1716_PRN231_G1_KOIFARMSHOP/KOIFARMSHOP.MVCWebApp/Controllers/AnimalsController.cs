@@ -158,10 +158,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
         {
-            if (id != animal.AnimalId)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {

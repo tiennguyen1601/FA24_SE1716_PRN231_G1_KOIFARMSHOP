@@ -9,7 +9,7 @@ namespace KOIFARMSHOP.Service.Services
     public interface IAnimalService
     {
         Task<IBusinessResult> GetAll();
-        Task<IBusinessResult> GetByID(string id);
+        Task<IBusinessResult> GetByID(int id);
         Task<IBusinessResult> Save(Animal animal);
         Task<IBusinessResult> DeleteByID(string id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
@@ -35,11 +35,11 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
             }
         }
-        public async Task<IBusinessResult> GetByID(string id)
+        public async Task<IBusinessResult> GetByID(int id)
         {
             #region Business rule
             #endregion
-            var list = _unitOfWork.AnimalImageRepository.GetByIdAsync(id);
+            var list = _unitOfWork.AnimalRepository.GetByIdAsync(id);
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
@@ -92,7 +92,7 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-        public async Task<IBusinessResult> DeleteByID(string id)
+        public async Task<IBusinessResult> DeleteByID(int id)
         {
             try
             {
