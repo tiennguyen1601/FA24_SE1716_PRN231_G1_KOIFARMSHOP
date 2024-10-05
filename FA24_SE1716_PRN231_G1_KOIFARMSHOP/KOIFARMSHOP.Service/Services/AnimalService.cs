@@ -11,7 +11,7 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(string id);
         Task<IBusinessResult> Save(Animal animal);
-        Task<IBusinessResult> DeleteByID(int id);
+        Task<IBusinessResult> DeleteByID(string id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
 
 
