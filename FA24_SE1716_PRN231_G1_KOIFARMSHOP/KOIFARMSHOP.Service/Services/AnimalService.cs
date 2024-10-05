@@ -11,7 +11,7 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(int id);
         Task<IBusinessResult> Save(Animal animal);
-        Task<IBusinessResult> DeleteByID(string id);
+        Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
 
 
@@ -39,7 +39,7 @@ namespace KOIFARMSHOP.Service.Services
         {
             #region Business rule
             #endregion
-            var list = _unitOfWork.AnimalRepository.GetByIdAsync(id);
+            var list = await _unitOfWork.AnimalRepository.GetByIdAsync(id);
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
@@ -123,43 +123,50 @@ namespace KOIFARMSHOP.Service.Services
             {
                 // Fetch koi fish details for all provided IDs
                 var koiFishList = new List<Animal>();
+                var validKoiFishIds = new List<int>();
                 foreach (var koiFishId in koiFishIds)
                 {
                     var koiFish = await _unitOfWork.AnimalRepository.GetByIdAsync(koiFishId);
                     if (koiFish != null)
                     {
                         koiFishList.Add(koiFish);
+                        validKoiFishIds.Add(koiFishId); // Add to valid ID list
                     }
                 }
 
-                // Check if we have enough data to compare
-                if (koiFishList.Count < 2)
+                // Check if we have any valid koi fish
+                if (koiFishList.Count == 0)
                 {
-                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, "At least two koi fish are required for comparison.", koiFishList);
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE,
+                        "No valid koi fish found for the given IDs.",
+                        koiFishList);
                 }
 
                 // Check if we have enough data to compare
                 if (koiFishList.Count < 2)
                 {
-                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, "At least two koi fish are required for comparison.", koiFishList);
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE,
+                        "At least two koi fish are required for comparison.",
+                        koiFishList);
                 }
 
                 // Sort the koi fish by price in ascending order
                 koiFishList = koiFishList.OrderBy(k => k.Price).ToList();
 
                 // Create a comparison message
-                string comparisonMessage = "Comparison of Koi Fish Prices:\n";
+                List<string> comparisonMessage = new List<string>();
+                comparisonMessage.Add("Comparison of Koi Fish Prices:");
                 for (int i = 0; i < koiFishList.Count - 1; i++)
                 {
                     var currentKoiFish = koiFishList[i];
                     var nextKoiFish = koiFishList[i + 1];
                     if (currentKoiFish.Price < nextKoiFish.Price)
                     {
-                        comparisonMessage += $"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) is more expensive than koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species}).\n";
+                        comparisonMessage.Add($"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) is more expensive than koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species})");
                     }
                     else if (currentKoiFish.Price == nextKoiFish.Price)
                     {
-                        comparisonMessage += $"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) has the same price as koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species}).\n";
+                        comparisonMessage.Add($"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) has the same price as koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species}).");
                     }
                 }
 

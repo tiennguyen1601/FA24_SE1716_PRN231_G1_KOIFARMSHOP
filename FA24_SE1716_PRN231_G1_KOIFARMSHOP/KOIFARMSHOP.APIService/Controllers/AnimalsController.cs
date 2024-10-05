@@ -34,7 +34,7 @@ namespace KOIFARMSHOP.APIService.Controllers
 
         // GET: api/Animals/5
         [HttpGet("{id}")]
-        public async Task<IBusinessResult> GetAnimal(string id)
+        public async Task<IBusinessResult> GetAnimal(int id)
         {
             var animal = await _animalService.GetByID(id);
 
@@ -60,7 +60,7 @@ namespace KOIFARMSHOP.APIService.Controllers
 
         // DELETE: api/Animals/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAnimal(string id)
+        public async Task<IActionResult> DeleteAnimal(int id)
         {
             var animal = await _animalService.GetByID(id);
             if (animal == null)
@@ -73,7 +73,7 @@ namespace KOIFARMSHOP.APIService.Controllers
         }
 
         [HttpPost("CompareMultipleFish")]
-        public async Task<IActionResult> CompareMultipleAnimal(List<string> ids)
+        public async Task<IActionResult> CompareMultipleAnimal(List<int> ids)
         {
             var koiFishList = new List<Animal>();
 
