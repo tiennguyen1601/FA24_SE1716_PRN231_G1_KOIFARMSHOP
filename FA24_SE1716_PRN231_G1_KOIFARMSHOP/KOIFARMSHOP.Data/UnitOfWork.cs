@@ -78,7 +78,7 @@ namespace KOIFARMSHOP.Data
         {
             get { return promotionRepository ??= new PromotionRepository(context); }
         }
-        private StaffRepository StaffRepository
+        public StaffRepository StaffRepository
         {
             get { return staffRepository ??= new StaffRepository(context); }
         }
