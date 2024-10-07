@@ -29,22 +29,18 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             using (var httpClient = new HttpClient())
             {
                 using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals"))
-                {
                 { 
                     if (respone.IsSuccessStatusCode)
                     {
                         var content = await respone.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
                         if(result != null && result.Data != null)
                         {
                             var data = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
                             return View(data);
                         }
                     }
-
-            
                 }
             }
             return View(new List<Animal>());
@@ -98,12 +94,15 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             using (var httpClient = new HttpClient())
             {
                 using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals"))
-        public async  Task<IActionResult> Create()
-        {
+                {
+
+                }
+            }
                 ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
                 ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
                 return View();
         }
+          
 
 
         // POST: Animals/Create
@@ -113,17 +112,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Animal animal)
         {
-
-
-            //    if (ModelState.IsValid)
-            //    {
-            //        _context.Add(animal);
-            //        await _context.SaveChangesAsync();
-            //        return RedirectToAction(nameof(Index));
-            //    }
-            //    ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
-            //    ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
-            //    return View(animal);
             bool savaStatus = false;
 
             using (var httpClient = new HttpClient())
@@ -152,46 +140,25 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
         // POST: Animals/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
-        {
-
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(animal);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-                        if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
-                        {
-                            savaStatus = true;
-                        }
-                        else
-                        {
-                            savaStatus = false;
-                        }
-                    }
-
-
-                }
-            }
-
-            if (savaStatus)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-                ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-                return View(animal);
-            }
-
-
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        using (var httpClient = new HttpClient())
+        //        {
+        //            var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Animals", animal);
+        //            if (response.IsSuccessStatusCode)
+        //            {
+        //                return RedirectToAction(nameof(Index));
+        //            }
+        //        }
+        //    }
+        //    ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+        //    ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+        //    return View(animal);
+        //}
 
         // GET: Animals/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -333,30 +300,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             }
         }
 
-
-        // GET: Animals/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            var animal = new Animal();
-            using (var httpClient = new HttpClient())
-            {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Animals/{id}"))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                        if (result != null && result.Status == Const.SUCCESS_UPDATE_CODE)
-                        {
-                           animal = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
-                        }
-                        
-                    }
-                }
-            }
-            return View(animal);
-        }
 
         // POST: Animals/Delete/5
         [HttpPost, ActionName("Delete")]

@@ -13,5 +13,16 @@ namespace KOIFARMSHOP.Data.Repository
     {
         public CustomerRepository() { }
         public CustomerRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
+
+        public async Task<Customer> GetCustomerByUsername(string username)
+        {
+            try
+            {
+                return await _context.Customers.FirstOrDefaultAsync(x => x.Username.Equals(username));
+            }catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
