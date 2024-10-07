@@ -10,7 +10,6 @@ using KOIFARMSHOP.Common;
 using Newtonsoft.Json;
 using KOIFARMSHOP.Service.Base;
 using System.Net.Http;
-using System.Data;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -32,7 +31,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 { 
                     if (respone.IsSuccessStatusCode)
                     {
-                        var content = await respone.Content.ReadAsStringAsync();
+                        var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
                         if(result != null && result.Data != null)
@@ -47,48 +46,35 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
 
         // GET: Animals/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            //if (id == null)
-            //{
-            //    return NotFound();
-            //}
+            if (id == 0)
+            {
+                return NotFound();
+            }
 
-            //var animal = await _context.Animals
-            //    .Include(a => a.CreatedByNavigation)
-            //    .Include(a => a.ModifiedByNavigation)
-            //    .FirstOrDefaultAsync(m => m.AnimalId == id);
-            //if (animal == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //return View(animal);
             using (var httpClient = new HttpClient())
             {
-                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals/" + id))
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Animals/" + id))
                 {
-                    if (respone.IsSuccessStatusCode)
+                    if (response.IsSuccessStatusCode)
                     {
-                        var content = await respone.Content.ReadAsStringAsync();
+                        var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
+                        if (result?.Data != null)
                         {
                             var data = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
                             return View(data);
                         }
                     }
-
                 }
             }
             return View(new Animal());
-
-
         }
 
         // GET: Animals/Create
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             var staffList = await GetStaff();
             ViewData["CreatedBy"] = new SelectList(staffList, "StaffId", "FullName");
@@ -98,10 +84,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
           
 
-
         // POST: Animals/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Animal animal)
@@ -111,17 +94,16 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                using (var respone = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Animals", animal))
+                using (var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Animals", animal))
                 {
-                    if (respone.IsSuccessStatusCode)
+                    if (response.IsSuccessStatusCode)
                     {
-                        var content = await respone.Content.ReadAsStringAsync();
+                        var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
+                        if (result?.Status == Const.SUCCESS_CREATE_CODE)
                         {
-                            var data = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
-                            return View(data);
+                            saveStatus = true;
                         }
                     }
 
@@ -138,8 +120,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                 return View(animal);
             }
-
-
         }
 
         // POST: Animals/Create
@@ -167,6 +147,11 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Animals/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
+            if (id == 0)
+            {
+                return NotFound();
+            }
+
             Animal animal = null;
             var staff = await GetStaff();
             
@@ -179,7 +164,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
+                        if (result?.Data != null)
                         {
                             animal = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
                         }
@@ -197,35 +182,11 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return View(animal);
         }
 
-        // GET: Animals/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var animal = await _context.Animals.FindAsync(id);
-            if (animal == null)
-            {
-                return NotFound();
-            }
-            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
-            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
-            return View(animal);
-        }
-
         // POST: Animals/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
         {
-            if (id != animal.AnimalId)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -253,9 +214,9 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
 
         // GET: Animals/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
+            if (id == 0)
             {
                 return NotFound();
             }
@@ -378,4 +339,3 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
     }
 }
-
