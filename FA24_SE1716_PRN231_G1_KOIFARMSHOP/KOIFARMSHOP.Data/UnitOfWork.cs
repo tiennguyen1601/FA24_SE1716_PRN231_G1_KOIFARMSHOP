@@ -74,7 +74,7 @@ namespace KOIFARMSHOP.Data
         {
             get { return productImageRepository ??= new ProductImageRepository(context); }
         }
-        private PromotionRepository PromotionRepository
+        public PromotionRepository PromotionRepository
         {
             get { return promotionRepository ??= new PromotionRepository(context); }
         }

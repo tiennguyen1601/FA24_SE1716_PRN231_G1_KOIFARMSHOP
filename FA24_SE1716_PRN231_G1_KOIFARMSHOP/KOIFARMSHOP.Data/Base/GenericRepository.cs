@@ -30,6 +30,7 @@ namespace KOIFARMSHOP.Data.Base
         {
             return await _context.Set<T>().ToListAsync();
         }
+
         public void Create(T entity)
         {
             _context.Add(entity);

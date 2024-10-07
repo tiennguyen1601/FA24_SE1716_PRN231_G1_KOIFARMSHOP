@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
+using KOIFARMSHOP.Service.Services;
+using KOIFARMSHOP.Service.Base;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -13,95 +15,96 @@ namespace KOIFARMSHOP.APIService.Controllers
     [ApiController]
     public class StaffsController : ControllerBase
     {
-        private readonly FA24_SE1716_PRN231_G1_KOIFARMSHOPContext _context;
+        //private readonly FA24_SE1716_PRN231_G1_KOIFARMSHOPContext _context;
+        private readonly IStaffService _staffService;
 
-        public StaffsController(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context)
+        public StaffsController(IStaffService staffService)
         {
-            _context = context;
+            _staffService = staffService;
         }
 
         // GET: api/Staffs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Staff>>> GetStaff()
+        public async Task<IBusinessResult> GetStaff()
         {
-            return await _context.Staff.ToListAsync();
+            return await _staffService.GetAll();
         }
 
-        // GET: api/Staffs/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Staff>> GetStaff(int id)
-        {
-            var staff = await _context.Staff.FindAsync(id);
+        //// GET: api/Staffs/5
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Staff>> GetStaff(int id)
+        //{
+        //    var staff = await _context.Staff.FindAsync(id);
 
-            if (staff == null)
-            {
-                return NotFound();
-            }
+        //    if (staff == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return staff;
-        }
+        //    return staff;
+        //}
 
-        // PUT: api/Staffs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutStaff(int id, Staff staff)
-        {
-            if (id != staff.StaffId)
-            {
-                return BadRequest();
-            }
+        //// PUT: api/Staffs/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutStaff(int id, Staff staff)
+        //{
+        //    if (id != staff.StaffId)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(staff).State = EntityState.Modified;
+        //    _context.Entry(staff).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StaffExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!StaffExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        // POST: api/Staffs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Staff>> PostStaff(Staff staff)
-        {
-            _context.Staff.Add(staff);
-            await _context.SaveChangesAsync();
+        //// POST: api/Staffs
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<Staff>> PostStaff(Staff staff)
+        //{
+        //    _context.Staff.Add(staff);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetStaff", new { id = staff.StaffId }, staff);
-        }
+        //    return CreatedAtAction("GetStaff", new { id = staff.StaffId }, staff);
+        //}
 
-        // DELETE: api/Staffs/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStaff(int id)
-        {
-            var staff = await _context.Staff.FindAsync(id);
-            if (staff == null)
-            {
-                return NotFound();
-            }
+        //// DELETE: api/Staffs/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteStaff(int id)
+        //{
+        //    var staff = await _context.Staff.FindAsync(id);
+        //    if (staff == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Staff.Remove(staff);
-            await _context.SaveChangesAsync();
+        //    _context.Staff.Remove(staff);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        private bool StaffExists(int id)
-        {
-            return _context.Staff.Any(e => e.StaffId == id);
-        }
+        //private bool StaffExists(int id)
+        //{
+        //    return _context.Staff.Any(e => e.StaffId == id);
+        //}
     }
 }
