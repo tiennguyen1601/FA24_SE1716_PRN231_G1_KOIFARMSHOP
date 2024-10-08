@@ -1,4 +1,6 @@
-﻿using KOIFARMSHOP.Data.Base;
+﻿using AutoMapper;
+using KOIFARMSHOP.Data.Base;
+using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,13 +14,19 @@ namespace KOIFARMSHOP.Data.Repository
     public class OrderRepository : GenericRepository<Order>
     {
         public OrderRepository() { }
-        public OrderRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
+        public OrderRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context)
+        {
+            _context = context;
 
-
+        }
         public async Task<Order> GetByIdDetail(int id)
         {
             var order = await _context.Orders
-            .Include(c => c.OrderDetails)
+            .Include(o => o.Customer)
+            .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Animal)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
             .FirstOrDefaultAsync(c => c.OrderId == id);
 
             return order;
@@ -26,11 +34,18 @@ namespace KOIFARMSHOP.Data.Repository
 
         public async Task<List<Order>> GetAllDetail()
         {
-            var order = await _context.Orders
-            .Include(c => c.OrderDetails)
+            var orders = await _context.Orders
+            .Include(o => o.Customer)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Animal)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
                 .ToListAsync();
 
-            return order;
+            return orders;
         }
+
+
+
     }
 }

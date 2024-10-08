@@ -1,13 +1,9 @@
-﻿using KOIFARMSHOP.Common;
+﻿using AutoMapper;
+using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data;
-using KOIFARMSHOP.Data.DTO;
+using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KOIFARMSHOP.Service.Services
 {
@@ -21,22 +17,47 @@ namespace KOIFARMSHOP.Service.Services
     public class OrderService : IOrderService
     {
         private readonly UnitOfWork _unitOfWork;
-        public OrderService(UnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+
+
+        public OrderService(UnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+
         }
         public async Task<IBusinessResult> GetAll()
         {
-            var list = await _unitOfWork.OrderRepository.GetAllDetail();
-            if (list == null)
+            var orders = await _unitOfWork.OrderRepository.GetAllDetail();
+
+            if (orders == null || !orders.Any())
             {
-                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Order>());
+                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<OrderResponseModel>());
             }
-            else
+
+            var orderResponseList = _mapper.Map<List<OrderResponseModel>>(orders);
+
+            var orderBuyRequestModels = orderResponseList.Select(order => new OrderResponseModel
             {
-                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
-            }
+                OrderId = order.OrderId,
+                CustomerId = order.CustomerId,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                PromotionId = order.PromotionId,
+                ShippingAddress = order.ShippingAddress,
+                DeliveryMethod = order.DeliveryMethod,
+                PaymentStatus = order.PaymentStatus,
+                Vat = order.Vat,
+                TotalAmountVat = order.TotalAmountVat,
+                Status = order.Status,
+                CustomerName = order.CustomerName, 
+                OrderDetails = order.OrderDetails
+            }).ToList();
+
+            return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderBuyRequestModels);
         }
+
+
 
         public async Task<IBusinessResult> GetByID(int id)
         {

@@ -132,46 +132,46 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // POST: Orders/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(OrderBuyRequestModel order)
-        {
-            bool savaStatus = false;
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(OrderBuyRequestModel order)
+        //{
+        //    bool savaStatus = false;
 
-            using (var httpClient = new HttpClient())
-            {
-                using (var respone = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Orders", order))
-                {
-                    if (respone.IsSuccessStatusCode)
-                    {
-                        var content = await respone.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+        //    using (var httpClient = new HttpClient())
+        //    {
+        //        using (var respone = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Orders", order))
+        //        {
+        //            if (respone.IsSuccessStatusCode)
+        //            {
+        //                var content = await respone.Content.ReadAsStringAsync();
+        //                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
-                        {
-                            savaStatus = true;
-                        }
-                        else
-                        {
-                            savaStatus = false;
-                        }
-                    }
+        //                if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
+        //                {
+        //                    savaStatus = true;
+        //                }
+        //                else
+        //                {
+        //                    savaStatus = false;
+        //                }
+        //            }
 
 
-                }
-            }
+        //        }
+        //    }
 
-            if (savaStatus)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name");
-                ViewData["PromotionId"] = new SelectList(_context.Promotions, "PromotionId", "Title");
-                return View(order);
-            }
-        }
+        //    if (savaStatus)
+        //    {
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    else
+        //    {
+        //        ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name");
+        //        ViewData["PromotionId"] = new SelectList(_context.Promotions, "PromotionId", "Title");
+        //        return View(order);
+        //    }
+        //}
 
         // GET: Orders/Edit/5
         public async Task<IActionResult> Edit(int? id)
