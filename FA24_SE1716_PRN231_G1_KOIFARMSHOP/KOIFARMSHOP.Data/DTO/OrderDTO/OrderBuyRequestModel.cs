@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KOIFARMSHOP.Data.DTOs
+namespace KOIFARMSHOP.Data.DTO.OrderDTO
 {
     public class OrderBuyRequestModel
     {
         public int OrderID { get; set; }
         public decimal TotalAmount { get; set; }
 
-   
+
         public string? ShippingAddress { get; set; }
 
         public string? DeliveryMethod { get; set; }

@@ -9,7 +9,7 @@ using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Service.Base;
 using Newtonsoft.Json;
-using KOIFARMSHOP.Data.DTOs;
+using KOIFARMSHOP.Data.DTO.OrderDTO;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {

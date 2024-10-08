@@ -1,6 +1,6 @@
 ﻿using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data;
-using KOIFARMSHOP.Data.DTOs;
+using KOIFARMSHOP.Data.DTO;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using System;
@@ -27,7 +27,7 @@ namespace KOIFARMSHOP.Service.Services
         }
         public async Task<IBusinessResult> GetAll()
         {
-            var list = await _unitOfWork.OrderRepository.GetAllAsync();
+            var list = await _unitOfWork.OrderRepository.GetAllDetail();
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Order>());

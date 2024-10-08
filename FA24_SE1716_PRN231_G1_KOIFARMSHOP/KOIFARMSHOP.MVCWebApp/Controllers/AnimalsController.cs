@@ -31,7 +31,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 { 
                     if (respone.IsSuccessStatusCode)
                     {
-                        var content = await response.Content.ReadAsStringAsync();
+                        var content = await respone.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
                         if(result != null && result.Data != null)
@@ -74,7 +74,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
 
         // GET: Animals/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var staffList = await GetStaff();
             ViewData["CreatedBy"] = new SelectList(staffList, "StaffId", "FullName");
@@ -82,7 +82,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             return View();
         }
-          
+
 
         // POST: Animals/Create
         [HttpPost]
@@ -103,7 +103,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                         if (result?.Status == Const.SUCCESS_CREATE_CODE)
                         {
-                            saveStatus = true;
+                            savaStatus = true;
                         }
                     }
 
