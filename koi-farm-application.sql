@@ -23,6 +23,7 @@ CREATE TABLE Customer (
     Username NVARCHAR(50) NOT NULL,
     Password NVARCHAR(255) NOT NULL,
     Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100),
     Phone NVARCHAR(20) NOT NULL,
     Address NVARCHAR(255),
     Points INT DEFAULT 0,

@@ -8,8 +8,6 @@
 </div>
 
 <div><button class="btn btn-primary" onclick="add()">open</button>
-    
-
 </div>
 
 <div class="modal fade" id="animalModal" tabindex="-1" aria-labelledby="animalModalLabel" aria-hidden="true">
@@ -46,6 +44,8 @@
                     <th class="card-title text-center">Certificate</th>
                     <th class="card-title text-center">Price</th>
                     <th class="card-title text-center">Color</th>
+                    <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">MaintenanceCost</th>
                     <th class="card-title text-center">AmountFeed</th>
                     <th class="card-title text-center">HealthStatus</th>
                     <th class="card-title text-center">FarmOrigin</th>
@@ -87,6 +87,8 @@
                         html += '<td>' + item.certificate + '</td>';
                         html += '<td>' + item.price + '</td>';
                         html += '<td>' + item.color + '</td>';
+                        html += '<td>' + item.status + '</td>';
+                        html += '<td>' + item.maintenanceCost + '</td>';
                         html += '<td>' + item.amountFeed + '</td>';
                         html += '<td>' + item.healthStatus + '</td>';
                         html += '<td>' + item.farmOrigin + '</td>';
@@ -102,7 +104,6 @@
             });
         }
         function add() {
-            // Xóa nội dung cũ và hiển thị form thêm mới
             $(".modal-body").html(`
                 <div class="form-group">
                     <label for="origin">Origin:</label>
@@ -133,6 +134,14 @@
                     <input type="number" id="price" name="price" class="form-control" required>
                 </div>
                 <div class="form-group">
+                    <label for="price">Status:</label>
+                    <input type="text" id="status" name="status" class="form-control" required>
+                </div>
+                <div class="form-group">
+                     <label for="price">MaintenanceCost:</label>
+                     <input type="text" id="maintenancecost" name="maintenancecost" class="form-control" required>
+                </div>
+                <div class="form-group">
                     <label for="color">Color:</label>
                     <input type="text" id="color" name="color" class="form-control" required>
                 </div>
@@ -144,6 +153,7 @@
                     <label for="healthStatus">Health Status:</label>
                     <input type="text" id="healthStatus" name="healthStatus" class="form-control" required>
                 </div>
+
                 <div class="form-group">
                     <label for="farmOrigin">Farm Origin:</label>
                     <input type="text" id="farmOrigin" name="farmOrigin" class="form-control" required>
@@ -163,7 +173,6 @@
             $('#animalModal').modal('show');
 
             $('#btSave').off('click').on('click', function () {
-                // Thu thập dữ liệu từ form
                 var animalData = {
                     origin: $('#origin').val(),
                     species: $('#species').val(),
@@ -172,6 +181,8 @@
                     size: $('#size').val(),
                     certificate: $('#certificate').val(),
                     price: $('#price').val(),
+                    status: $('#status').val(),
+                    status: $('#maintenancecost').val(),
                     color: $('#color').val(),
                     amountFeed: $('#amountFeed').val(),
                     healthStatus: $('#healthStatus').val(),
@@ -196,11 +207,5 @@
                 });
             });
         }
-
-
-
-       
-
-
     </script>
 }

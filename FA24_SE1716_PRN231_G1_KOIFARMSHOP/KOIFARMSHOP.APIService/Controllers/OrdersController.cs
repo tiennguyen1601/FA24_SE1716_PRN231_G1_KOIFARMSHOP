@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using KOIFARMSHOP.Data.Models;
+using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Common;
+using KOIFARMSHOP.Data.DTO.OrderDTO.KOIFARMSHOP.Data.DTO.OrderDTO;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -15,8 +13,8 @@ namespace KOIFARMSHOP.APIService.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        //private readonly FA24_SE1716_PRN231_G1_KOIFARMSHOPContext _context;
         private readonly IOrderService _orderService;
+
         public OrdersController(IOrderService orderService)
         {
             _orderService = orderService;
@@ -33,38 +31,35 @@ namespace KOIFARMSHOP.APIService.Controllers
         [HttpGet("{id}")]
         public async Task<IBusinessResult> GetOrder(int id)
         {
-            var order = await _orderService.GetByID(id);
-
-            return order;
+            return await _orderService.GetByID(id);
         }
 
         // PUT: api/Orders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IBusinessResult> PutOrder(Order order)
+        public async Task<IBusinessResult> PutOrder([FromBody] OrderCompleteRequest orderCompleteRequest)
         {
-            return await _orderService.Save(order);
+            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails);
         }
 
         // POST: api/Orders
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IBusinessResult> PostOrder(Order order)
+        public async Task<IBusinessResult> PostOrder([FromBody] OrderCompleteRequest orderCompleteRequest)
         {
-            return await _orderService.Save(order);
+            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails);
         }
+
 
         // DELETE: api/Orders/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var animal = await _orderService.GetByID(id);
-            if (animal == null)
+            var orderResult = await _orderService.GetByID(id);
+            if (orderResult == null || orderResult.Data == null)
             {
                 return NotFound();
             }
-            await _orderService.DeleteByID(id);
 
+            await _orderService.DeleteByID(id);
             return NoContent();
         }
     }

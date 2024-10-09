@@ -13,9 +13,15 @@ namespace KOIFARMSHOP.Data.Mapper
     {
         public MapperProfile()
         {
-            //Order
+            #region Order
             CreateMap<Order, OrderResponseModel>();
             CreateMap<OrderDetail, OrderDetailResponseModel>();
+            CreateMap<OrderDetailRequest, OrderDetail>();
+            #endregion
+
+            #region OrderDetail
+            CreateMap<OrderRequestModel, Order>();
+            #endregion
         }
-        }
+    }
 }
