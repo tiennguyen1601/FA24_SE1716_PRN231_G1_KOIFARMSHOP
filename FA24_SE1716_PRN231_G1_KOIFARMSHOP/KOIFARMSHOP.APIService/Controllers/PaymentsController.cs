@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
-using KOIFARMSHOP.Service;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Service.Services;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {

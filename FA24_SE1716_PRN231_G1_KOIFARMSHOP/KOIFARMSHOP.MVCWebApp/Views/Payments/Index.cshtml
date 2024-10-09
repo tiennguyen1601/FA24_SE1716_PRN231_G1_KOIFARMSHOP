@@ -40,7 +40,14 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @if (Model == null || Model.Count() == 0)
+        {
+            <tr>
+                <td colspan="9" style="text-align: center;">No data</td>
+            </tr>
+        }
+        else
+        { @foreach (var item in Model) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Method)
@@ -73,5 +80,6 @@
             </td>
         </tr>
 }
+        }
     </tbody>
 </table>

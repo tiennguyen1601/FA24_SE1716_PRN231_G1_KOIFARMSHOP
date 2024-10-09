@@ -39,7 +39,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                     }
                 }
             }
-            return View();
+            return View(new List<Payment>());
         }
 
         // GET: Payments/Details/5

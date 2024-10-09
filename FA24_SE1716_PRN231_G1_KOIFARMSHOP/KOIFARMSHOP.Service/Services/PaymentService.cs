@@ -9,7 +9,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KOIFARMSHOP.Service
+namespace KOIFARMSHOP.Service.Services
 {
     public interface IPaymentService
     {
