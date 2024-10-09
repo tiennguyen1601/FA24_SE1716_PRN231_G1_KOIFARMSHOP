@@ -19,6 +19,7 @@ namespace KOIFARMSHOP.APIService.Controllers
         }
 
         [HttpPost]
+        [Route("login")]
         public async Task<IBusinessResult> Login(LoginReqModel loginReqModel)
         {
             return await _authenticationService.Login(loginReqModel);
