@@ -54,15 +54,15 @@ namespace KOIFARMSHOP.Data
         {
             get { return orderRepository ??= new OrderRepository(context); }
         }
-        private OrderDetailRepository OrderDetailRepository
+        public OrderDetailRepository OrderDetailRepository
         {
             get { return orderDetailRepository ??= new OrderDetailRepository(context); }
         }
-        private OrderPromotionRepository OrderPromotionRepository
+        public OrderPromotionRepository OrderPromotionRepository
         {
             get { return orderPromotionRepository ??= new OrderPromotionRepository(context); }
         }
-        private PaymentRepository PaymentRepository
+        public PaymentRepository PaymentRepository
         {
             get { return paymentRepository ??= new PaymentRepository(context); }
         }

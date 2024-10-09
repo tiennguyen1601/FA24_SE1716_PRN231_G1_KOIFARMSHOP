@@ -1,6 +1,7 @@
 using KOIFARMSHOP.Data;
 using KOIFARMSHOP.Data.Mapper;
 using KOIFARMSHOP.Data.Models;
+using KOIFARMSHOP.Service;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Services.CloudinaryServices;
@@ -32,6 +33,7 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 
 
