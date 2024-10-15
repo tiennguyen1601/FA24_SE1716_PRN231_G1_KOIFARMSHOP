@@ -47,6 +47,12 @@ namespace KOIFARMSHOP.Common
         public static int WARNING_NO_DATA_CODE = 4;
         public static string WARNING_NO_DATA_MSG = "No data";
 
+        public static string WARNING_DUPLICATE_EMAIL_MSG = "The email has already been used by another user";
+        public static string WARNING_DUPLICATE_USERNAME_MSG = "The username has already been used by another user";
+        public static string WARNING_DUPLICATE_PHONE_MSG = "The phone number has already been used by another user";
+        public static string WARNING_INVALID_OTP_MSG = "The provied otp is invalid or expired";
+        public static string WARNING_INVALID_STATUS_MSG = "You are already verified";
+
         #endregion
     }
 }

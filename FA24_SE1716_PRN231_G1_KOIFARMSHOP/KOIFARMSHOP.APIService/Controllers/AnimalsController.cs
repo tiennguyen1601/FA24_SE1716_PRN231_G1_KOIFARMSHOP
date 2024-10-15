@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Common;
+using Newtonsoft.Json;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -44,7 +46,7 @@ namespace KOIFARMSHOP.APIService.Controllers
         [HttpPut("{id}")]
         public async Task<IBusinessResult> PutAnimal(Animal animal)
         {
-           return await _animalService.Save(animal);
+            return await _animalService.Save(animal);
         }
 
         // POST: api/Animals
@@ -69,6 +71,39 @@ namespace KOIFARMSHOP.APIService.Controllers
 
             return NoContent();
         }
-        
+
+        [HttpPost("CompareMultipleFish")]
+        public async Task<IActionResult> CompareMultipleAnimal(List<int> ids)
+        {
+            var koiFishList = new List<Animal>();
+
+            foreach (var id in ids)
+            {
+                var result = await _animalService.GetByID(id);
+
+                if (result == null )
+                {
+                    return NotFound($"Koi fish with ID {id} was not found.");
+                }
+
+                var fish = result.Data as Animal;
+
+                if (fish == null)
+                {
+                    return NotFound($"Koi fish with ID {id} was not found.");
+                }
+
+                koiFishList.Add(fish);
+            }
+
+            var koiFishIds = koiFishList.Select(f => f.AnimalId).ToList();
+
+            var comparisonResult = await _animalService.CompareMultipleKoiFishPrices(koiFishIds);
+
+            return Ok(comparisonResult);
+        }
+
+
+
     }
 }
