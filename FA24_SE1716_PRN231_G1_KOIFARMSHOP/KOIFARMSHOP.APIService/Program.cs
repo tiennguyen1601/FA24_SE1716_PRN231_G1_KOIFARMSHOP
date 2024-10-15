@@ -5,11 +5,13 @@ using KOIFARMSHOP.Service;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Services.CloudinaryServices;
+using KOIFARMSHOP.Service.Services.EmailServices;
 using KOIFARMSHOP.Service.Services.JWTService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services.Helper.VerifyCode;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -34,6 +36,8 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<VerificationCodeCache>();
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 
 

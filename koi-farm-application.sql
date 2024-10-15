@@ -23,6 +23,7 @@ CREATE TABLE Customer (
     Username NVARCHAR(50) NOT NULL,
     Password NVARCHAR(255) NOT NULL,
     Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100),
     Phone NVARCHAR(20) NOT NULL,
     Address NVARCHAR(255),
     Points INT DEFAULT 0,
@@ -181,8 +182,8 @@ CREATE TABLE OrderDetails (
 -- Insert sample staff
 INSERT INTO Staff (Username, Password, FullName, Email, Phone, Address, Role, Status, CreatedAt)
 VALUES 
-('john_doe', 'password123', 'John Doe', 'john@example.com', '1234567890', '123 Street, City', 'Manager', 'Active', GETDATE()),
-('jane_smith', 'password123', 'Jane Smith', 'jane@example.com', '0987654321', '456 Avenue, City', 'Technician', 'Active', GETDATE());
+('john_doe', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'John Doe', 'john@example.com', '1234567890', '123 Street, City', 'Manager', 'Active', GETDATE()),
+('jane_smith', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'Jane Smith', 'jane@example.com', '0987654321', '456 Avenue, City', 'Technician', 'Active', GETDATE());
 
 -- Insert sample customers
 INSERT INTO Customer (Username, Password, Name, Phone, Address, Points, CreatedAt, LoyaltyLevel, Status)

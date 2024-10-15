@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Data.DTO.CustomerDTO;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -67,6 +68,33 @@ namespace KOIFARMSHOP.APIService.Controllers
 
             return NoContent();
         }
-        
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<IBusinessResult> RegisterCustomer(CustomerRegisterReqModel customerRegisterReqModel)
+        {
+            var result = await _customerService.Register(customerRegisterReqModel);
+
+            return result;
+        }
+
+        [HttpPost]
+        [Route("verify")]
+        public async Task<IBusinessResult> VerifyCustomer(CustomerVerifyReqModel customerVerifyReqModel)
+        {
+            var result = await _customerService.VerifyCustomer(customerVerifyReqModel);
+
+            return result;
+        }
+
+        [HttpPost]
+        [Route("resend-verification-code")]
+        public async Task<IBusinessResult> ResendVerificationOTPCustomer(string email)
+        {
+            var result = await _customerService.ResendVerifyEmail(email);
+
+            return result;
+        }
+
     }
 }
