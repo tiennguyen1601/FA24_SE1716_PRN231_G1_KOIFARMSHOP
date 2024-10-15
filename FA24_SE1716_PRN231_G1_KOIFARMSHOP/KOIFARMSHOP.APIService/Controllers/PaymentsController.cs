@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
+using KOIFARMSHOP.Data.DTO.PaymentDTO;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -38,14 +39,14 @@ namespace KOIFARMSHOP.APIService.Controllers
 
         // PUT: api/Payments/5
         [HttpPut]
-        public async Task<IBusinessResult> PutPayment(Payment payment)
+        public async Task<IBusinessResult> PutPayment(PaymentCreateRequestModel payment)
         {
             return await _paymentService.Save(payment);
         }
 
         // POST: api/Payments
         [HttpPost]
-        public async Task<IBusinessResult> PostPayment(Payment payment)
+        public async Task<IBusinessResult> PostPayment(PaymentCreateRequestModel payment)
         {
             return await _paymentService.Save(payment);
         }

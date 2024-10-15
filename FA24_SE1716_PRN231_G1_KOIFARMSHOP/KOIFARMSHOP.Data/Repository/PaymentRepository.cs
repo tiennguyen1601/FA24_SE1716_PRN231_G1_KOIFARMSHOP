@@ -13,5 +13,33 @@ namespace KOIFARMSHOP.Data.Repository
     {
         public PaymentRepository() { }
         public PaymentRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
+
+        public List<Payment> GetAll()
+        {
+            return _context.Set<Payment>()
+                .Include(p => p.Customer)
+                .ToList();
+        }
+
+        public async Task<List<Payment>> GetAllAsync()
+        {
+            return await _context.Set<Payment>()
+                .Include(p => p.Customer)
+                .ToListAsync();
+        }
+
+        public Payment GetById(int id)
+        {
+            return _context.Set<Payment>()
+                .Include(p => p.Customer)
+                .FirstOrDefault(p => p.PaymentId == id);
+        }
+
+        public async Task<Payment> GetByIdAsync(int id)
+        {
+            return await _context.Set<Payment>()
+                .Include(p => p.Customer)
+                .FirstOrDefaultAsync(p => p.PaymentId == id);
+        }
     }
 }

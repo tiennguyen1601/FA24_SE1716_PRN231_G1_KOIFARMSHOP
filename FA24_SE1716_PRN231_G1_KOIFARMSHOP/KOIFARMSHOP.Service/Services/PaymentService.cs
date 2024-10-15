@@ -1,5 +1,8 @@
-﻿using KOIFARMSHOP.Common;
+﻿using AutoMapper;
+using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data;
+using KOIFARMSHOP.Data.DTO.PaymentDTO;
+using KOIFARMSHOP.Data.Enums;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using System;
@@ -15,17 +18,19 @@ namespace KOIFARMSHOP.Service.Services
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetById(int id);
-        Task<IBusinessResult> Save(Payment payment);
+        Task<IBusinessResult> Save(PaymentCreateRequestModel payment);
         Task<IBusinessResult> DeleteById(int id);
     }
 
     public class PaymentService : IPaymentService
     {
         private readonly UnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public PaymentService()
+        public PaymentService(IMapper mapper)
         {
             _unitOfWork ??= new UnitOfWork();
+            _mapper = mapper;
         }
 
         public async Task<IBusinessResult> GetAll()
@@ -40,7 +45,7 @@ namespace KOIFARMSHOP.Service.Services
             {
                 return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, list);
             }
-        }
+        }   
 
         public async Task<IBusinessResult> GetById(int id)
         {
@@ -56,16 +61,25 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-        public async Task<IBusinessResult> Save(Payment payment)
+        public async Task<IBusinessResult> Save(PaymentCreateRequestModel payment)
         {
             try
             {
                 int result = -1;
                 var current = await _unitOfWork.PaymentRepository.GetByIdAsync(payment.PaymentId);
+                var order = await _unitOfWork.OrderRepository.GetByIdAsync(payment.OrderId.Value);
 
                 if (current != null)
                 {
-                    result = await _unitOfWork.PaymentRepository.UpdateAsync(payment);
+                    current.Status = payment.Status;
+
+                    current.UpdatedAt = DateTime.Now;
+                    if (current.Status.Equals(PaymentEnums.Paid.ToString()))
+                    {
+                        current.PaymentDate = DateTime.Now;
+                    }
+
+                    result = await _unitOfWork.PaymentRepository.UpdateAsync(current);
 
                     if (result > 0)
                     {
@@ -78,7 +92,12 @@ namespace KOIFARMSHOP.Service.Services
                 }
                 else
                 {
-                    result = await _unitOfWork.PaymentRepository.CreateAsync(payment);
+                    current = _mapper.Map<Payment>(payment);
+
+                    current.CustomerId = order.CustomerId;
+                    current.Status = PaymentEnums.Unpaid.ToString();
+
+                    result = await _unitOfWork.PaymentRepository.CreateAsync(current);
 
                     if (result > 0)
                     {

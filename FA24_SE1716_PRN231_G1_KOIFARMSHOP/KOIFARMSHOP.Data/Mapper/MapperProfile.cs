@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using KOIFARMSHOP.Data.DTO.OrderDTO;
+using KOIFARMSHOP.Data.DTO.PaymentDTO;
 using KOIFARMSHOP.Data.Models;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,10 @@ namespace KOIFARMSHOP.Data.Mapper
 
             #region OrderDetail
             CreateMap<OrderRequestModel, Order>();
+            #endregion
+
+            #region Payment
+            CreateMap<PaymentCreateRequestModel, Payment>();
             #endregion
         }
     }
