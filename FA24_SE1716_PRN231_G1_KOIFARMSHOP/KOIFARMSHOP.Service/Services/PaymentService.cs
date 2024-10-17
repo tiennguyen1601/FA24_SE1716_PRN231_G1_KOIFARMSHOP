@@ -72,7 +72,7 @@ namespace KOIFARMSHOP.Service.Services
                 if (current != null)
                 {
                     current.Status = payment.Status;
-
+                    current.TransactionId = payment.TransactionId;
                     current.UpdatedAt = DateTime.Now;
                     if (current.Status.Equals(PaymentEnums.Paid.ToString()))
                     {
@@ -96,6 +96,7 @@ namespace KOIFARMSHOP.Service.Services
 
                     current.CustomerId = order.CustomerId;
                     current.Status = PaymentEnums.Unpaid.ToString();
+                    current.UpdatedAt = DateTime.Now;
 
                     result = await _unitOfWork.PaymentRepository.CreateAsync(current);
 

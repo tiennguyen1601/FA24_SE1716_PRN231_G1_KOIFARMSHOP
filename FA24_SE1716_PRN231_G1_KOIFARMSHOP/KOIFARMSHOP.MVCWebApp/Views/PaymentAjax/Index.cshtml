@@ -1,17 +1,71 @@
-﻿<div class="modal fade" id="bankModal" tabindex="-1" aria-labelledby="bankModalLabel" aria-hidden="true">
+﻿<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
             {
                 @Html.AntiForgeryToken()
                 <div class="modal-header">
-                    <h5 class="modal-title" id="bankModalLabel">Bank</h5>
+                    <h5 class="modal-title">Add New Payment</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="form-group">
+                        <label for="modalOrderSelect" class="control-label">Order</label>
+                        <select class="form-control" asp-items="ViewBag.OrderId" id="modalOrderSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Customer</label>
+                        <select class="form-control pe-none bg-secondary" asp-items="ViewBag.CustomerId" id="modalCustomerSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalMethod" class="control-label">Method</label>
+                        <input id="modalMethod" class="form-control" />
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-primary" onclick="addPayment()">Add</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentUpdateModal" tabindex="-1" aria-labelledby="paymentUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frmUpdate" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="updatePaymentId"/>
+                    <div class="form-group">
+                        <label for="updateOrderSelect" class="control-label">Order</label>
+                        <select class="form-control pe-none bg-secondary" asp-items="ViewBag.OrderId" id="updateOrderSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Customer</label>
+                        <select class="form-control pe-none bg-secondary" asp-items="ViewBag.CustomerId" id="updateCustomerSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Status</label>
+                        <select class="form-control" asp-items="ViewBag.Status" id="updateStatusSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Method</label>
+                        <input class="form-control pe-none bg-secondary" id="updateMethod"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateTransactionId" class="control-label">Transaction Id</label>
+                        <input id="updateTransactionId" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="updatePayment()">Save</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             }
@@ -24,7 +78,7 @@
         <h3 class="display-8">Payment List</h3>
     </div>
     <div class="col-md-2 text-end">
-        <button type="button" class="btn btn-primary" onclick="add();">
+        <button type="button" class="btn btn-primary" onclick="showModal()">
             Add
         </button>
     </div>
@@ -42,6 +96,7 @@
                     <th class="card-title text-center">CreatedAt</th>
                     <th class="card-title text-center">UpdatedAt</th>
                     <th class="card-title text-center">Customer</th>
+                    <th class="card-title text-center">Total Amount Vat</th>
                     <th class="card-title text-center">Order</th>
                     <th class="card-title text-center"></th>
                 </tr>
@@ -56,20 +111,30 @@
     <script type="text/javascript">
         $(document).ready(function () {
             loadData();
+
+            $('#modalOrderSelect').change(function () {
+                var selectedOrderId = +$(this).val();
+                updateCustomerSelection(selectedOrderId, '#modalCustomerSelect');
+            });
+
+            var initialOrderId = +$('#modalOrderSelect').val();
+            updateCustomerSelection(initialOrderId, '#modalCustomerSelect');
         });
 
         function loadData() {
             $.ajax({
-                url: 'https://localhost:7176/api/Payments', // Adjust the controller name as needed
+                url: 'https://localhost:7176/api/Payments',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 success: function (result) {
-                    alert("Server response: ", result.message);
-                    console.log(result);
+                    // alert("Server response: ", result.message);
+                    // console.log(result);
 
                     var html = "";
                     $.each(result.data, function (index, item) {
+                        let editEnable = item.status === "Unpaid" ? '' : 'disabled';
+
                         html += '<tr>';
                         html += '<td>' + item.method + '</td>';
                         html += '<td>' + item.status + '</td>';
@@ -77,9 +142,13 @@
                         html += '<td>' + item.paymentDate + '</td>';
                         html += '<td>' + item.createdAt + '</td>';
                         html += '<td>' + item.updatedAt + '</td>';
-                        html += '<td>' + item.customerId + '</td>';
+                        html += '<td>' + item.customer.name + '</td>';
+                        html += '<td>' + item.order.totalAmountVat + '</td>';
                         html += '<td>' + item.orderId + '</td>';
-                        html += '</td></td>';
+                        html += '<td>' +
+                            `<button class="btn btn-primary p-1 me-1 ${editEnable}" onclick="showUpdateModal(${item.paymentId})">Edit</button>` +
+                            `<button class="btn btn-danger p-1 me-1" onclick="deletePayment(${item.paymentId})">Delete</button>` +
+                            '</td>';
                         html += '</tr>';
                     });
                     $('.tblPayment').html(html);
@@ -90,11 +159,106 @@
             });
         }
 
-        function add() {
-            $("#bankModalContent").html("");
-            $("#bankModalLabel").html("Add New");
+        function updateCustomerSelection(selectedOrderId, customerSelectId) {
+            var orders = @Html.Raw(Json.Serialize(ViewBag.Orders));
+            var selectedOrder = orders.find(order => order.orderId == selectedOrderId);
 
-            $('#bankModal').modal('show');
+            if (selectedOrder) {
+                var customerId = selectedOrder.customerId;
+                $(customerSelectId).val(customerId);
+            } else {
+                $(customerSelectId).val('');
+            }
         }
+
+        function addPayment() {
+            const payload = {
+                paymentId: 0,
+                orderId: $('#modalOrderSelect').val(),
+                method: $('#modalMethod').val(),
+                status: null,
+                transactionId: null
+            }
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Payments',
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(payload),
+                success: function (result) {
+                    alert("Payment added successfully!");
+                    loadData();
+                    $('#paymentModal').modal('hide');
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+        }
+
+        function updatePayment() {
+            const payload = {
+                paymentId: $('#updatePaymentId').val(),
+                orderId: $('#updateOrderSelect').val(),
+                method: $('#updateMethod').val(),
+                status: $('#updateStatusSelect').val(),
+                transactionId: $('#updateTransactionId').val()
+            };
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Payments/',
+                type: "PUT",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(payload),
+                success: function (result) {
+                    alert("Payment updated successfully!");
+                    loadData();
+                    $('#paymentUpdateModal').modal('hide');
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+        }
+
+        function deletePayment(paymentId) {
+            if (confirm("Are you sure you want to delete this payment?")) {
+                $.ajax({
+                    url: 'https://localhost:7176/api/Payments/' + paymentId,
+                    type: "DELETE",
+                    success: function (result) {
+                        alert("Payment deleted successfully!");
+                        loadData();
+                    },
+                    error: function (xhr, error) {
+                        alert(xhr.statusText);
+                    }
+                });
+            }
+        }
+
+        function showModal() {
+            $('#paymentModal').modal('show');
+        }
+
+        function showUpdateModal(paymentId) {
+            $.ajax({
+                url: 'https://localhost:7176/api/Payments/' + paymentId,
+                type: "GET",
+                success: function (result) {
+                    const data = result.data;
+                    $('#updatePaymentId').val(data.paymentId);
+                    $('#updateOrderSelect').val(data.orderId);
+                    $('#updateCustomerSelect').val(data.customerId);
+                    $('#updateStatusSelect').val(data.status);
+                    $('#updateMethod').val(data.method);
+                    $('#updateTransactionId').val(data.transactionId);
+                    $('#paymentUpdateModal').modal('show');
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });            
+        }        
     </script>
 }

@@ -84,7 +84,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PaymentId,OrderId,Method,TransactionId")] PaymentCreateRequestModel payment)
+        public async Task<IActionResult> Create([Bind("PaymentId,OrderId,Method")] PaymentCreateRequestModel payment)
         {
             bool saveStatus = false;
 

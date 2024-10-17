@@ -18,6 +18,7 @@ namespace KOIFARMSHOP.Data.Repository
         {
             return _context.Set<Payment>()
                 .Include(p => p.Customer)
+                .Include(p => p.Order)
                 .ToList();
         }
 
@@ -25,6 +26,7 @@ namespace KOIFARMSHOP.Data.Repository
         {
             return await _context.Set<Payment>()
                 .Include(p => p.Customer)
+                .Include(p => p.Order)
                 .ToListAsync();
         }
 
@@ -32,6 +34,7 @@ namespace KOIFARMSHOP.Data.Repository
         {
             return _context.Set<Payment>()
                 .Include(p => p.Customer)
+                .Include(p => p.Order)
                 .FirstOrDefault(p => p.PaymentId == id);
         }
 
@@ -39,6 +42,7 @@ namespace KOIFARMSHOP.Data.Repository
         {
             return await _context.Set<Payment>()
                 .Include(p => p.Customer)
+                .Include(p => p.Order)
                 .FirstOrDefaultAsync(p => p.PaymentId == id);
         }
     }

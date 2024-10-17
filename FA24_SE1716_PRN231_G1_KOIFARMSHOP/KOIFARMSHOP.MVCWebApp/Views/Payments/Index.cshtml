@@ -4,7 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Payment List</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -32,6 +32,9 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Customer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Order.TotalAmountVat)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Order)
@@ -71,12 +74,15 @@
                 @Html.DisplayFor(modelItem => item.Customer.Name)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Order.TotalAmountVat)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.OrderId)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.PaymentId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PaymentId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PaymentId">Delete</a>
+                <a class="btn btn-primary me-1 @(item.Status != "Unpaid" ? "disabled" : "")" asp-action="Edit" asp-route-id="@item.PaymentId">Edit</a>
+                <a class="btn btn-danger me-1" asp-action="Delete" asp-route-id="@item.PaymentId">Delete</a>
+                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.PaymentId">Details</a>
             </td>
         </tr>
 }
