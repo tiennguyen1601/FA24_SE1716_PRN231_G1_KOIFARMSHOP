@@ -10,6 +10,7 @@ using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Service.Base;
 using Newtonsoft.Json;
 using KOIFARMSHOP.Data.DTO.ProductDTO;
+using KOIFARMSHOP.Data.Enums;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -41,7 +42,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                     }
                 }
             }
-            return categories;
+            return categories.Where(x => x.Status.Equals(StatusEnums.Active.ToString())).ToList();
         }
 
         public async Task<Product> GetProduct(int productId)
@@ -64,6 +65,29 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 }
             }
             return product;
+        }
+
+        public async Task<List<Staff>> GetStaffs()
+        {
+            var staffs = new List<Staff>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Staffs"))
+                {
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var content = await res.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                        if (result != null && result.Data != null)
+                        {
+                            staffs = JsonConvert.DeserializeObject<List<Staff>>(result.Data.ToString());
+
+                        }
+                    }
+                }
+            }
+            return staffs;
         }
 
         // GET: Products
@@ -120,10 +144,11 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> Create()
         {
             var categories = await GetCategories();
+            var staffs = await GetStaffs();
 
             ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name");
-            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+            ViewData["CreatedBy"] = new SelectList(staffs, "StaffId", "FullName");
+            ViewData["ModifiedBy"] = new SelectList(staffs, "StaffId", "FullName");
             return View();
         }
 
@@ -138,6 +163,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             bool saveStatus = false;
 
             var categories = await GetCategories();
+            var staffs = await GetStaffs();
 
             if (ModelState.IsValid)
             {
@@ -170,7 +196,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 else
                 {
                     ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name");
-                    ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.CreatedBy);
+                    ViewData["CreatedBy"] = new SelectList(staffs, "StaffId", "FullName", product.CreatedBy);
                     return View(product);
                 }
             }
@@ -181,7 +207,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             var product = new Product();
-            var categories = new List<Category>();
+            var categories = await GetCategories();
+            var staffs = await GetStaffs();
 
             var updateProductModel = new UpdateProductReqModel();
 
@@ -214,25 +241,9 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         }
                     }
                 }
-
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Category"))
-                {
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var content = await res.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                        if (result != null && result.Data != null)
-                        {
-                            categories = JsonConvert.DeserializeObject<List<Category>>(result.Data.ToString());
-
-                        }
-                    }
-                }
             }
-            ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name");
-            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.CreatedBy);
-            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.ModifiedBy);
+            ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name", updateProductModel.CategoryId);
+            ViewData["ModifiedBy"] = new SelectList(staffs, "StaffId", "FullName", updateProductModel.ModifiedBy);
 
             return View(updateProductModel);
         }
@@ -247,7 +258,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             bool saveStatus = false;
 
-            var categories = new List<Category>();
+            var categories = await GetCategories();
+            var staffs = await GetStaffs();
 
             if (ModelState.IsValid)
             {
@@ -270,22 +282,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                             }
                         }
                     }
-
-                    using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Category"))
-                    {
-                        if (res.IsSuccessStatusCode)
-                        {
-                            var content = await res.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                            if (result != null && result.Data != null)
-                            {
-                                categories = JsonConvert.DeserializeObject<List<Category>>(result.Data.ToString());
-
-                            }
-                        }
-                    }
-
                 }
                 if (saveStatus)
                 {
@@ -293,8 +289,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 }
                 else
                 {
-                    ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name");
-                    ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", updateProductReqModel.ModifiedBy);
+                    ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name", updateProductReqModel.CategoryId);
+                    ViewData["ModifiedBy"] = new SelectList(staffs, "StaffId", "FullName", updateProductReqModel.ModifiedBy);
                     return View(updateProductReqModel);
                 }
             }

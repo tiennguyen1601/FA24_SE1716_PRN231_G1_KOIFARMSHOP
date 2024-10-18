@@ -23,6 +23,7 @@ namespace KOIFARMSHOP.Service.Services
 
         Task<IBusinessResult> SearchProducts( ProductFilterReqModel? productFilterReqModel, string? searchValue, int? page, int? size);
         Task<IBusinessResult> GetBrandName();
+        Task<IBusinessResult> ActivateDeactivate(int productId);
     }
     public class ProductService : IProductService
     {
@@ -33,6 +34,36 @@ namespace KOIFARMSHOP.Service.Services
         {
             _unitOfWork ??= new UnitOfWork();
             _productImageService = productImageService;
+        }
+
+        public async Task<IBusinessResult> ActivateDeactivate(int productId)
+        {
+            try
+            {
+                var currProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productId);
+
+                if (currProduct == null)
+                {
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new Product());
+                }
+                else
+                {
+                    var result = await _unitOfWork.ProductRepository.ActivateDeactivate(currProduct);
+
+                    if (result)
+                    {
+                        return new BusinessResult(Const.SUCCESS_UPDATE_CODE, Const.SUCCESS_UPDATE_MSG, currProduct);
+                    }
+                    else
+                    {
+                        return new BusinessResult(Const.FAIL_UPDATE_CODE, Const.FAIL_UPDATE_MSG, currProduct);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(Const.ERROR_EXCEPTION, ex.Message);
+            }
         }
 
         public async Task<IBusinessResult> DeleteById(int productId)

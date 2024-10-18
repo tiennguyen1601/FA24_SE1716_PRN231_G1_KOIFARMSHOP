@@ -12,27 +12,45 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
-        <!-- Placeholder for Product Image (if you want to include) -->
-        @if (Model.ProductImages != null && Model.ProductImages.Any())
-        {
-            var isFirstImage = true;
-
-            foreach (var image in Model.ProductImages)
-            {
-                <div class="carousel-item @(isFirstImage ? "active" : "")">
-                    <img src="@image.ImageUrl" class="d-block w-75 h-auto" alt="Product Image" />
-                </div>
-                isFirstImage = false;
-            }
-        }
-        else
-        {
-            <div class="carousel-item active">
-                <img src="~/images/default-product.png" class="d-block w-100" alt="Default Image" />
+    <div class="col-md-4">
+        <h4>Product Images</h4>
+        <hr />
+        <div id="productImageCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @if (Model.ProductImages != null && Model.ProductImages.Any())
+                {
+                    var isFirstImage = true;
+                    foreach (var image in Model.ProductImages)
+                    {
+                        <div class="carousel-item @(isFirstImage ? "active" : "")">
+                            <img src="@image.ImageUrl" class="d-block w-100" alt="Product Image" />
+                        </div>
+                        isFirstImage = false;
+                    }
+                }
+                else
+                {
+                    <div class="carousel-item active">
+                        <img src="~/images/default-product.png" class="d-block w-75" alt="Default Image" />
+                    </div>
+                }
             </div>
-        }
+
+            @if (Model.ProductImages != null && Model.ProductImages.Count > 1)
+            {
+                <!-- Carousel controls -->
+                <a class="carousel-control-prev" href="#productImageCarousel" role="button" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only text-secondary">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#productImageCarousel" role="button" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only text-secondary">Next</span>
+                </a>
+            }
+        </div>
     </div>
+
     <div class="col-md-6">
         <h4>Product Details</h4>
         <hr />
@@ -55,14 +73,26 @@
             <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Weight)</dt>
             <dd class="col-sm-8">@Html.DisplayFor(model => model.Weight)</dd>
 
+            @{
+                var categoryName = Model.Category != null ? Model.Category.Name : "N/A";
+            }
+
             <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Category)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.Category.Name)</dd>
+            <dd class="col-sm-8">@Html.DisplayFor(model => categoryName)</dd>
+
+            @{
+                var createdBy = Model.CreatedByNavigation != null ? Model.CreatedByNavigation.FullName : "N/A";
+            }
 
             <dt class="col-sm-4">@Html.DisplayNameFor(model => model.CreatedByNavigation)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.CreatedByNavigation.FullName)</dd>
+            <dd class="col-sm-8">@Html.DisplayFor(model => createdBy)</dd>
+
+            @{
+                var modifyBy = Model.ModifiedByNavigation != null ? Model.ModifiedByNavigation.FullName : "N/A";
+            }
 
             <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ModifiedByNavigation)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.ModifiedByNavigation.FullName)</dd>
+            <dd class="col-sm-8">@Html.DisplayFor(model => modifyBy)</dd>
         </dl>
     </div>
 </div>

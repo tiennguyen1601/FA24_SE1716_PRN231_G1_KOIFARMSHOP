@@ -17,6 +17,7 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> Save(Category category);
         Task<IBusinessResult> DeleteById(int categoryId);
         Task<Category> GetCategoryById(int categoryId);
+        Task<IBusinessResult> ActicvateDeactivate(int categoryId);
     }
 
     public class CategoryService : ICategoryService
@@ -26,6 +27,36 @@ namespace KOIFARMSHOP.Service.Services
         public CategoryService()
         {
             _unitOfWork ??= new UnitOfWork();
+        }
+
+        public async Task<IBusinessResult> ActicvateDeactivate(int categoryId)
+        {
+            try
+            {
+                var currCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(categoryId);
+
+                if (currCategory == null)
+                {
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new Product());
+                }
+                else
+                {
+                    var result = await _unitOfWork.CategoryRepository.ActivateDeactivate(currCategory);
+
+                    if (result)
+                    {
+                        return new BusinessResult(Const.SUCCESS_UPDATE_CODE, Const.SUCCESS_UPDATE_MSG, currCategory);
+                    }
+                    else
+                    {
+                        return new BusinessResult(Const.FAIL_UPDATE_CODE, Const.FAIL_UPDATE_MSG, currCategory);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BusinessResult(Const.ERROR_EXCEPTION, ex.Message);
+            }
         }
 
         public async Task<IBusinessResult> DeleteById(int categoryId)

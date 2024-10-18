@@ -59,6 +59,10 @@ namespace KOIFARMSHOP.APIService.Controllers
 
             if (currProduct == null) return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Product>());
 
+            var rawImages = updateProduct.Images[0];
+
+            List<string> Images = new List<string>(rawImages.Split(new[] { ", " }, StringSplitOptions.None));
+
             currProduct.Name = !string.IsNullOrEmpty(updateProduct.Name) ? updateProduct.Name : currProduct.Name;
             currProduct.Description = !string.IsNullOrEmpty(updateProduct.Description) ? updateProduct.Description : currProduct.Description;
             currProduct.Price = updateProduct.Price != null ? (decimal)updateProduct.Price : currProduct.Price;
@@ -69,12 +73,13 @@ namespace KOIFARMSHOP.APIService.Controllers
             currProduct.ExpiryDate = updateProduct.ExpiryDate.HasValue ? updateProduct.ExpiryDate.Value : currProduct.ExpiryDate;
             currProduct.ManufacturingDate = updateProduct.ManufacturingDate.HasValue ? updateProduct.ManufacturingDate.Value : currProduct.ManufacturingDate;
             currProduct.CategoryId = updateProduct.CategoryId != null ? updateProduct.CategoryId : currProduct.CategoryId;
+            currProduct.ModifiedBy = updateProduct.ModifiedBy != null ? updateProduct.ModifiedBy : currProduct.ModifiedBy;
             currProduct.UpdatedAt = DateTime.Now;
 
             //_context.Products.Update(currProduct);
             //await _context.SaveChangesAsync();
 
-            var result = await _productService.Save(currProduct, updateProduct.Images);
+            var result = await _productService.Save(currProduct, Images);
 
             return result;
         }
@@ -82,6 +87,12 @@ namespace KOIFARMSHOP.APIService.Controllers
         [HttpPost]
         public async Task<IBusinessResult> PostProduct(CreateProductReqModel product)
         {
+
+            var rawImages = product.Images[0];
+
+            List<string> Images = new List<string>(rawImages.Split(new[] { ", " }, StringSplitOptions.None));
+
+
             Product newProduct = new Product
             {
                 Name = product.Name,
@@ -98,15 +109,16 @@ namespace KOIFARMSHOP.APIService.Controllers
                 CreatedAt = DateTime.Now,
                 CreatedBy = product.CreatedBy
             };
-            return await _productService.Save(newProduct, product.Images);
+            return await _productService.Save(newProduct, Images);
         }
 
 
         // DELETE: api/Products/5
-        [HttpDelete("{id}")]
-        public async Task<IBusinessResult> DeleteProduct(int id)
+        [HttpPost]
+        [Route("ActivateDeactivate/{id}")]
+        public async Task<IBusinessResult> ActivateDeactivateProduct(int id)
         {
-            return await _productService.DeleteById(id);
+            return await _productService.ActivateDeactivate(id);
         }
     }
 }

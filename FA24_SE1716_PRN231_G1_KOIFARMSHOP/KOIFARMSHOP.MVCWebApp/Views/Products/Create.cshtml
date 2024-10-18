@@ -149,11 +149,11 @@
 
                             $('#imagePreview').empty();
 
-                            uploadedImages = [];
+                            uploadedImages = result.data
 
-                            $.each(result.data, function (i, imageUrl) {
+                            $.each(uploadedImages, function (i, imageUrl) {
 
-                                uploadedImages.push(imageUrl);
+                                // uploadedImages.push(imageUrl);
 
                                 $('#imagePreview').append(`
                                                 <div class="col-md-3 mb-3" data-url="${imageUrl}">
@@ -163,7 +163,9 @@
                                             `);
                             });
 
-                            $('#UploadedImages').val(JSON.stringify(uploadedImages));
+                            $('#UploadedImages').val(uploadedImages.join(", "))
+
+                            console.log(uploadedImages);
 
 
                             alert('Uploaded image successfully!')
