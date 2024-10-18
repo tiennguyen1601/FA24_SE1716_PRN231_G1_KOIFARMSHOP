@@ -4,16 +4,26 @@ using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data.Models;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+
+using KOIFARMSHOP.Service.Services.JWTService;
+
 using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IAnimalService
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(int id);
+
+
+        Task<IBusinessResult> GetAllByUser(string token);
+        Task<IBusinessResult> Save(Animal animal);
+
         Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
+
         Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
 
@@ -22,11 +32,19 @@ namespace KOIFARMSHOP.Service.Services
     public class AnimalService : IAnimalService
     {
         private readonly UnitOfWork _unitOfWork;
+
+        private readonly IJWTService _jwtService;
+        public AnimalService(IJWTService jWTService)
+        {
+            _unitOfWork ??= new UnitOfWork();
+            _jwtService = jWTService;
+
         private readonly IMapper _mapper;
         public AnimalService(UnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+
         }
 
         public async Task<IBusinessResult> GetAll()
@@ -61,7 +79,31 @@ namespace KOIFARMSHOP.Service.Services
             }
 
         }
+
+
+        public async Task<IBusinessResult> GetAllByUser(string token)
+        {
+
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
+            var list = await _unitOfWork.AnimalRepository.GetAllByUserId(userId);
+            if (list == null)
+            {
+                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
+            }
+            else
+            {
+                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
+            }
+        }
+
+        public async Task<IBusinessResult> Save(Animal animal)
+
         public async Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null)
+
         {
             try
             {
@@ -199,5 +241,7 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
             }
         }
+
+
     }
 }

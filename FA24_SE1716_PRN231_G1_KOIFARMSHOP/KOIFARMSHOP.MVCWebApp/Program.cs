@@ -4,16 +4,19 @@ using KOIFARMSHOP.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 //Dependency Injection
 builder.Services.AddScoped<FA24_SE1716_PRN231_G1_KOIFARMSHOPContext>();
+
 builder.Services.AddScoped<UnitOfWork>();
-builder.Services.AddScoped<IAnimalService, AnimalService>();
-builder.Services.AddScoped<IConsignmentService, ConsignmentService>();
+
 
 builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
