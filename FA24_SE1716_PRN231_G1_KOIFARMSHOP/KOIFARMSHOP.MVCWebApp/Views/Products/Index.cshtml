@@ -4,116 +4,413 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Product List</h1>
+
+<button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#searchFormCollapse" aria-expanded="false" aria-controls="searchFormCollapse">
+    Search
+</button>
+
+<!-- Collapsible form -->
+<div class="collapse" id="searchFormCollapse">
+    <div class="p-4 bg-light rounded shadow">
+        <h3 class="mb-4">Product Search</h3>
+        <form method="get" id="searchForm">
+            <div class="form-group row">
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="searchValue" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search for products..." />
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Category:</label>
+                    <div id="category-options" class="form-check flex-column">
+                        @* Checkbox options will be dynamically loaded here *@
+                    </div>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Brand:</label>
+                    <div id="brand-options" class="form-check">
+                        @* Checkbox options will be dynamically loaded here *@
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input type="number" id="minPrice" name="minPrice" class="form-control" placeholder="Min Price" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="number" id="maxPrice" name="maxPrice" class="form-control" placeholder="Max Price" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-6 mb-3">
+                    <input type="number" id="minDiscount" name="minDiscount" class="form-control" placeholder="Min Discount" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="number" id="maxDiscount" name="maxDiscount" class="form-control" placeholder="Max Discount" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-6 mb-3">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <button type="button" class="btn btn-secondary w-100" id="resetButton">Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
+
+@* <table class="table table-striped table-bordered">
+    <thead class="thead-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StockQuantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Brand)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Weight)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Discount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExpiryDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ManufacturingDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedByNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ModifiedByNavigation)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.Name)</th>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.Price)</th>
+            <th>@Html.DisplayNameFor(model => model.StockQuantity)</th>
+            <th>@Html.DisplayNameFor(model => model.Brand)</th>
+            <th>@Html.DisplayNameFor(model => model.Weight)</th>
+            <th>@Html.DisplayNameFor(model => model.Discount)</th>
+            <th>@Html.DisplayNameFor(model => model.ExpiryDate)</th>
+            <th>@Html.DisplayNameFor(model => model.ManufacturingDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.Category)</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StockQuantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Brand)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Weight)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Discount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExpiryDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ManufacturingDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedByNavigation.FullName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ModifiedByNavigation.FullName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ProductId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProductId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                <td>@Html.DisplayFor(modelItem => item.StockQuantity)</td>
+                <td>@Html.DisplayFor(modelItem => item.Brand)</td>
+                <td>@Html.DisplayFor(modelItem => item.Weight)</td>
+                <td>@Html.DisplayFor(modelItem => item.Discount)</td>
+                <td>@Html.DisplayFor(modelItem => item.ExpiryDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.ManufacturingDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.Category.Name)</td>
+                <td>
+                    <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.ProductId">Edit</a>
+                    <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.ProductId">Details</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
-</table>
+</table> *@
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Description</th>
+                    <th class="text-center">Price</th>
+                    <th class="text-center">StockQuantity</th>
+                    <th class="text-center">Brand</th>
+                    <th class="text-center">Weight</th>
+                    <th class="text-center">Discount</th>
+                    <th class="text-center">Expiry Date</th>
+                    <th class="text-center">Manufacturing Date</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Category</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="tblProducts">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center" id="paginationControls">
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+            loadBrands();
+            loadCategories();
+
+            $('#searchForm').submit(function (e) {
+                e.preventDefault();
+                searchProducts();
+            });
+
+            $('#resetButton').click(function () {
+                $('input[name="searchValue"]').val('');
+                $('input[name="categories"]').prop('checked', false);
+                $('input[name="brands"]').prop('checked', false);
+                $('#minPrice').val('');
+                $('#maxPrice').val('');
+                $('#minDiscount').val('');
+                $('#maxDiscount').val('');
+
+                loadData();
+            });
+
+        });
+
+        function loadBrands() {
+            $.ajax({
+                url: 'https://localhost:7176/api/Products/brand',
+                type: 'GET',
+                success: function (result) {
+                    var brandOptions = '';
+                    $.each(result.data, function (key, brand) {
+                        brandOptions += `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="brands" value="${brand}" id="brand-${brand}">
+                                <label class="form-check-label" for="brand-${brand}">${brand}</label>
+                            </div>`;
+                    });
+                    $('#brand-options').html(brandOptions);
+                }
+            });
+        }
+
+        function loadCategories() {
+            $.ajax({
+                url: 'https://localhost:7176/api/Category',
+                type: 'GET',
+                success: function (result) {
+                    var categoryOptions = '';
+                    $.each(result.data, function (key, category) {
+                        categoryOptions += `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="categories" value="${category.name}" id="category-${category.name}">
+                                <label class="form-check-label" for="category-${category.name}">${category.name}</label>
+                            </div>`;
+                    });
+                    $('#category-options').html(categoryOptions);
+                }
+            });
+        }
+
+        var TotalItems = 0;
+        var PageSize = 10; 
+        var CurrentPage = 1;
+
+        function loadData(page = 1) {
+            $.ajax({
+                url: 'https://localhost:7176/api/Products?page=' + page + '&size=' + PageSize,
+                type: 'GET',
+                success: function (result) {
+                    TotalItems = result.data.totalItems;
+                    PageSize = result.data.pageSize;
+                    CurrentPage = result.data.currentPage;
+                    displayProducts(result.data.data);
+                    updatePaginationControls();
+                },
+                error: function (xhr, error) {
+                    alert("Failed to load products: " + xhr.statusText);
+                }
+            });
+        }
+
+        function searchProducts(page = 1) {
+
+            var selectedBrands = $('input[name="brands"]:checked').map(function () {
+                return this.value;
+            }).get();
+
+            var selectedCategories = $('input[name="categories"]:checked').map(function () {
+                return this.value;
+            }).get();
+
+            // console.log("Selected Brands: ", selectedBrands);
+            // console.log("Selected Categories: ", selectedCategories);
+
+            var queryString = $.param({
+                searchValue: $('input[name="searchValue"]').val(),
+                minPrice: $('#minPrice').val(),
+                maxPrice: $('#maxPrice').val(),
+                minDiscount: $('#minDiscount').val(),
+                maxDiscount: $('#maxDiscount').val()
+            });
+
+            selectedCategories.forEach(function (category) {
+                queryString += `&Category=${encodeURIComponent(category)}`;
+            });
+
+            selectedBrands.forEach(function (brand) {
+                queryString += `&Brand=${encodeURIComponent(brand)}`;
+            });
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Products/search?' + queryString + '&page=' + page + '&size=' + PageSize,
+                type: 'GET',
+                success: function (result) {
+                    TotalItems = result.data.totalItems;
+                    PageSize = result.data.pageSize;
+                    CurrentPage = result.data.currentPage;
+                    displayProducts(result.data.data);
+                    updatePaginationControls();
+
+                },
+                error: function (xhr, error) {
+                    alert("Search failed: " + xhr.statusText);
+                }
+            });
+        }
+
+        function displayProducts(products) {
+            var html = '';
+            $.each(products, function (key, item) {
+                html += '<tr>';
+                html += '<td>' + item.name + '</td>';
+                html += '<td>' + item.description + '</td>';
+                html += '<td>' + item.price + '</td>';
+                html += '<td>' + item.stockQuantity + '</td>';
+                html += '<td>' + item.brand + '</td>';
+                html += '<td>' + item.weight + '</td>';
+                html += '<td>' + item.discount + '</td>';
+                html += '<td>' + item.expiryDate + '</td>';
+                html += '<td>' + item.manufacturingDate + '</td>';
+                html += '<td>' + item.status + '</td>';
+                html += '<td>' + item.category.name + '</td>';
+                html += '<td>';
+                html += '<a class="btn btn-sm btn-info" href="/Products/Edit/' + item.productId + '">Edit</a> ';
+                html += '<a class="btn btn-sm btn-secondary" href="/Products/Details/' + item.productId + '">Details</a> ';
+                if (item.status !== "Inactive") {
+                    html += '<a class="btn btn-sm btn-danger" href="/Products/Delete/' + item.productId + '">Delete</a>';
+                }
+                html += '</td>';
+                html += '</tr>';
+            });
+            $('.tblProducts').html(html);
+        }
+
+        function updatePaginationControls() {
+            var totalPages = Math.ceil(TotalItems / PageSize);
+            var paginationHtml = '';
+
+            // Previous button
+            paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+            </li>`;
+
+            // Page numbers
+            for (var i = 1; i <= totalPages; i++) {
+                paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                </li>`;
+            }
+
+            // Next button
+            paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+            </li>`;
+
+            // Update the pagination controls
+            $('#paginationControls').html(paginationHtml);
+        }
+
+        function changePage(page) {
+            if (page >= 1 && page <= Math.ceil(TotalItems / PageSize)) {
+                loadData(page);
+            }
+        }
+
+        // function openModal() {
+        //     $(".modal-body").html(`
+        //                 <div class="form-group">
+        //                     <label for="name">Name:</label>
+        //                     <input type="text" id="name" name="name" class="form-control" required>
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="description">Description:</label>
+        //                     <input type="text" id="description" name="description" class="form-control" required>
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="price">Price:</label>
+        //                     <input type="number" id="price" name="price" class="form-control" required>
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="stockQuantity">Stock Quantity:</label>
+        //                     <input type="number" id="stockQuantity" name="stockQuantity" class="form-control" required>
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="brand">Brand:</label>
+        //                     <input type="text" id="brand" name="brand" class="form-control" required>
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="weight">Weight:</label>
+        //                     <input type="text" id="weight" name="weight" class="form-control" required>
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="discount">Discount:</label>
+        //                     <input type="text" id="discount" name="discount" class="form-control">
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="expiryDate">Expiry Date:</label>
+        //                     <input type="date" id="expiryDate" name="expiryDate" class="form-control">
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="manufacturingDate">Manufacturing Date:</label>
+        //                     <input type="date" id="manufacturingDate" name="manufacturingDate" class="form-control">
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="status">Status:</label>
+        //                     <input type="text" id="status" name="status" class="form-control">
+        //                 </div>
+        //                 <div class="form-group">
+        //                     <label for="category">Category:</label>
+        //                     <input type="text" id="category" name="category" class="form-control" required>
+        //                 </div>
+        //             `);
+
+        //     $("#productModalLabel").html("Add New Product");
+        //     $('#productModal').modal('show');
+
+        //     $('#btSave').off('click').on('click', function () {
+        //         var productData = {
+        //             name: $('#name').val(),
+        //             description: $('#description').val(),
+        //             price: $('#price').val(),
+        //             stockQuantity: $('#stockQuantity').val(),
+        //             brand: $('#brand').val(),
+        //             weight: $('#weight').val(),
+        //             discount: $('#discount').val(),
+        //             expiryDate: $('#expiryDate').val(),
+        //             manufacturingDate: $('#manufacturingDate').val(),
+        //             status: $('#status').val(),
+        //             category: $('#category').val()
+        //         };
+
+        //         $.ajax({
+        //             url: 'https://localhost:7176/api/Products',
+        //             type: 'POST',
+        //             contentType: 'application/json;charset=utf-8',
+        //             data: JSON.stringify(productData),
+        //             success: function (result) {
+        //                 alert("Product added successfully!");
+        //                 $('#productModal').modal('hide');
+        //                 loadData();
+        //             },
+        //             error: function (xhr, error) {
+        //                 alert("Failed to add product: " + xhr.statusText);
+        //             }
+        //         });
+        //     });
+        // }
+    </script>
+}
