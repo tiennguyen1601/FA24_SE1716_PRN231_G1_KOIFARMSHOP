@@ -4,13 +4,15 @@ using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data.Models;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
+using AutoMapper;
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IAnimalService
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(int id);
-        Task<IBusinessResult> Save(Animal animal);
+        Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
         Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
 
@@ -19,9 +21,11 @@ namespace KOIFARMSHOP.Service.Services
     public class AnimalService : IAnimalService
     {
         private readonly UnitOfWork _unitOfWork;
-        public AnimalService()
+        private readonly IMapper _mapper;
+        public AnimalService(UnitOfWork unitOfWork, IMapper mapper)
         {
-            _unitOfWork ??= new UnitOfWork();
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
         public async Task<IBusinessResult> GetAll()
         {
@@ -50,41 +54,46 @@ namespace KOIFARMSHOP.Service.Services
             }
 
         }
-        public async Task<IBusinessResult> Save(Animal animal)
+        public async Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null)
         {
             try
             {
-                int result = -1;
-                var animalTmp = _unitOfWork.AnimalRepository.GetByIdAsync(animal.AnimalId);
-                if (animalTmp != null)
+                Animal animal;
+
+                if (animalId.HasValue)
                 {
-                    #region Business Rule
-                    #endregion Business Rule
-
-                    result = await _unitOfWork.AnimalRepository.UpdateAsync(animal);
-
-                    if (result > 0)
+                    animal = await _unitOfWork.AnimalRepository.GetByIdAsync(animalId.Value);
+                    if (animal == null)
                     {
-                        return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
+                        return new BusinessResult(Const.WARNING_NO_DATA_CODE, "Animal not found.");
                     }
-                    else
-                    {
-                        return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animal);
-                    }
+
+                    _mapper.Map(request, animal);
                 }
                 else
                 {
-                    result = await _unitOfWork.AnimalRepository.CreateAsync(animal);
-
-                    if (result > 0)
-                    {
-                        return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, new List<Animal>());
-                    }
-                    else
-                    {
-                        return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animal);
-                    }
+                    animal = _mapper.Map<Animal>(request);
+                    animal.CreatedAt = DateTime.UtcNow;
+                    animal.CreatedBy = request.CreatedBy;
                 }
+
+                if (request.AnimalImages != null)
+                {
+                    animal.AnimalImages = request.AnimalImages
+                        .Select(url => new AnimalImage { ImageUrl = url })
+                        .ToList();
+                }
+
+                int result = animalId.HasValue
+                    ? await _unitOfWork.AnimalRepository.UpdateAsync(animal)
+                    : await _unitOfWork.AnimalRepository.CreateAsync(animal);
+
+                if (result > 0)
+                {
+                    return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, animal);
+                }
+
+                return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animal);
             }
             catch (Exception ex)
             {

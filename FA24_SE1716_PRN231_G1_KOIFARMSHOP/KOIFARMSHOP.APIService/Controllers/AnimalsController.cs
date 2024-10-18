@@ -10,6 +10,7 @@ using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Common;
 using Newtonsoft.Json;
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -25,6 +26,7 @@ namespace KOIFARMSHOP.APIService.Controllers
             _animalService = animalService;
         }
 
+
         // GET: api/Animals
         [HttpGet]
         public async Task<IBusinessResult> GetAnimals()
@@ -36,40 +38,38 @@ namespace KOIFARMSHOP.APIService.Controllers
         [HttpGet("{id}")]
         public async Task<IBusinessResult> GetAnimal(int id)
         {
-            var animal = await _animalService.GetByID(id);
-
-            return animal;
+            return await _animalService.GetByID(id);
         }
 
         // PUT: api/Animals/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IBusinessResult> PutAnimal(Animal animal)
+        public async Task<IBusinessResult> PutAnimal(int id, [FromBody] AnimalReqModel request)
         {
-            return await _animalService.Save(animal);
+            if (!ModelState.IsValid)
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid model state");
+            }
+
+            return await _animalService.Save(request, id);
         }
 
         // POST: api/Animals
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IBusinessResult> PostAnimal(Animal animal)
+        public async Task<IBusinessResult> PostAnimal([FromBody] AnimalReqModel request)
         {
-            return await _animalService.Save(animal);
+            if (!ModelState.IsValid)
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid model state");
+            }
 
+            return await _animalService.Save(request);
         }
 
         // DELETE: api/Animals/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAnimal(int id)
+        public async Task<IBusinessResult> DeleteAnimal(int id)
         {
-            var animal = await _animalService.GetByID(id);
-            if (animal == null)
-            {
-                return NotFound();
-            }
-            await _animalService.DeleteByID(id);
-
-            return NoContent();
+            return await _animalService.DeleteByID(id);
         }
 
         [HttpPost("CompareMultipleFish")]
