@@ -8,6 +8,7 @@ namespace KOIFARMSHOP.Data.DTO.AniamlDTO
 {
     public class AnimalReqModel
     {
+        public string? Name { get; set; }
         public string? Origin { get; set; }
         public string? Species { get; set; }
         public string? Type { get; set; }

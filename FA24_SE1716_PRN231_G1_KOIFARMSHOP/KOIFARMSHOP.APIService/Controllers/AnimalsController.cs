@@ -29,9 +29,9 @@ namespace KOIFARMSHOP.APIService.Controllers
 
         // GET: api/Animals
         [HttpGet]
-        public async Task<IBusinessResult> GetAnimals()
+        public async Task<IBusinessResult> GetAnimals(int? page = 1, int? size = 10)
         {
-            return await _animalService.GetAll();
+            return await _animalService.GetAll(page, size);
         }
 
         // GET: api/Animals/5
@@ -39,6 +39,13 @@ namespace KOIFARMSHOP.APIService.Controllers
         public async Task<IBusinessResult> GetAnimal(int id)
         {
             return await _animalService.GetByID(id);
+        }
+
+        // GET: api/Animals/search
+        [HttpGet("search")]
+        public async Task<IBusinessResult> SearchAnimals([FromQuery] AnimalFilterReqModel? filterModel, [FromQuery] string? searchValue, int? page = 1, int? size = 10)
+        {
+            return await _animalService.SearchAnimals(filterModel, searchValue, page, size);
         }
 
         // PUT: api/Animals/5
@@ -102,8 +109,5 @@ namespace KOIFARMSHOP.APIService.Controllers
 
             return Ok(comparisonResult);
         }
-
-
-
     }
 }
