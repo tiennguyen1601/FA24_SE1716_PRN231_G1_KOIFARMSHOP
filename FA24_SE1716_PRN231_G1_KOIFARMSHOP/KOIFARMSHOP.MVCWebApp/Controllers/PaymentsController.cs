@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,33 +13,88 @@ using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Data.DTO.PaymentDTO;
 using KOIFARMSHOP.Data.Enums;
+using System.Net;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
     public class PaymentsController : Controller
     {
+        private readonly HttpClient _httpClient;
+
+        public override void OnActionExecuting(ActionExecutingContext ctx)
+        {
+            base.OnActionExecuting(ctx);
+
+            var token = HttpContext.Session.GetString("Token");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
         public PaymentsController()
         {
+            _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(Const.APIEndPoint);            
         }
 
         // GET: Payments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? method, 
+            string? status, 
+            string? transactionId, 
+            DateTime? paymentDate, 
+            DateTime? createdAt, 
+            DateTime? updatedAt, 
+            string? customerName, 
+            string? orderId, 
+            decimal? minAmount,
+            decimal? maxAmount)
         {
-            using (var httpClient = new HttpClient())
-            {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Payments"))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+            var queryParameters = new List<string>();
+            queryParameters.Add($"method={Uri.EscapeDataString(method ?? "")}");
+            queryParameters.Add($"status={Uri.EscapeDataString(status ?? "")}");
+            queryParameters.Add($"transactionId={Uri.EscapeDataString(transactionId ?? "")}");
+            if (paymentDate.HasValue)
+                queryParameters.Add($"paymentDate={paymentDate.Value:yyyy-MM-dd}");
+            if (createdAt.HasValue)
+                queryParameters.Add($"createdAt={createdAt.Value:yyyy-MM-dd}");
+            if (updatedAt.HasValue)
+                queryParameters.Add($"updatedAt={updatedAt.Value:yyyy-MM-dd}");
+            queryParameters.Add($"customerName={Uri.EscapeDataString(customerName ?? "")}");
+            queryParameters.Add($"orderId={Uri.EscapeDataString(orderId ?? "")}");
+            if (minAmount.HasValue)
+                queryParameters.Add($"minAmount={minAmount.Value}");
+            if (maxAmount.HasValue)
+                queryParameters.Add($"maxAmount={maxAmount.Value}");
 
-                        if (result != null && result.Data != null)
-                        {
-                            var data = JsonConvert.DeserializeObject<List<Payment>>(result.Data.ToString());
-                            return View(data);
-                        }
+            var queryString = string.Join("&", queryParameters);
+
+            using (var response = await _httpClient.GetAsync($"Payments?{queryString}"))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                    if (result != null && result.Data != null)
+                    {
+                        var data = JsonConvert.DeserializeObject<List<Payment>>(result.Data.ToString());
+
+                        ViewBag.Method = method;
+                        ViewBag.Status = status;
+                        ViewBag.TransactionId = transactionId;
+                        ViewBag.PaymentDate = paymentDate;
+                        ViewBag.CreatedAt = createdAt;
+                        ViewBag.UpdatedAt = updatedAt;
+                        ViewBag.CustomerName = customerName;
+                        ViewBag.OrderId = orderId;
+                        ViewBag.MinAmount = minAmount;
+                        ViewBag.MaxAmount = maxAmount;
+
+                        return View(data);
                     }
+                }else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return Redirect("/Customers/Login");
                 }
             }
             return View(new List<Payment>());
@@ -47,20 +103,17 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Payments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            using (var httpClient = new HttpClient())
+            using (var response = await _httpClient.GetAsync($"Payments/{id}"))
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Payments/{id}"))
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
-                        {
-                            var data = JsonConvert.DeserializeObject<Payment>(result.Data.ToString());
-                            return View(data);
-                        }
+                    if (result != null && result.Data != null)
+                    {
+                        var data = JsonConvert.DeserializeObject<Payment>(result.Data.ToString());
+                        return View(data);
                     }
                 }
             }
@@ -90,23 +143,20 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                using (var httpClient = new HttpClient())
+                using (var response = await _httpClient.PostAsJsonAsync($"Payments", payment))
                 {
-                    using (var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + $"Payments", payment))
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var content = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                            if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
-                            {
-                                saveStatus = true;
-                            }
-                            else
-                            {
-                                saveStatus = false;
-                            }
+                        if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
+                        {
+                            saveStatus = true;
+                        }
+                        else
+                        {
+                            saveStatus = false;
                         }
                     }
                 }
@@ -127,19 +177,16 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             var payment = new Payment();
 
-            using (var httpClient = new HttpClient())
+            using (var response = await _httpClient.GetAsync($"Payments/{id}"))
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Payments/{id}"))
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
-                        {
-                            payment = JsonConvert.DeserializeObject<Payment>(result.Data.ToString());
-                        }
+                    if (result != null && result.Data != null)
+                    {
+                        payment = JsonConvert.DeserializeObject<Payment>(result.Data.ToString());
                     }
                 }
             }
@@ -166,23 +213,20 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                using (var httpClient = new HttpClient())
+                using (var response = await _httpClient.PutAsJsonAsync($"Payments", payment))
                 {
-                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + $"Payments", payment))
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var content = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                            if (result != null && result.Status == Const.SUCCESS_UPDATE_CODE)
-                            {
-                                saveStatus = true;
-                            }
-                            else
-                            {
-                                saveStatus = false;
-                            }
+                        if (result != null && result.Status == Const.SUCCESS_UPDATE_CODE)
+                        {
+                            saveStatus = true;
+                        }
+                        else
+                        {
+                            saveStatus = false;
                         }
                     }
                 }
@@ -203,19 +247,16 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             var payment = new Payment();
 
-            using (var httpClient = new HttpClient())
+            using (var response = await _httpClient.GetAsync($"Payments/{id}"))
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Payments/{id}"))
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
-                        {
-                            payment = JsonConvert.DeserializeObject<Payment>(result.Data.ToString());
-                        }
+                    if (result != null && result.Data != null)
+                    {
+                        payment = JsonConvert.DeserializeObject<Payment>(result.Data.ToString());
                     }
                 }
             }
@@ -237,23 +278,20 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                using (var httpClient = new HttpClient())
+                using (var response = await _httpClient.DeleteAsync($"Payments/{id}"))
                 {
-                    using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + $"Payments/{id}"))
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var content = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                            if (result != null && result.Status == Const.SUCCESS_DELETE_CODE)
-                            {
-                                saveStatus = true;
-                            }
-                            else
-                            {
-                                saveStatus = false;
-                            }
+                        if (result != null && result.Status == Const.SUCCESS_DELETE_CODE)
+                        {
+                            saveStatus = true;
+                        }
+                        else
+                        {
+                            saveStatus = false;
                         }
                     }
                 }
@@ -270,22 +308,19 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         private async Task<List<Customer>> GetCustomers() {
             var list = new List<Customer>();
 
-            using (var httpClient = new HttpClient())
+            using (var response = await _httpClient.GetAsync($"Customers"))
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Customers"))
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
-                        {
-                            list = JsonConvert.DeserializeObject<List<Customer>>(result.Data.ToString());
-                        }
+                    if (result != null && result.Data != null)
+                    {
+                        list = JsonConvert.DeserializeObject<List<Customer>>(result.Data.ToString());
                     }
-                };
-            }
+                }
+            };
 
             return list;
         }
@@ -294,22 +329,19 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             var list = new List<Order>();
 
-            using (var httpClient = new HttpClient())
+            using (var response = await _httpClient.GetAsync($"Orders"))
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Orders"))
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
-                        {
-                            list = JsonConvert.DeserializeObject<List<Order>>(result.Data.ToString());
-                        }
+                    if (result != null && result.Data != null)
+                    {
+                        list = JsonConvert.DeserializeObject<List<Order>>(result.Data.ToString());
                     }
-                };
-            }
+                }
+            };
 
             return list;
         }

@@ -54,7 +54,7 @@ namespace KOIFARMSHOP.Service.Services
                 CustomerName = order.CustomerName,
                 PromotionTitle = order.PromotionTitle,
                 OrderDetails = order.OrderDetails
-            }).ToList().Where(m => m.Status.Equals("Active"));
+            }).ToList();
 
             return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderBuyRequestModels);
         }
