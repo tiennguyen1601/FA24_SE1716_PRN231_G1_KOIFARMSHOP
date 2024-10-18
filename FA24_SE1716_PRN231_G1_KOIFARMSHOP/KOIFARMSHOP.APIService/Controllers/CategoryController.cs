@@ -1,8 +1,11 @@
-﻿using KOIFARMSHOP.Data.Models;
+﻿using KOIFARMSHOP.Common;
+using KOIFARMSHOP.Data.DTO.CategoryDTO;
+using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Common;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -30,15 +33,33 @@ namespace KOIFARMSHOP.APIService.Controllers
         }
 
         [HttpPost]
-        public async Task<IBusinessResult> CreateCategory(Category category)
+        public async Task<IBusinessResult> CreateCategory(CategoryCreateReqModel categoryCreateReqModel)
         {
-            return await _categoryService.Save(category);
+            Category newCategory = new Category
+            {
+                Name = categoryCreateReqModel.Name,
+                Description = categoryCreateReqModel.Description,
+                Status = "Active"
+            };
+
+            var result = await _categoryService.Save(newCategory);
+
+            return result;
         }
 
         [HttpPut]
-        public async Task<IBusinessResult> UpdateCateory(Category category)
+        public async Task<IBusinessResult> UpdateCateory(CategoryUpdateReqModel categoryUpdateReqModel)
         {
-            return await _categoryService.Save(category);
+            var currCategory = await _categoryService.GetCategoryById(categoryUpdateReqModel.CategoryId);
+
+            if (currCategory == null) return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Category>());
+
+            currCategory.Name = !string.IsNullOrEmpty(categoryUpdateReqModel.Name) ? categoryUpdateReqModel.Name : currCategory.Name;
+            currCategory.Description = !string.IsNullOrEmpty(categoryUpdateReqModel.Description) ? categoryUpdateReqModel.Description : currCategory.Description;
+
+            var result = await _categoryService.Save(currCategory);
+
+            return result;
         }
 
         [HttpDelete("{categoryId}")]

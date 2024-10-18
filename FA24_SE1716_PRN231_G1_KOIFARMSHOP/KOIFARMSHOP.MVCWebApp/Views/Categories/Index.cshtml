@@ -1,0 +1,185 @@
+﻿@model IEnumerable<KOIFARMSHOP.Data.Models.Category>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+@* <table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.CategoryId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.CategoryId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.CategoryId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table> *@
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Description</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="tblCategories">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+        });
+
+        function loadData() {
+            $.ajax({
+                url: 'https://localhost:7176/api/Category',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    var html = '';
+                    $.each(result.data, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.name + '</td>';
+                        html += '<td>' + item.description + '</td>';
+                        html += '<td>' + item.status + '</td>';
+                        html += '<td>';
+                        html += '<a class="btn btn-sm btn-info" href="/Categories/Edit/' + item.categoryId + '">Edit</a> ';
+                        html += '<a class="btn btn-sm btn-secondary" href="/Categories/Details/' + item.categoryId + '">Details</a> ';
+                        html += '<a class="btn btn-sm btn-danger" href="/Categories/Delete/' + item.categoryId + '">Delete</a>';
+
+                        html += '</td>';
+                        html += '</tr>';
+                    });
+                    $('.tblCategories').html(html);
+                },
+                error: function (xhr, error) {
+                    alert("Failed to load categories: " + xhr.statusText);
+                }
+            });
+        }
+
+        function openModal() {
+            // $(".modal-body").html(`
+            //                     <div class="form-group">
+            //                         <label for="name">Name:</label>
+            //                         <input type="text" id="name" name="name" class="form-control" required>
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="description">Description:</label>
+            //                         <input type="text" id="description" name="description" class="form-control" required>
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="price">Price:</label>
+            //                         <input type="number" id="price" name="price" class="form-control" required>
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="stockQuantity">Stock Quantity:</label>
+            //                         <input type="number" id="stockQuantity" name="stockQuantity" class="form-control" required>
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="brand">Brand:</label>
+            //                         <input type="text" id="brand" name="brand" class="form-control" required>
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="weight">Weight:</label>
+            //                         <input type="text" id="weight" name="weight" class="form-control" required>
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="discount">Discount:</label>
+            //                         <input type="text" id="discount" name="discount" class="form-control">
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="expiryDate">Expiry Date:</label>
+            //                         <input type="date" id="expiryDate" name="expiryDate" class="form-control">
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="manufacturingDate">Manufacturing Date:</label>
+            //                         <input type="date" id="manufacturingDate" name="manufacturingDate" class="form-control">
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="status">Status:</label>
+            //                         <input type="text" id="status" name="status" class="form-control">
+            //                     </div>
+            //                     <div class="form-group">
+            //                         <label for="category">Category:</label>
+            //                         <input type="text" id="category" name="category" class="form-control" required>
+            //                     </div>
+            //                 `);
+
+            // $("#productModalLabel").html("Add New Product");
+            // $('#productModal').modal('show');
+
+            // $('#btSave').off('click').on('click', function () {
+            //     var productData = {
+            //         name: $('#name').val(),
+            //         description: $('#description').val(),
+            //         price: $('#price').val(),
+            //         stockQuantity: $('#stockQuantity').val(),
+            //         brand: $('#brand').val(),
+            //         weight: $('#weight').val(),
+            //         discount: $('#discount').val(),
+            //         expiryDate: $('#expiryDate').val(),
+            //         manufacturingDate: $('#manufacturingDate').val(),
+            //         status: $('#status').val(),
+            //         category: $('#category').val()
+            //     };
+
+            //     // $.ajax({
+            //     //     url: 'https://localhost:7176/api/Products',
+            //     //     type: 'POST',
+            //     //     contentType: 'application/json;charset=utf-8',
+            //     //     data: JSON.stringify(productData),
+            //     //     success: function (result) {
+            //     //         alert("Product added successfully!");
+            //     //         $('#productModal').modal('hide');
+            //     //         loadData();
+            //     //     },
+            //     //     error: function (xhr, error) {
+            //     //         alert("Failed to add product: " + xhr.statusText);
+            //     //     }
+            //     // });
+            // });
+        }
+    </script>
+}

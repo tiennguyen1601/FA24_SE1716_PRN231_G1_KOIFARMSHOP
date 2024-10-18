@@ -27,5 +27,36 @@ namespace KOIFARMSHOP.Data.Repository
                 .Take(sizeIndex)
                 .ToListAsync();
         }
+
+        public async Task<List<Product>> GetProducts()
+        {
+            return await _context.Products.Include(x => x.Category)
+                .Include(x => x.CreatedByNavigation)
+                .Include(x => x.ModifiedByNavigation)
+                .Include(x => x.Category)
+                .ToListAsync();
+        }
+
+        public async Task<Product> GetProductById(int productId)
+        {
+            return await _context.Products.Include(x => x.Category)
+                .Include(x => x.CreatedByNavigation)
+                .Include(x => x.ModifiedByNavigation)
+                .Include(x => x.Category)
+                .Include(x => x.ProductImages)
+                .FirstOrDefaultAsync(x => x.ProductId == productId);
+        }
+
+        public async Task<bool> Delete(Product product)
+        {
+            var currProduct = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == product.ProductId);
+
+            currProduct.Status = "Inactive";
+
+            _context.Update(currProduct);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
