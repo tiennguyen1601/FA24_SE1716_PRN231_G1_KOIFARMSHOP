@@ -12,7 +12,7 @@
 
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <form asp-action="Create" enctype="multipart/form-data">
+            <form asp-action="Create" enctype="multipart/form-data" id="productForm">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                 
                 <div class="mb-3">
@@ -146,6 +146,7 @@
                     success: function (result) {
                         if (result && result.data) {
 
+                            console.log(result.data)
 
                             $('#imagePreview').empty();
 
@@ -166,7 +167,6 @@
                             $('#UploadedImages').val(uploadedImages.join(", "))
 
                             console.log(uploadedImages);
-
 
                             alert('Uploaded image successfully!')
 
@@ -191,6 +191,16 @@
                 // Remove the image preview from the UI
                 $(this).closest('div').remove();
             });
+
+            $('#productForm').on('submit', function (e) {
+                var uploadedImages = $('#UploadedImages').val().trim();
+
+                if (!uploadedImages || uploadedImages.length === 0) {
+                    e.preventDefault(); // Prevent form submission
+                    alert("Please upload at least one image before submitting the form.");
+                }
+            });
+
         });
     </script>
 }
