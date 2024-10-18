@@ -106,12 +106,12 @@ namespace KOIFARMSHOP.Service.Services
                 {
                     return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new Consignment());
                 }
+
                 else
                 {
-                    consignmentById.Status = "Deleted";  
-                    var result = await _unitOfWork.ConsignmentRepository.UpdateAsync(consignmentById);
+                    var result = await _unitOfWork.ConsignmentRepository.Delete(consignmentById);
 
-                    if (result > 0)
+                    if (result)
                     {
                         return new BusinessResult(Const.SUCCESS_DELETE_CODE, Const.SUCCESS_DELETE_MSG, consignmentById);
                     }
@@ -126,6 +126,7 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
             }
         }
+
 
 
 

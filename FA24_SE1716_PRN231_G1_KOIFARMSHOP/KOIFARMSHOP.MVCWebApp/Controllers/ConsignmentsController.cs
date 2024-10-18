@@ -247,36 +247,24 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             bool deleteStatus = false;
+            var consignment = new Consignment(); 
 
-            var consignment = new Consignment();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Consignments/" + id))
+                using (var res = await httpClient.DeleteAsync(Const.APIEndPoint + $"Consignments/{id}"))
                 {
-                    if (response.IsSuccessStatusCode)
+                    if (res.IsSuccessStatusCode)
                     {
-                        var content = await response.Content.ReadAsStringAsync();
+                        var content = await res.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
+                        if (result != null && result.Status == Const.SUCCESS_DELETE_CODE)
                         {
-                            consignment = JsonConvert.DeserializeObject<Consignment>(result.Data.ToString());
-
-                            consignment.Status = "Deleted";
-
-                            using (var updateResponse = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "Consignments/", consignment))
-                            {
-                                if (updateResponse.IsSuccessStatusCode)
-                                {
-                                    var updateContent = await updateResponse.Content.ReadAsStringAsync();
-                                    var updateResult = JsonConvert.DeserializeObject<BusinessResult>(updateContent);
-
-                                    if (updateResult != null && updateResult.Status == Const.SUCCESS_UPDATE_CODE)
-                                    {
-                                        deleteStatus = true;
-                                    }
-                                }
-                            }
+                            deleteStatus = true;
+                        }
+                        else
+                        {
+                            deleteStatus = false;
                         }
                     }
                 }
@@ -284,17 +272,17 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (deleteStatus)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); 
             }
             else
             {
-                // Nếu xóa thất bại, quay lại trang hiện tại
                 ViewData["AnimalId"] = new SelectList(_context.Animals, "AnimalId", "AnimalId", consignment.AnimalId);
                 ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", consignment.CustomerId);
                 ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId", consignment.OrderId);
                 return View(consignment);
             }
         }
+
 
 
 

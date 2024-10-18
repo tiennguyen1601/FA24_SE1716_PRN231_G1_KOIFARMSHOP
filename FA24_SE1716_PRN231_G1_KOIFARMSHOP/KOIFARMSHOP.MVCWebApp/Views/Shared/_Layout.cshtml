@@ -31,15 +31,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Index">Orders</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Consignments" asp-action="Index">Consignments</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="consignmentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Consignments
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="consignmentDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Consignments" asp-action="Index">Consignment</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Consign" asp-action="Index">Consignment Ajax</a>
+                                </li>
+                            </ul>
+                        </li>
+
                         </li>
                         <li class="nav-item">
-<<<<<<< HEAD
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Consign" asp-action="Index">Consign</a>
-=======
                             <a class="nav-link text-dark" asp-area="" asp-controller="Payments" asp-action="Index">Payments</a>
->>>>>>> Dev
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

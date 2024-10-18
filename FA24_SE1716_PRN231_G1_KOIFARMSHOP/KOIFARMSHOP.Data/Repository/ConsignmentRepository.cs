@@ -37,5 +37,17 @@ namespace KOIFARMSHOP.Data.Repository
             return consignment;
         }
 
+        public async Task<bool> Delete(Consignment consignment)
+        {
+            var currConsignment = await _context.Consignments.FirstOrDefaultAsync(x => x.ConsignmentId == consignment.ConsignmentId);
+
+            currConsignment.Status = "Deleted";
+
+            _context.Update(currConsignment);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }
