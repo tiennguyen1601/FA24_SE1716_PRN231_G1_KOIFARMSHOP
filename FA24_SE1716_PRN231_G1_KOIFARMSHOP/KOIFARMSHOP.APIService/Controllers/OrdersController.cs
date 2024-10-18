@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using KOIFARMSHOP.Data.DTO.OrderDTO;
-using KOIFARMSHOP.Service.Services;
+﻿using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Service.Base;
-using KOIFARMSHOP.Common;
-using KOIFARMSHOP.Data.DTO.OrderDTO.KOIFARMSHOP.Data.DTO.OrderDTO;
+using KOIFARMSHOP.Service.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -38,14 +34,18 @@ namespace KOIFARMSHOP.APIService.Controllers
         [HttpPut("{id}")]
         public async Task<IBusinessResult> PutOrder([FromBody] OrderCompleteRequest orderCompleteRequest)
         {
-            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails);
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+
+            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails, token);
         }
 
         // POST: api/Orders
         [HttpPost]
         public async Task<IBusinessResult> PostOrder([FromBody] OrderCompleteRequest orderCompleteRequest)
         {
-            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails);
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+
+            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails, token);
         }
 
 
