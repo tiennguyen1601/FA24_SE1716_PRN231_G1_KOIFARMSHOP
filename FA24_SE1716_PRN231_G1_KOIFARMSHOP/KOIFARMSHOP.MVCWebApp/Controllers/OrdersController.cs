@@ -97,17 +97,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( OrderCompleteRequest order)
         {
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var error in errors)
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-                return View(order);
-            }
-
             var customers = await GetCustomer();
             var promotions = await GetPromotion();
             var animals = await GetAnimal();
@@ -120,9 +109,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 ModelState.AddModelError("", "User is not authenticated.");
                 return View(order);
             }
-
-
-
 
             using (var httpClient = new HttpClient())
             {
@@ -166,52 +152,106 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
+            var customers = await GetCustomer();
+            var promotions = await GetPromotion();
+            var animals = await GetAnimal();
+
+            using (var httpClient = new HttpClient())
             {
-                return NotFound();
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Orders/" + id))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                        if (result != null && result.Data != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
+
+                            var totalAmount = data.OrderDetails.Sum(od => od.Amount ?? 0);
+                            var totalSubtotal = data.OrderDetails.Sum(od => od.Subtotal ?? 0);
+                            var totalDiscount = data.OrderDetails.Sum(od => od.Discount ?? 0);
+
+
+                            var orderCompleteRequest = new OrderCompleteRequest
+                            {
+                                OrderId = data.OrderId,
+                                TotalAmount = data.TotalAmount,
+                                PromotionId = data.PromotionId,
+                                ShippingAddress = data.ShippingAddress,
+                                DeliveryMethod = data.DeliveryMethod,
+                                PaymentStatus = data.PaymentStatus,
+                                Vat = data.Vat,
+                                Amount = totalAmount, 
+                                Subtotal = totalSubtotal,
+                                Discount = totalDiscount
+                            };
+
+                            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
+                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
+                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+
+                            return View(orderCompleteRequest); 
+                        }
+                    }
+                }
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", order.CustomerId);
-            ViewData["PromotionId"] = new SelectList(_context.Promotions, "PromotionId", "Title", order.PromotionId);
-            return View(order);
+            return View(new OrderCompleteRequest());
         }
 
+
         // POST: Orders/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OrderId,CustomerId,OrderDate,TotalAmount,PromotionId,ShippingAddress,DeliveryMethod,PaymentStatus,Vat,TotalAmountVat,Status")] Order order)
+        public async Task<IActionResult> Edit(int id, OrderCompleteRequest order) 
         {
             if (id != order.OrderId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var customers = await GetCustomer();
+            var promotions = await GetPromotion();
+            var animals = await GetAnimal();
+            bool saveStatus = false;
+
+            var token = HttpContext.Session.GetString("Token");
+
+            if (string.IsNullOrEmpty(token))
             {
-                try
+                ModelState.AddModelError("", "User is not authenticated.");
+                return View(order);
+            }
+
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "Orders/{id}", order);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderExists(order.OrderId))
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                    if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        saveStatus = true;
                     }
                 }
+            }
+
+            if (saveStatus)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", order.CustomerId);
-            ViewData["PromotionId"] = new SelectList(_context.Promotions, "PromotionId", "Title", order.PromotionId);
-            return View(order);
+            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
+            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
+            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+            return View(order); 
         }
+
 
         // GET: Orders/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -221,16 +261,31 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders
-                .Include(o => o.Customer)
-                .Include(o => o.Promotion)
-                .FirstOrDefaultAsync(m => m.OrderId == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
+            var customers = await GetCustomer();
+            var promotions = await GetPromotion();
+            var animals = await GetAnimal();
 
-            return View(order);
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Orders/" + id))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                        if (result != null && result.Data != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
+                            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
+                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
+                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+                            return View(data); 
+                        }
+                    }
+                }
+            }
+            return View(new OrderResponseModel());
         }
 
         // POST: Orders/Delete/5
@@ -238,14 +293,36 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order != null)
+            bool saveStatus = false;
+            var product = new Product();
+            using (var httpClient = new HttpClient())
             {
-                _context.Orders.Remove(order);
-            }
+                using (var res = await httpClient.DeleteAsync(Const.APIEndPoint + $"Orders/{id}"))
+                {
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var content = await res.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                        if (result != null && result.Status == Const.SUCCESS_DELETE_CODE)
+                        {
+                            saveStatus = true;
+                        }
+                        else
+                        {
+                            saveStatus = false;
+                        }
+                    }
+                }
+            }
+            if (saveStatus)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return RedirectToAction();
+            }
         }
 
         private bool OrderExists(int id)

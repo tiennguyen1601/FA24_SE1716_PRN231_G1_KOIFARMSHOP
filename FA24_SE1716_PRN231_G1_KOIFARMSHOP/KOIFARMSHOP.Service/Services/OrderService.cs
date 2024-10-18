@@ -148,12 +148,16 @@ namespace KOIFARMSHOP.Service.Services
                     var existingOrder = await _unitOfWork.OrderRepository.GetByIdAsync(order.OrderId);
                     if (existingOrder != null)
                     {
-                        _mapper.Map(order, existingOrder);
+                        _mapper.Map(orderCompleteRequest, existingOrder);
                         var result = await _unitOfWork.OrderRepository.UpdateAsync(existingOrder);
-                        await _unitOfWork.OrderRepository.SaveAsync();
-                        return result > 0
-                            ? new BusinessResult(Const.SUCCESS_UPDATE_CODE, Const.SUCCESS_UPDATE_MSG, existingOrder)
-                            : new BusinessResult(Const.FAIL_UPDATE_CODE, Const.FAIL_UPDATE_MSG, order);
+                        if (result > 0)
+                        {
+                            return new BusinessResult(Const.SUCCESS_UPDATE_CODE, Const.SUCCESS_UPDATE_MSG, order);
+                        }
+                        else
+                        {
+                            return new BusinessResult(Const.FAIL_UPDATE_CODE, Const.FAIL_UPDATE_MSG, order);
+                        }
                     }
                     else
                     {
@@ -164,7 +168,6 @@ namespace KOIFARMSHOP.Service.Services
                 {
                     order.Status = "Active";
                     var result = await _unitOfWork.OrderRepository.CreateAsync(order);
-                    await _unitOfWork.OrderRepository.SaveAsync();
 
                     return result > 0
                         ? new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, order)

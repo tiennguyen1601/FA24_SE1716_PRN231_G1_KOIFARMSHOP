@@ -1,16 +1,17 @@
 ﻿@model IEnumerable<KOIFARMSHOP.Data.DTO.OrderDTO.OrderResponseModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Order List";
 }
 
-<h1>Index</h1>
+<h1 class="text-center mb-4">Order List</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
+<p class="text-center">
+    <a asp-action="Create" class="btn btn-success">Create New</a>
 </p>
-<table class="table">
-    <thead>
+
+<table class="table table-striped table-hover">
+    <thead class="table-light">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.OrderDate)
@@ -42,48 +43,57 @@
             <th>
                 @Html.DisplayNameFor(model => model.PromotionTitle)
             </th>
-            <th></th>
+            <th class="text-center" style="width: 150px;">Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OrderDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TotalAmount)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ShippingAddress)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DeliveryMethod)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PaymentStatus)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Vat)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TotalAmountVat)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CustomerName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PromotionTitle)
+                    </td>
+                    <td class="text-center">
+                        <a asp-action="Edit" asp-route-id="@item.OrderId" class="btn btn-warning btn-sm">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.OrderId" class="btn btn-info btn-sm">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.OrderId" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.OrderDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TotalAmount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ShippingAddress)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DeliveryMethod)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PaymentStatus)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Vat)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TotalAmountVat)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Status)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CustomerName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PromotionTitle)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.OrderId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.OrderId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.OrderId">Delete</a>
-                </td>
+                <td colspan="11" class="text-center">No orders found.</td>
             </tr>
         }
     </tbody>

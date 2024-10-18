@@ -17,18 +17,18 @@ namespace KOIFARMSHOP.APIService.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<IBusinessResult> GetProducts(int? page = 1, int? size = 10)
-        {
-            return await _orderService.GetAll(page, size);
-        }
-
-        //// GET: api/Orders
         //[HttpGet]
-        //public async Task<IBusinessResult> GetOrders()
+        //public async Task<IBusinessResult> GetProducts(int? page = 1, int? size = 10)
         //{
-        //    return await _orderService.GetAll();
+        //    return await _orderService.GetAll(page, size);
         //}
+
+        // GET: api/Orders
+        [HttpGet]
+        public async Task<IBusinessResult> GetOrders()
+        {
+            return await _orderService.GetAll();
+        }
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
