@@ -11,16 +11,15 @@
     <div class="col-md-4">
         <h4>Product Images</h4>
         <hr />
-        <div id="productImageCarousel" class="carousel slide" data-ride="carousel">
+        <div id="productImageCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 @if (Model.ProductImages != null && Model.ProductImages.Any())
                 {
                     var isFirstImage = true;
-
                     foreach (var image in Model.ProductImages)
                     {
                         <div class="carousel-item @(isFirstImage ? "active" : "")">
-                            <img src="@image.ImageUrl" class="d-block w-75" alt="Product Image" />
+                            <img src="@image.ImageUrl" class="d-block w-100" alt="Product Image" />
                         </div>
                         isFirstImage = false;
                     }
@@ -32,19 +31,19 @@
                     </div>
                 }
             </div>
-            
+
             @if (Model.ProductImages != null && Model.ProductImages.Count > 1)
             {
-                <a class="carousel-control-prev" href="#productImageCarousel" role="button" data-slide="prev">
+                <!-- Carousel controls -->
+                <a class="carousel-control-prev" href="#productImageCarousel" role="button" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
+                    <span class="sr-only text-secondary">Previous</span>
                 </a>
-                <a class="carousel-control-next" href="#productImageCarousel" role="button" data-slide="next">
+                <a class="carousel-control-next" href="#productImageCarousel" role="button" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
+                    <span class="sr-only text-secondary">Next</span>
                 </a>
             }
-
         </div>
     </div>
 
@@ -83,14 +82,26 @@
             <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
             <dd class="col-sm-9">@Html.DisplayFor(model => model.Status)</dd>
 
+             @{
+                var categoryName = Model.Category != null ? Model.Category.Name : "N/A";
+            }
+
             <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Category)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Category.Name)</dd>
+            <dd class="col-sm-9">@Html.DisplayFor(model => categoryName)</dd>
+
+            @{
+                var createdBy = Model.CreatedByNavigation != null ? Model.CreatedByNavigation.FullName : "N/A";
+            }
 
             <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedByNavigation)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedByNavigation.FullName)</dd>
+            <dd class="col-sm-9">@Html.DisplayFor(model => createdBy)</dd>
+
+            @{
+                var modifyBy = Model.ModifiedByNavigation != null ? Model.ModifiedByNavigation.FullName : "N/A";
+            }
 
             <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ModifiedByNavigation)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.ModifiedByNavigation.FullName)</dd>
+            <dd class="col-sm-9">@Html.DisplayFor(model => modifyBy)</dd>
         </dl>
     </div>
 </div>

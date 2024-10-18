@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IAnimalService
@@ -27,23 +28,29 @@ namespace KOIFARMSHOP.Service.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
         public async Task<IBusinessResult> GetAll()
         {
-            var list = await _unitOfWork.AnimalRepository.GetAllAsync();
-            if (list == null)
+            var queryableList = await _unitOfWork.AnimalRepository.GetAllAsync();
+
+            var list = await queryableList
+                               .Include(a => a.CreatedByNavigation)
+                               .Include(a => a.ModifiedByNavigation)
+                               .ToListAsync();
+
+            if (list == null || !list.Any())
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
             }
-            else
-            {
-                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
-            }
+
+            return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
         }
+
         public async Task<IBusinessResult> GetByID(int id)
         {
             #region Business rule
             #endregion
-            var list = await _unitOfWork.AnimalImageRepository.GetByIdAsync(id);
+            var list = await _unitOfWork.AnimalRepository.GetByIdAsync(id);
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
@@ -73,7 +80,7 @@ namespace KOIFARMSHOP.Service.Services
                 else
                 {
                     animal = _mapper.Map<Animal>(request);
-                    animal.CreatedAt = DateTime.UtcNow;
+                    animal.CreatedAt = DateTime.Now;
                     animal.CreatedBy = request.CreatedBy;
                 }
 

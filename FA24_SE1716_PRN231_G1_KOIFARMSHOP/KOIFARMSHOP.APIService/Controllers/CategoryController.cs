@@ -67,5 +67,12 @@ namespace KOIFARMSHOP.APIService.Controllers
         {
             return await _categoryService.DeleteById(categoryId);
         }
+
+        [HttpPost]
+        [Route("ActivateDeactivate/{categoryId}")]
+        public async Task<IBusinessResult> ActivateDeactivate(int categoryId)
+        {
+            return await _categoryService.ActicvateDeactivate(categoryId);
+        }
     }
 }

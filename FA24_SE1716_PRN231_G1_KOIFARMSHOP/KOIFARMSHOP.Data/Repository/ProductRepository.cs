@@ -1,4 +1,5 @@
 ﻿using KOIFARMSHOP.Data.Base;
+using KOIFARMSHOP.Data.Enums;
 using KOIFARMSHOP.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -52,6 +53,18 @@ namespace KOIFARMSHOP.Data.Repository
             var currProduct = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == product.ProductId);
 
             currProduct.Status = "Inactive";
+
+            _context.Update(currProduct);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ActivateDeactivate(Product product)
+        {
+            var currProduct = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == product.ProductId);
+
+            currProduct.Status =  currProduct.Status.Equals(StatusEnums.Active.ToString()) ? StatusEnums.Inactive.ToString() : StatusEnums.Active.ToString();
 
             _context.Update(currProduct);
 
