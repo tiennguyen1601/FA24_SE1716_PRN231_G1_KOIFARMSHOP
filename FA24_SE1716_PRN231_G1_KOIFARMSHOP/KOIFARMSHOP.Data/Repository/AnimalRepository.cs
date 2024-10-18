@@ -14,6 +14,15 @@ namespace KOIFARMSHOP.Data.Repository
         public AnimalRepository() { }
         public AnimalRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
 
+        public async Task<List<Animal>> GetAllByUserId(int userId)
+        {
+            var animals = await _context.Animals
+                .Where(a => a.CreatedBy == userId)
+                .ToListAsync();
+
+            return animals;
+        }
+
         public async Task<List<Animal>> GetAnimals(int? page, int? size)
         {
             var pageIndex = (page.HasValue && page > 0) ? page.Value : 1;

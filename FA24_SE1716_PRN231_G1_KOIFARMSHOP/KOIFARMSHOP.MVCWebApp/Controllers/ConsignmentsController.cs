@@ -10,6 +10,7 @@ using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Service.Base;
 using Newtonsoft.Json;
 using Azure;
+using System.Net.Http.Headers;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -25,13 +26,22 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Consignments
         public async Task<IActionResult> Index()
         {
+            var token = HttpContext.Session.GetString("Token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Customers");
+            }
+
             using (var httpClient = new HttpClient())
             {
-                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Consignments"))
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Consignments"))
                 {
-                    if (respone.IsSuccessStatusCode)
+                    if (response.IsSuccessStatusCode)
                     {
-                        var content = await respone.Content.ReadAsStringAsync();
+                        var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
                         if (result != null && result.Data != null)
@@ -40,11 +50,13 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                             return View(data);
                         }
                     }
-
                 }
             }
+
+            // If the request fails or no data is returned, return an empty list
             return View(new List<Consignment>());
         }
+
 
         // GET: Consignments/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -69,18 +81,50 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             ViewData["AnimalId"] = new SelectList(_context.Animals, "AnimalId", "AnimalId", consignment.AnimalId);
             ViewData["CustomerName"] = new SelectList(_context.Customers, "CustomerId", "Name", consignment.CustomerId);
-            ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId", consignment.OrderId);
+            //ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId", consignment.OrderId);
 
             return View(consignment);
         }
 
+        public async Task<List<Animal>> GetAnimals(string token)
+        {
+            var animals = new List<Animal>();
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Animals/User"))
+                {
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var content = await res.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                        if (result != null && result.Data != null)
+                        {
+                            animals = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
+
+                        }
+                    }
+                }
+            }
+            return animals;
+        }
+
 
         // GET: Consignments/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["AnimalId"] = new SelectList(_context.Animals, "AnimalId", "AnimalId");
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name");
-            ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId");
+            var token = HttpContext.Session.GetString("Token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Customers");
+            }
+
+            var animals = await GetAnimals(token);
+
+
+            ViewData["AnimalOrigin"] = new SelectList(animals, "AnimalId", "Origin");
+
             return View();
         }
 
@@ -108,22 +152,42 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> Create(Consignment consignment)
         {
             bool saveStatus = false;
+
             if (ModelState.IsValid)
             {
+                // Retrieve the token from the session
+                var token = HttpContext.Session.GetString("Token");
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    ModelState.AddModelError("", "User is not authenticated.");
+                    return View(consignment);
+                }
+
                 using (var httpClient = new HttpClient())
                 {
-                    using (var respone = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Consignments/", consignment))
+                    // Add Bearer token to the Authorization header
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    using (var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Consignments/", consignment))
                     {
-                        if (respone.IsSuccessStatusCode)
+                        if (response.IsSuccessStatusCode)
                         {
-                            var content = await respone.Content.ReadAsStringAsync();
+                            var content = await response.Content.ReadAsStringAsync();
                             var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
                             if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
                             {
                                 saveStatus = true;
                             }
-                            else { saveStatus = false; }
+                            else
+                            {
+                                saveStatus = false;
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", "Error while calling the service.");
                         }
                     }
                 }
@@ -133,11 +197,12 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             {
                 return RedirectToAction(nameof(Index));
             }
-            else 
-            { 
-               return View(consignment);   
+            else
+            {
+                return View(consignment);
             }
         }
+
 
         // GET: Consignments/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -247,36 +312,24 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             bool deleteStatus = false;
+            var consignment = new Consignment(); 
 
-            var consignment = new Consignment();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Consignments/" + id))
+                using (var res = await httpClient.DeleteAsync(Const.APIEndPoint + $"Consignments/{id}"))
                 {
-                    if (response.IsSuccessStatusCode)
+                    if (res.IsSuccessStatusCode)
                     {
-                        var content = await response.Content.ReadAsStringAsync();
+                        var content = await res.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
+                        if (result != null && result.Status == Const.SUCCESS_DELETE_CODE)
                         {
-                            consignment = JsonConvert.DeserializeObject<Consignment>(result.Data.ToString());
-
-                            consignment.Status = "Deleted";
-
-                            using (var updateResponse = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "Consignments/", consignment))
-                            {
-                                if (updateResponse.IsSuccessStatusCode)
-                                {
-                                    var updateContent = await updateResponse.Content.ReadAsStringAsync();
-                                    var updateResult = JsonConvert.DeserializeObject<BusinessResult>(updateContent);
-
-                                    if (updateResult != null && updateResult.Status == Const.SUCCESS_UPDATE_CODE)
-                                    {
-                                        deleteStatus = true;
-                                    }
-                                }
-                            }
+                            deleteStatus = true;
+                        }
+                        else
+                        {
+                            deleteStatus = false;
                         }
                     }
                 }
@@ -284,17 +337,17 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (deleteStatus)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); 
             }
             else
             {
-                // Nếu xóa thất bại, quay lại trang hiện tại
                 ViewData["AnimalId"] = new SelectList(_context.Animals, "AnimalId", "AnimalId", consignment.AnimalId);
                 ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", consignment.CustomerId);
                 ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId", consignment.OrderId);
                 return View(consignment);
             }
         }
+
 
 
 

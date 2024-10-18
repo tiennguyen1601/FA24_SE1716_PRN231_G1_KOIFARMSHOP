@@ -41,6 +41,12 @@ namespace KOIFARMSHOP.APIService.Controllers
             return await _animalService.GetByID(id);
         }
 
+        [HttpGet("User")]
+        public async Task<IBusinessResult> GetAnimalsByUser()
+        {
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            var animal = await _animalService.GetAllByUser(token);
+            return animal;
         // GET: api/Animals/search
         [HttpGet("search")]
         public async Task<IBusinessResult> SearchAnimals([FromQuery] AnimalFilterReqModel? filterModel, [FromQuery] string? searchValue, int? page = 1, int? size = 10)

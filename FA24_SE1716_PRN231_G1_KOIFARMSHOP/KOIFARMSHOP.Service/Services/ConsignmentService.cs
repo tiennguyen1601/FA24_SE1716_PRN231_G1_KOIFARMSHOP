@@ -1,7 +1,9 @@
-﻿using KOIFARMSHOP.Common;
+﻿using AutoMapper;
+using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Service.Services.JWTService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,29 +14,37 @@ namespace KOIFARMSHOP.Service.Services
 {
     public interface IConsignmentService
     {
-        Task<IBusinessResult> GetAll();
+        Task<IBusinessResult> GetAll(string token);
         Task<IBusinessResult> GetByID(int id);
-        Task<IBusinessResult> Save(Consignment consignment);
+        Task<IBusinessResult> Save(Consignment consignment, string token);
         Task<IBusinessResult> DeleteByID(int id);
     }
     public class ConsignmentService : IConsignmentService
     {
         private readonly UnitOfWork _unitOfWork;
-        public ConsignmentService()
+        private readonly IJWTService _jwtService;
+        private readonly IMapper _mapper;
+        public ConsignmentService(UnitOfWork unitOfWork, IMapper mapper, IJWTService jWTService)
         {
             _unitOfWork ??= new UnitOfWork();
+            _jwtService = jWTService;
         }
-        public async Task<IBusinessResult> GetAll()
+        public async Task<IBusinessResult> GetAll(string token)
         {
-            var list = await _unitOfWork.ConsignmentRepository.GetAllDetail();
-            var filteredList = list.Where(c => c.Status != "Deleted").ToList();
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
+            var list = await _unitOfWork.ConsignmentRepository.GetAllDetail(userId);
+            //var filteredList = list.Where(c => c.Status != "Deleted").ToList();
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Consignment>());
             }
             else
             {
-                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, filteredList);
+                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
             }
         }
         public async Task<IBusinessResult> GetByID(int id)
@@ -52,14 +62,19 @@ namespace KOIFARMSHOP.Service.Services
             }
 
         }
-        public async Task<IBusinessResult> Save(Consignment consignment)
+        public async Task<IBusinessResult> Save(Consignment consignment, string token)
         {
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
             try
             {
                 int result = -1;
-                var animalTmp = await _unitOfWork.ConsignmentRepository.GetByIdAsync(consignment.ConsignmentId);
+                var consignmentTmp = await _unitOfWork.ConsignmentRepository.GetByIdAsync(consignment.ConsignmentId);
 
-                if (animalTmp != null)
+                if (consignmentTmp != null)
                 {
                     #region Business Rule
                     #endregion Business Rule
@@ -77,6 +92,9 @@ namespace KOIFARMSHOP.Service.Services
                 }
                 else
                 {
+                    consignment.CustomerId = userId;
+                    consignment.CreatedAt = DateTime.Now;
+                    consignment.Status = "Pending";
                     result = await _unitOfWork.ConsignmentRepository.CreateAsync(consignment);
 
                     if (result > 0)
@@ -106,12 +124,12 @@ namespace KOIFARMSHOP.Service.Services
                 {
                     return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new Consignment());
                 }
+
                 else
                 {
-                    consignmentById.Status = "Deleted";  
-                    var result = await _unitOfWork.ConsignmentRepository.UpdateAsync(consignmentById);
+                    var result = await _unitOfWork.ConsignmentRepository.Delete(consignmentById);
 
-                    if (result > 0)
+                    if (result)
                     {
                         return new BusinessResult(Const.SUCCESS_DELETE_CODE, Const.SUCCESS_DELETE_MSG, consignmentById);
                     }
@@ -126,6 +144,7 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
             }
         }
+
 
 
 
