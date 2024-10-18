@@ -16,7 +16,6 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
         public string? PaymentStatus { get; set; }
         public decimal? Vat { get; set; }
         public decimal? TotalAmountVat { get; set; }
-        public string? Status { get; set; }
     }
     public class OrderDetailRequest
     {

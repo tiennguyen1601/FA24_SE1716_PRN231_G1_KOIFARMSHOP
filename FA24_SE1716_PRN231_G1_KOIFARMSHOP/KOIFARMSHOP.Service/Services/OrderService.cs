@@ -4,26 +4,27 @@ using KOIFARMSHOP.Data;
 using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
-
+using KOIFARMSHOP.Service.Services.JWTService;
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IOrderService
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(int id);
-        Task<IBusinessResult> Save(OrderRequestModel orderRequest, List<OrderDetailRequest> orderDetails);
+        Task<IBusinessResult> Save(OrderRequestModel orderRequest, List<OrderDetailRequest> orderDetails, string token);
         Task<IBusinessResult> DeleteByID(int id);
     }
     public class OrderService : IOrderService
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IJWTService _jwtService;
 
-
-        public OrderService(UnitOfWork unitOfWork, IMapper mapper)
+        public OrderService(UnitOfWork unitOfWork, IMapper mapper, IJWTService jWTService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _jwtService = jWTService;
 
         }
         public async Task<IBusinessResult> GetAll()
@@ -41,18 +42,19 @@ namespace KOIFARMSHOP.Service.Services
             {
                 OrderId = order.OrderId,
                 CustomerId = order.CustomerId,
+                PromotionId = order.PromotionId,
                 OrderDate = order.OrderDate,
                 TotalAmount = order.TotalAmount,
-                PromotionId = order.PromotionId,
                 ShippingAddress = order.ShippingAddress,
                 DeliveryMethod = order.DeliveryMethod,
                 PaymentStatus = order.PaymentStatus,
                 Vat = order.Vat,
                 TotalAmountVat = order.TotalAmountVat,
                 Status = order.Status,
-                CustomerName = order.CustomerName, 
+                CustomerName = order.CustomerName,
+                PromotionTitle = order.PromotionTitle,
                 OrderDetails = order.OrderDetails
-            }).ToList();
+            }).ToList().Where(m => m.Status.Equals("Active"));
 
             return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderBuyRequestModels);
         }
@@ -73,8 +75,15 @@ namespace KOIFARMSHOP.Service.Services
             return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderResponse);
         }
 
-        public async Task<IBusinessResult> Save(OrderRequestModel orderRequest, List<OrderDetailRequest> orderDetails)
+        public async Task<IBusinessResult> Save(OrderRequestModel orderRequest, List<OrderDetailRequest> orderDetails, string token)
         {
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
+
+            var task = await _unitOfWork.CustomerRepository.GetByIdAsync(userId);
             try
             {
                 if (orderRequest == null || orderDetails == null || !orderDetails.Any())
@@ -83,6 +92,7 @@ namespace KOIFARMSHOP.Service.Services
                 }
 
                 var order = _mapper.Map<Order>(orderRequest);
+                order.CustomerId = userId;
                 order.OrderDetails = _mapper.Map<List<OrderDetail>>(orderDetails);
 
                 if (order.OrderId > 0)
@@ -104,6 +114,7 @@ namespace KOIFARMSHOP.Service.Services
                 }
                 else
                 {
+                    order.Status = "Active";
                     var result = await _unitOfWork.OrderRepository.CreateAsync(order);
                     await _unitOfWork.OrderRepository.SaveAsync();
 
@@ -120,6 +131,7 @@ namespace KOIFARMSHOP.Service.Services
 
 
 
+
         public async Task<IBusinessResult> DeleteByID(int id)
         {
             try
@@ -129,20 +141,24 @@ namespace KOIFARMSHOP.Service.Services
                 {
                     return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new Order());
                 }
+
+                orderById.Status = "Inactive";
+                var result = await _unitOfWork.OrderRepository.UpdateAsync(orderById);
+                await _unitOfWork.OrderRepository.SaveAsync();
+
+                if (result >0)
+                {
+                    return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderById);
+                }
                 else
                 {
-                    var result = await _unitOfWork.OrderRepository.RemoveAsync(orderById);
-                    if (result)
-                    {
-                        return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderById);
-                    }
-                    else
-                    {
-                        return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, orderById);
-                    }
+                    return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, orderById);
                 }
             }
-            catch (Exception ex) { return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString()); }
+            catch (Exception ex)
+            {
+                return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
+            }
         }
 
     }

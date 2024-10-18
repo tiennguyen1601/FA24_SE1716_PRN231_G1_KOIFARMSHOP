@@ -35,8 +35,10 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddSingleton<VerificationCodeCache>();
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 

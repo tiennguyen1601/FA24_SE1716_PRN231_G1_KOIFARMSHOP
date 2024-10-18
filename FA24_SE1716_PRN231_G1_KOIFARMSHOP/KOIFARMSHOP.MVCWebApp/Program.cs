@@ -12,6 +12,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<FA24_SE1716_PRN231_G1_KOIFARMSHOPContext>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<IConsignmentService, ConsignmentService>();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,9 +28,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession();
 app.UseRouting();
 
 app.UseAuthorization();
