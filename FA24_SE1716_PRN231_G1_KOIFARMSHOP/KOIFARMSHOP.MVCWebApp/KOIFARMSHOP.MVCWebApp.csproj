@@ -19,4 +19,8 @@
     <ProjectReference Include="..\KOIFARMSHOP.Data\KOIFARMSHOP.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Middleware\" />
+  </ItemGroup>
+
 </Project>
