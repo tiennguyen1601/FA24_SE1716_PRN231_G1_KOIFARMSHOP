@@ -26,16 +26,18 @@ namespace KOIFARMSHOP.Data.Repository
             return consignment;
         }
 
-        public async Task<List<Consignment>> GetAllDetail()
+        public async Task<List<Consignment>> GetAllDetail(int customerId)
         {
-            var consignment = await _context.Consignments
+            var consignments = await _context.Consignments
                 .Include(c => c.Animal)
                 .Include(c => c.Customer)
-                .Include(c => c.Order)
-                .ToListAsync();  
+                //.Include(c => c.Order)
+                .Where(c => c.CustomerId == customerId)  
+                .ToListAsync();
 
-            return consignment;
+            return consignments;
         }
+
 
         public async Task<bool> Delete(Consignment consignment)
         {

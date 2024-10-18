@@ -41,6 +41,14 @@ namespace KOIFARMSHOP.APIService.Controllers
             return animal;
         }
 
+        [HttpGet("User")]
+        public async Task<IBusinessResult> GetAnimalsByUser()
+        {
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            var animal = await _animalService.GetAllByUser(token);
+            return animal;
+        }
+
         // PUT: api/Animals/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
