@@ -6,103 +6,96 @@
 
 <h1>Details</h1>
 
-<div>
-    <h4>Product</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StockQuantity)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StockQuantity)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Brand)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Brand)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Weight)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Weight)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Discount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Discount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExpiryDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExpiryDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ManufacturingDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ManufacturingDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedByNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedByNavigation.FullName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedByNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedByNavigation.FullName)
-        </dd>
-    </dl>
+<div class="row">
+    <!-- Left Column: Product Images -->
+    <div class="col-md-4">
+        <h4>Product Images</h4>
+        <hr />
+        <div id="productImageCarousel" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                @if (Model.ProductImages != null && Model.ProductImages.Any())
+                {
+                    var isFirstImage = true;
+
+                    foreach (var image in Model.ProductImages)
+                    {
+                        <div class="carousel-item @(isFirstImage ? "active" : "")">
+                            <img src="@image.ImageUrl" class="d-block w-75" alt="Product Image" />
+                        </div>
+                        isFirstImage = false;
+                    }
+                }
+                else
+                {
+                    <div class="carousel-item active">
+                        <img src="~/images/default-product.png" class="d-block w-75" alt="Default Image" />
+                    </div>
+                }
+            </div>
+            
+            @if (Model.ProductImages != null && Model.ProductImages.Count > 1)
+            {
+                <a class="carousel-control-prev" href="#productImageCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#productImageCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            }
+
+        </div>
+    </div>
+
+    <!-- Right Column: Product Information -->
+    <div class="col-md-8">
+        <h4>Product Information</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Description)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Description)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Price)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Price)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StockQuantity)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.StockQuantity)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Brand)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Brand)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Weight)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Weight)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Discount)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Discount)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ExpiryDate)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ExpiryDate)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ManufacturingDate)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ManufacturingDate)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Status)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Category)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Category.Name)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedByNavigation)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedByNavigation.FullName)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ModifiedByNavigation)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ModifiedByNavigation.FullName)</dd>
+        </dl>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ProductId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model?.ProductId" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>

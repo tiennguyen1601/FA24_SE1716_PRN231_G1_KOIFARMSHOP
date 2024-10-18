@@ -26,7 +26,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var categories = new List<Category>();
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "/Category"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Category"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -49,7 +49,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var product = new Product();
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"/Products/{productId}"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"Products/{productId}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -69,25 +69,27 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            using (var httpClient = new HttpClient())
-            {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "/Products"))
-                {
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var content = await res.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+            //using (var httpClient = new HttpClient())
+            //{
+            //    using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Products"))
+            //    {
+            //        if (res.IsSuccessStatusCode)
+            //        {
+            //            var content = await res.Content.ReadAsStringAsync();
+            //            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                        if (result != null && result.Data != null)
-                        {
-                            var data = JsonConvert.DeserializeObject<List<Product>>(result.Data.ToString());
+            //            if (result != null && result.Data != null)
+            //            {
+            //                var data = JsonConvert.DeserializeObject<List<Product>>(result.Data.ToString());
 
-                            return View(data);
-                        }
-                    }
-                }
-            }
-            return View(new List<Product>());
+            //                return View(data);
+            //            }
+            //        }
+            //    }
+            //}
+            //return View(new List<Product>());
+
+            return View();
         }
 
         // GET: Products/Details/5
@@ -95,7 +97,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"/Products/{id}"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"Products/{id}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -141,7 +143,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             {
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "/Products", product))
+                    using (var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Products", product))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -181,9 +183,11 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var product = new Product();
             var categories = new List<Category>();
 
+            var updateProductModel = new UpdateProductReqModel();
+
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"/Products/{id}"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"Products/{id}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -194,11 +198,24 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         {
                             product = JsonConvert.DeserializeObject<Product>(result.Data.ToString());
 
+                            updateProductModel.ProductId = product.ProductId;
+                            updateProductModel.Name = product.Name;
+                            updateProductModel.Brand = product.Brand;
+                            updateProductModel.Description = product.Description;
+                            updateProductModel.Price = product.Price;
+                            updateProductModel.StockQuantity = product.StockQuantity;
+                            updateProductModel.Weight = product.Weight;
+                            updateProductModel.Discount = product.Discount;
+                            updateProductModel.ExpiryDate = product.ExpiryDate;
+                            updateProductModel.ManufacturingDate = product.ManufacturingDate;
+                            updateProductModel.CategoryId = product.CategoryId;
+                            updateProductModel.ModifiedBy = product.ModifiedBy;
+                            updateProductModel.Images = product.ProductImages.Select(x => x.ImageUrl).ToList();
                         }
                     }
                 }
 
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "/Category"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Category"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -217,7 +234,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.CreatedBy);
             ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.ModifiedBy);
 
-            return View(product);
+            return View(updateProductModel);
         }
 
         // POST: Products/Edit/5
@@ -226,7 +243,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         //[Bind("ProductId,Name,Description,Price,StockQuantity,Brand,Weight,Discount,ExpiryDate,ManufacturingDate,CategoryId,Status,CreatedAt,UpdatedAt,CreatedBy,ModifiedBy")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,  Product product)
+        public async Task<IActionResult> Edit(int id,  UpdateProductReqModel updateProductReqModel)
         {
             bool saveStatus = false;
 
@@ -236,7 +253,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             {
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "/Products", product))
+                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "Products", updateProductReqModel))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -254,7 +271,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         }
                     }
 
-                    using (var res = await httpClient.GetAsync(Const.APIEndPoint + "/Category"))
+                    using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Category"))
                     {
                         if (res.IsSuccessStatusCode)
                         {
@@ -277,13 +294,12 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 else
                 {
                     ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name");
-                    ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.CreatedBy);
-                    ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", product.ModifiedBy);
-                    return View(product);
+                    ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", updateProductReqModel.ModifiedBy);
+                    return View(updateProductReqModel);
                 }
             }
 
-            return View(product);
+            return View(updateProductReqModel);
         }
 
         // GET: Products/Delete/5
@@ -294,7 +310,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"/Products/{id}"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + $"Products/{id}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -322,7 +338,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var product = new Product();
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.DeleteAsync(Const.APIEndPoint + $"/Products/{id}"))
+                using (var res = await httpClient.DeleteAsync(Const.APIEndPoint + $"Products/{id}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {

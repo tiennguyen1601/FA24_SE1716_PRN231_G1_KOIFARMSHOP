@@ -1,10 +1,13 @@
-﻿using KOIFARMSHOP.Data.DTO.ProductDTO;
+﻿using KOIFARMSHOP.Common;
+using KOIFARMSHOP.Data.DTO.ProductDTO;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Common;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace KOIFARMSHOP.APIService.Controllers
 {
@@ -22,10 +25,9 @@ namespace KOIFARMSHOP.APIService.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IBusinessResult> GetProducts()
+        public async Task<IBusinessResult> GetProducts(int? page = 1, int? size = 10)
         {
-            return await _productService.GetAll();
+            return await _productService.GetAll(page, size);
         }
 
         [HttpGet("{productId}")]
@@ -34,12 +36,47 @@ namespace KOIFARMSHOP.APIService.Controllers
             return await _productService.GetById(productId);
         }
 
+        [HttpGet]
+        [Route("search")]
+        public async Task<IBusinessResult> SearchProducts([FromQuery] ProductFilterReqModel? productFilterReqModel, string? searchValue, int? page = 1, int? size = 10)
+        {
+            return await _productService.SearchProducts(productFilterReqModel, searchValue, page, size);
+        }
+
+        [HttpGet]
+        [Route("brand")]
+        public async Task<IBusinessResult> GetBrandName()
+        {
+            return await _productService.GetBrandName();
+        }
+
         // PUT: api/Products/5
         [HttpPut]
-        public async Task<IBusinessResult> PutProduct(Product product)
+        public async Task<IBusinessResult> PutProduct(UpdateProductReqModel updateProduct)
         {
 
-            return await _productService.Save(product);
+            var currProduct = await _productService.GetProductById(updateProduct.ProductId);
+
+            if (currProduct == null) return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Product>());
+
+            currProduct.Name = !string.IsNullOrEmpty(updateProduct.Name) ? updateProduct.Name : currProduct.Name;
+            currProduct.Description = !string.IsNullOrEmpty(updateProduct.Description) ? updateProduct.Description : currProduct.Description;
+            currProduct.Price = updateProduct.Price != null ? (decimal)updateProduct.Price : currProduct.Price;
+            currProduct.StockQuantity = updateProduct.StockQuantity != null ? (int)updateProduct.StockQuantity : currProduct.StockQuantity;
+            currProduct.Brand = !string.IsNullOrEmpty(updateProduct.Brand) ? updateProduct.Brand : currProduct.Brand; ;
+            currProduct.Weight = updateProduct.Weight != null ? (int)updateProduct.Weight : currProduct.Weight; ;
+            currProduct.Discount = updateProduct.Discount != null ? (decimal)updateProduct.Discount : currProduct.Discount; ;
+            currProduct.ExpiryDate = updateProduct.ExpiryDate.HasValue ? updateProduct.ExpiryDate.Value : currProduct.ExpiryDate;
+            currProduct.ManufacturingDate = updateProduct.ManufacturingDate.HasValue ? updateProduct.ManufacturingDate.Value : currProduct.ManufacturingDate;
+            currProduct.CategoryId = updateProduct.CategoryId != null ? updateProduct.CategoryId : currProduct.CategoryId;
+            currProduct.UpdatedAt = DateTime.Now;
+
+            //_context.Products.Update(currProduct);
+            //await _context.SaveChangesAsync();
+
+            var result = await _productService.Save(currProduct, updateProduct.Images);
+
+            return result;
         }
 
         [HttpPost]
@@ -61,7 +98,7 @@ namespace KOIFARMSHOP.APIService.Controllers
                 CreatedAt = DateTime.Now,
                 CreatedBy = product.CreatedBy
             };
-            return await _productService.Save(newProduct);
+            return await _productService.Save(newProduct, product.Images);
         }
 
 
