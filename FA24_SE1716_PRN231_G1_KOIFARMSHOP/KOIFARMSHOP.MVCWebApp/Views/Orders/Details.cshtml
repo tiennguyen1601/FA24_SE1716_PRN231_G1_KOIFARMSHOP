@@ -80,7 +80,7 @@
         <thead>
             <tr>
                 <th>@Html.DisplayNameFor(model => model.OrderDetails.First().ProductName)</th>
-                <th>@Html.DisplayNameFor(model => model.OrderDetails.First().AnimalType)</th>
+                <th>@Html.DisplayNameFor(model => model.OrderDetails.First().AnimalSpecies)</th>
                 <th>@Html.DisplayNameFor(model => model.OrderDetails.First().Quantity)</th>
                 <th>@Html.DisplayNameFor(model => model.OrderDetails.First().Price)</th>
                 <th>@Html.DisplayNameFor(model => model.OrderDetails.First().Amount)</th>
@@ -93,7 +93,7 @@
             {
                 <tr>
                     <td>@Html.DisplayFor(modelItem => detail.ProductName)</td>
-                    <td>@Html.DisplayFor(modelItem => detail.AnimalType)</td>
+                    <td>@Html.DisplayFor(modelItem => detail.AnimalSpecies)</td>
                     <td>@Html.DisplayFor(modelItem => detail.Quantity)</td>
                     <td>@Html.DisplayFor(modelItem => detail.Price)</td>
                     <td>@Html.DisplayFor(modelItem => detail.Amount)</td>
