@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Common;
 using Newtonsoft.Json;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Service.Services;
+using KOIFARMSHOP.MVCWebApp.Models;
+using System.Net.Http.Json;
+
+
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -123,21 +122,76 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index)); // Adjust handling as needed
         }
 
+        // GET: Animals/Compare
+        public async Task<IActionResult> Compare()
+        {
+            var model = new CompareAnimalsViewModel
+            {
+                Animals = await GetAnimals(),
+                SelectedAnimalIds = new List<int>(),
+                ComparisonResults = new List<ComparisonResult>()
+            };
+
+            if (!model.Animals.Any())
+            {
+                ModelState.AddModelError("", "No animals available for comparison.");
+                return View(model);
+            }
+
+            return View(model);
+        }
+
+        // POST: Animals/Compare
+        [HttpPost]
+        public async Task<IActionResult> Compare(CompareAnimalsViewModel model)
+        {
+            model.Animals = await GetAnimals();
+
+            if (model.SelectedAnimalIds == null || !model.SelectedAnimalIds.Any())
+            {
+                ModelState.AddModelError("", "No animal IDs provided.");
+                return View(model);
+            }
+
+            if (model.SelectedAttributes == null || !model.SelectedAttributes.Any())
+            {
+                ModelState.AddModelError("", "No attributes selected for comparison.");
+                return View(model);
+            }
+
+            model.ComparisonResults = await CompareMultipleFishAttributes(model.SelectedAnimalIds, model.SelectedAttributes);
+
+
+            if (model.ComparisonResults == null || !model.ComparisonResults.Any())
+            {
+                ModelState.AddModelError("", "No results to display for the selected attributes.");
+                return View(model);
+            }
+
+            return View("ComparisonResults", model);
+        }
+
+
+
         private async Task<List<Animal>> GetAnimals()
         {
             using var httpClient = new HttpClient();
             var response = await httpClient.GetAsync($"{Const.APIEndPoint}Animals");
+            var animals = new List<Animal>();
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-                if (result?.Data != null)
+
+                if (result != null && result.Data != null)
                 {
-                    return JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
+                    animals = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString()) ?? new List<Animal>();
                 }
             }
-            return new List<Animal>();
+            return animals;
         }
+
 
         private async Task<Animal> GetAnimal(int id)
         {
@@ -175,6 +229,29 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var response = await httpClient.DeleteAsync($"{Const.APIEndPoint}Animals/{id}");
             return response.IsSuccessStatusCode;
         }
+
+
+        private static async Task<List<CompareAnimalsViewModel>> CompareMultipleFishAttributes(List<int> animalIds, List<string> selectedAttributes)
+        {
+            using var httpClient = new HttpClient();
+
+            var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Animals/CompareMultipleFish", animalIds, selectedAttributes);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+
+                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                if (result?.Data != null)
+                {
+                    return JsonConvert.DeserializeObject<List<CompareAnimalsViewModel>>(result.Data.ToString());
+                }
+            }
+
+            return new List<CompareAnimalsViewModel>();
+        }
+
 
         private async Task LoadStaffData()
         {

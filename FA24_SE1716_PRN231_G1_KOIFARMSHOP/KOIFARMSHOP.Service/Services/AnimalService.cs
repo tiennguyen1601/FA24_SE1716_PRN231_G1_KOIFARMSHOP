@@ -17,14 +17,12 @@ namespace KOIFARMSHOP.Service.Services
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(int id);
-
-
         Task<IBusinessResult> GetAllByUser(string token);
 
         Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
 
         Task<IBusinessResult> DeleteByID(int id);
-        Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
+        Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes);
 
 
     }
@@ -169,66 +167,154 @@ namespace KOIFARMSHOP.Service.Services
             catch (Exception ex) { return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString()); }
         }
 
-        public async Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds)
+        public async Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes)
         {
             try
-            {
-                // Fetch koi fish details for all provided IDs
+            {            
                 var koiFishList = new List<Animal>();
-                var validKoiFishIds = new List<int>();
                 foreach (var koiFishId in koiFishIds)
                 {
                     var koiFish = await _unitOfWork.AnimalRepository.GetByIdAsync(koiFishId);
                     if (koiFish != null)
                     {
-                        koiFishList.Add(koiFish);
-                        validKoiFishIds.Add(koiFishId); // Add to valid ID list
+                        koiFishList.Add(koiFish); 
                     }
                 }
 
-                // Check if we have any valid koi fish
-                if (koiFishList.Count == 0)
-                {
-                    return new BusinessResult(Const.WARNING_NO_DATA_CODE,
-                        "No valid koi fish found for the given IDs.",
-                        koiFishList);
-                }
-
-                // Check if we have enough data to compare
                 if (koiFishList.Count < 2)
                 {
-                    return new BusinessResult(Const.WARNING_NO_DATA_CODE,
-                        "At least two koi fish are required for comparison.",
-                        koiFishList);
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, "Cần ít nhất hai cá koi để so sánh.");
                 }
 
-                // Sort the koi fish by price in ascending order
-                koiFishList = koiFishList.OrderBy(k => k.Price).ToList();
+                var comparisonMessage = new List<string> { "So sánh các thuộc tính của cá koi:" };
 
-                // Create a comparison message
-                List<string> comparisonMessage = new List<string>();
-                comparisonMessage.Add("Comparison of Koi Fish Prices:");
-                for (int i = 0; i < koiFishList.Count - 1; i++)
+                if (comparisonAttributes.Contains("Price"))
                 {
-                    var currentKoiFish = koiFishList[i];
-                    var nextKoiFish = koiFishList[i + 1];
-                    if (currentKoiFish.Price < nextKoiFish.Price)
+                    koiFishList = koiFishList.OrderBy(k => k.Price).ToList();
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
                     {
-                        comparisonMessage.Add($"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) is more expensive than koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species})");
-                    }
-                    else if (currentKoiFish.Price == nextKoiFish.Price)
-                    {
-                        comparisonMessage.Add($"Koi fish with ID {nextKoiFish.AnimalId} ({nextKoiFish.Species}) has the same price as koi fish with ID {currentKoiFish.AnimalId} ({currentKoiFish.Species}).");
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (currentKoi.Price < nextKoi.Price)
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} đắt hơn cá koi ID {currentKoi.AnimalId}.");
+                        }
+                        else if (currentKoi.Price == nextKoi.Price)
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có giá tương đương với cá koi ID {currentKoi.AnimalId}.");
+                        }
                     }
                 }
 
-                // Return the list of koi fish with comparison message
+                if (comparisonAttributes.Contains("Size"))
+                {
+                    koiFishList = koiFishList.OrderBy(k => k.Size).ToList();
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (!string.Equals(currentKoi.Size, nextKoi.Size, StringComparison.OrdinalIgnoreCase))
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} lớn hơn cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
+                if (comparisonAttributes.Contains("HealthStatus"))
+                {
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (!string.Equals(currentKoi.HealthStatus, nextKoi.HealthStatus, StringComparison.OrdinalIgnoreCase))
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có tình trạng sức khỏe khác với cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
+                if (comparisonAttributes.Contains("Gender"))
+                {
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (!string.Equals(currentKoi.Gender, nextKoi.Gender, StringComparison.OrdinalIgnoreCase))
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có giới tính khác với cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
+                if (comparisonAttributes.Contains("FarmOrigin"))
+                {
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (!string.Equals(currentKoi.FarmOrigin, nextKoi.FarmOrigin, StringComparison.OrdinalIgnoreCase))
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có nguồn gốc khác với cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
+                if (comparisonAttributes.Contains("Color"))
+                {
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (!string.Equals(currentKoi.Color, nextKoi.Color, StringComparison.OrdinalIgnoreCase))
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có màu sắc khác với cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
+                if (comparisonAttributes.Contains("MaintenanceCost"))
+                {
+                    koiFishList = koiFishList.OrderBy(k => k.MaintenanceCost).ToList();
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (currentKoi.MaintenanceCost < nextKoi.MaintenanceCost)
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có chi phí bảo trì cao hơn cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
+                if (comparisonAttributes.Contains("BirthYear"))
+                {
+                    koiFishList = koiFishList.OrderBy(k => k.BirthYear).ToList();
+                    for (int i = 0; i < koiFishList.Count - 1; i++)
+                    {
+                        var currentKoi = koiFishList[i];
+                        var nextKoi = koiFishList[i + 1];
+
+                        if (currentKoi.BirthYear < nextKoi.BirthYear)
+                        {
+                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} trẻ hơn cá koi ID {currentKoi.AnimalId}.");
+                        }
+                    }
+                }
+
                 var result = new
                 {
                     KoiFishList = koiFishList,
                     ComparisonMessage = comparisonMessage
                 };
-                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, result);
+
+                return new BusinessResult(Const.SUCCESS_CREATE_CODE, "So sánh thành công", result);
             }
             catch (Exception ex)
             {
@@ -236,6 +322,6 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-
     }
 }
+
