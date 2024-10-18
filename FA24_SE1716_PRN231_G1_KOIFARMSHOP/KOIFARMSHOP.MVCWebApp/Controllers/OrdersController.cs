@@ -26,25 +26,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Orders
         public async Task<IActionResult> Index()
         {
-            using (var httpClient = new HttpClient())
-            {
-                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Orders"))
-                {
-                    if (respone.IsSuccessStatusCode)
-                    {
-                        var content = await respone.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                        if (result != null && result.Data != null)
-                        {
-                            var data = JsonConvert.DeserializeObject<List<OrderResponseModel>>(result.Data.ToString());
-                            return View(data);
-                        }
-                    }
-
-                }
-            }
-            return View(new List<OrderResponseModel>());
+            return View();
         }
 
 
