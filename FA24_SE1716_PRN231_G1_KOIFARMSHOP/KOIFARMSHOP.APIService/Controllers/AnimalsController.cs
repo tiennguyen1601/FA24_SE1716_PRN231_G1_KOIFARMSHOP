@@ -4,12 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Common;
-using Newtonsoft.Json;
 using KOIFARMSHOP.Data.DTO.AniamlDTO;
 
 namespace KOIFARMSHOP.APIService.Controllers
@@ -18,7 +16,6 @@ namespace KOIFARMSHOP.APIService.Controllers
     [ApiController]
     public class AnimalsController : ControllerBase
     {
-        //private readonly FA24_SE1716_PRN231_G1_KOIFARMSHOPContext _context;
         private readonly IAnimalService _animalService;
 
         public AnimalsController(IAnimalService animalService)
@@ -26,12 +23,11 @@ namespace KOIFARMSHOP.APIService.Controllers
             _animalService = animalService;
         }
 
-
         // GET: api/Animals
         [HttpGet]
-        public async Task<IBusinessResult> GetAnimals()
+        public async Task<IBusinessResult> GetAnimals(int? page = 1, int? size = 10)
         {
-            return await _animalService.GetAll();
+            return await _animalService.GetAll(page, size);
         }
 
         // GET: api/Animals/5
@@ -41,12 +37,20 @@ namespace KOIFARMSHOP.APIService.Controllers
             return await _animalService.GetByID(id);
         }
 
+        // GET: api/Animals/User
         [HttpGet("User")]
         public async Task<IBusinessResult> GetAnimalsByUser()
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
             var animal = await _animalService.GetAllByUser(token);
             return animal;
+        }
+
+        // GET: api/Animals/search
+        [HttpGet("search")]
+        public async Task<IBusinessResult> SearchAnimals([FromQuery] AnimalFilterReqModel? filterModel, [FromQuery] string? searchValue, int? page = 1, int? size = 10)
+        {
+            return await _animalService.SearchAnimals(filterModel, searchValue, page, size);
         }
 
         // PUT: api/Animals/5
@@ -80,6 +84,7 @@ namespace KOIFARMSHOP.APIService.Controllers
             return await _animalService.DeleteByID(id);
         }
 
+        // POST: api/Animals/CompareMultipleFish
         [HttpPost("CompareMultipleFish")]
         public async Task<IActionResult> CompareMultipleAnimal(List<int> ids)
         {
@@ -89,7 +94,7 @@ namespace KOIFARMSHOP.APIService.Controllers
             {
                 var result = await _animalService.GetByID(id);
 
-                if (result == null )
+                if (result == null)
                 {
                     return NotFound($"Koi fish with ID {id} was not found.");
                 }
@@ -105,13 +110,9 @@ namespace KOIFARMSHOP.APIService.Controllers
             }
 
             var koiFishIds = koiFishList.Select(f => f.AnimalId).ToList();
-
             var comparisonResult = await _animalService.CompareMultipleKoiFishPrices(koiFishIds);
 
             return Ok(comparisonResult);
         }
-
-
-
     }
 }

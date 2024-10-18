@@ -25,8 +25,10 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Animals
         public async Task<IActionResult> Index()
         {
-            var animals = await GetAnimals();
-            return View(animals);
+            //var animals = await GetAnimals();
+            //return View(animals);
+
+            return View();
         }
 
         // GET: Animals/Details/5
@@ -120,7 +122,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var saveStatus = await DeleteAnimal(id);
-            return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index)); // Adjust handling as needed
+            return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index)); 
         }
 
         private async Task<List<Animal>> GetAnimals()
