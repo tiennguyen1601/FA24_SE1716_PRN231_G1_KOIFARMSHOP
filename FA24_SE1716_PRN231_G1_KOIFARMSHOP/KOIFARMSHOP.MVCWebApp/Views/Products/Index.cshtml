@@ -16,21 +16,19 @@
         <h3 class="mb-4">Product Search</h3>
         <form method="get" id="searchForm">
             <div class="form-group row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                     <input type="text" name="searchValue" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search for products..." />
                 </div>
 
-                <div class="col-md-12 mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Category:</label>
                     <div id="category-options" class="form-check flex-column">
-                        @* Checkbox options will be dynamically loaded here *@
                     </div>
                 </div>
 
-                <div class="col-md-12 mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Brand:</label>
                     <div id="brand-options" class="form-check">
-                        @* Checkbox options will be dynamically loaded here *@
                     </div>
                 </div>
 
@@ -288,15 +286,45 @@
                 html += '<td>' + item.status + '</td>';
                 html += '<td>' + item.category.name + '</td>';
                 html += '<td>';
-                html += '<a class="btn btn-sm btn-info" href="/Products/Edit/' + item.productId + '">Edit</a> ';
-                html += '<a class="btn btn-sm btn-secondary" href="/Products/Details/' + item.productId + '">Details</a> ';
+                
                 if (item.status !== "Inactive") {
-                    html += '<a class="btn btn-sm btn-danger" href="/Products/Delete/' + item.productId + '">Delete</a>';
+                    html += '<a class="btn btn-sm btn-info" href="/Products/Edit/' + item.productId + '">Edit</a> ';
+                    html += '<a class="btn btn-sm btn-secondary" href="/Products/Details/' + item.productId + '">Details</a> ';
+                    html += '<button class="btn btn-sm btn-danger" onclick="activateDeactivateProduct(' + item.productId + ', \'' + item.status + '\')">Deactivate</button>';
+                }else {
+                    html += '<button class="btn btn-sm btn-success" onclick="activateDeactivateProduct(' + item.productId + ', \'' + item.status + '\')">Activate</button>';
                 }
                 html += '</td>';
                 html += '</tr>';
             });
             $('.tblProducts').html(html);
+        }
+
+        function activateDeactivateProduct(productId, status) {
+
+            var isConfirmed;
+
+            if (status === "Active") {
+                isConfirmed = confirm("Are you sure you want to deactivate this product?");
+
+            } else {
+                isConfirmed = confirm("Are you sure you want to activate this product?")
+            }
+
+            if (isConfirmed) {
+                $.ajax({
+                    url: 'https://localhost:7176/api/Products/ActivateDeactivate/' + productId,
+                    type: 'POST',
+                    contentType: 'application/json;charset=utf-8',
+                    success: function (result) {
+                        alert("Product status changed successfully!");
+                        loadData();
+                    },
+                    error: function (xhr, error) {
+                        alert("Failed to delete product: " + xhr.statusText);
+                    }
+                });
+            }
         }
 
         function updatePaginationControls() {

@@ -1,51 +1,18 @@
 ﻿@model IEnumerable<KOIFARMSHOP.Data.Models.Category>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Category";
 }
 
-<h1>Index</h1>
+<h1>Category</h1>
+
+@* <p>
+    <a asp-action="Create">Create New</a>
+</p> *@
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <button class="btn btn-primary" id="addCategoryBtn">Add New Category</button>
 </p>
-
-@* <table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CategoryId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CategoryId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CategoryId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table> *@
 
 <div class="row mt-3">
     <div class="col-md-12">
@@ -64,11 +31,184 @@
     </div>
 </div>
 
+<!-- Modal for Adding New Category -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addCategoryForm">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <input type="text" id="description" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveCategoryBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="updateCategoryModal" tabindex="-1" role="dialog" aria-labelledby="updateCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateCategoryModalLabel">Update Category</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="updateCategoryForm">
+                    <input type="hidden" id="categoryId" value="">
+
+                    <div class="form-group">
+                        <label for="updateName">Name:</label>
+                        <input type="text" id="updateName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateDescription">Description:</label>
+                        <input type="text" id="updateDescription" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="updateCategoryBtn">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
             loadData();
+
+            $('#addCategoryBtn').click(function () {
+                $('#addCategoryModal').modal('show');
+            });
+
+            $('#saveCategoryBtn').click(function () {
+                addCategory();
+            });
+
+            $('#updateCategoryBtn').click(function () {
+                updateCategory();
+            });
+
         });
+
+        function addCategory() {
+
+            var name = $('#name').val().trim();
+            var description = $('#description').val().trim();
+
+            if (name === "" || description === "") {
+                alert("Both Name and Description fields are required.");
+                return;
+            }
+
+            var categoryData = {
+                name: $('#name').val(),
+                description: $('#description').val()
+            };
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Category',
+                type: 'POST',
+                contentType: 'application/json;charset=utf-8',
+                data: JSON.stringify(categoryData),
+                success: function (result) {
+                    alert("Category added successfully!");
+                    $('#addCategoryModal').modal('hide');
+                    loadData(); // Refresh the data
+                },
+                error: function (xhr, error) {
+                    alert("Failed to add category: " + xhr.statusText);
+                }
+            });
+        }
+
+        function openUpdateModal(categoryId, name, description) {
+            $('#categoryId').val(categoryId);
+            $('#updateName').val(name);
+            $('#updateDescription').val(description);
+            $('#updateCategoryModal').modal('show');
+        }
+
+        function updateCategory() {
+
+            var name = $('#updateName').val().trim();
+            var description = $('#updateDescription').val().trim();
+
+            if (name === "" || description === "") {
+                alert("Both Name and Description fields are required.");
+                return;
+            }
+
+            var categoryData = {
+                categoryId: $('#categoryId').val(),
+                name: $('#updateName').val(),
+                description: $('#updateDescription').val()
+            };
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Category',
+                type: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                data: JSON.stringify(categoryData),
+                success: function (result) {
+                    alert("Category updated successfully!");
+                    $('#updateCategoryModal').modal('hide');
+                    loadData(); // Refresh the data
+                },
+                error: function (xhr, error) {
+                    alert("Failed to update category: " + xhr.statusText);
+                }
+            });
+        }
+
+        function activateDeactivateCategory(categoryId, status) {
+
+            var isConfirmed;
+
+            if (status === "Active") {
+                isConfirmed = confirm("Are you sure you want to deactivate this category?");
+
+            } else {
+                isConfirmed =  confirm("Are you sure you want to activate this category?")
+            }
+
+            if (isConfirmed) {
+                $.ajax({
+                    url: 'https://localhost:7176/api/Category/ActivateDeactivate/' + categoryId,
+                    type: 'POST',
+                    contentType: 'application/json;charset=utf-8',
+                    success: function (result) {
+                        alert("Category status changed successfully!");
+                        loadData(); 
+                    },
+                    error: function (xhr, error) {
+                        alert("Failed to delete category: " + xhr.statusText);
+                    }
+                });
+            }
+        }
+
+        
 
         function loadData() {
             $.ajax({
@@ -84,9 +224,14 @@
                         html += '<td>' + item.description + '</td>';
                         html += '<td>' + item.status + '</td>';
                         html += '<td>';
-                        html += '<a class="btn btn-sm btn-info" href="/Categories/Edit/' + item.categoryId + '">Edit</a> ';
-                        html += '<a class="btn btn-sm btn-secondary" href="/Categories/Details/' + item.categoryId + '">Details</a> ';
-                        html += '<a class="btn btn-sm btn-danger" href="/Categories/Delete/' + item.categoryId + '">Delete</a>';
+
+                        if (item.status !== "Inactive") {
+                            html += '<button class="btn btn-sm btn-info" onclick="openUpdateModal(' + item.categoryId + ',\'' + item.name + '\',\'' + item.description + '\')">Edit</button> ';
+                            html += '<button class="btn btn-sm btn-danger" onclick="activateDeactivateCategory(' + item.categoryId + ', \'' + item.status + '\')">Deactivate</button>';
+
+                        }else {
+                            html += '<button class="btn btn-sm btn-success" onclick="activateDeactivateCategory(' + item.categoryId + ', \'' + item.status + '\')">Activate</button>';
+                        }
 
                         html += '</td>';
                         html += '</tr>';
@@ -99,87 +244,5 @@
             });
         }
 
-        function openModal() {
-            // $(".modal-body").html(`
-            //                     <div class="form-group">
-            //                         <label for="name">Name:</label>
-            //                         <input type="text" id="name" name="name" class="form-control" required>
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="description">Description:</label>
-            //                         <input type="text" id="description" name="description" class="form-control" required>
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="price">Price:</label>
-            //                         <input type="number" id="price" name="price" class="form-control" required>
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="stockQuantity">Stock Quantity:</label>
-            //                         <input type="number" id="stockQuantity" name="stockQuantity" class="form-control" required>
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="brand">Brand:</label>
-            //                         <input type="text" id="brand" name="brand" class="form-control" required>
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="weight">Weight:</label>
-            //                         <input type="text" id="weight" name="weight" class="form-control" required>
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="discount">Discount:</label>
-            //                         <input type="text" id="discount" name="discount" class="form-control">
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="expiryDate">Expiry Date:</label>
-            //                         <input type="date" id="expiryDate" name="expiryDate" class="form-control">
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="manufacturingDate">Manufacturing Date:</label>
-            //                         <input type="date" id="manufacturingDate" name="manufacturingDate" class="form-control">
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="status">Status:</label>
-            //                         <input type="text" id="status" name="status" class="form-control">
-            //                     </div>
-            //                     <div class="form-group">
-            //                         <label for="category">Category:</label>
-            //                         <input type="text" id="category" name="category" class="form-control" required>
-            //                     </div>
-            //                 `);
-
-            // $("#productModalLabel").html("Add New Product");
-            // $('#productModal').modal('show');
-
-            // $('#btSave').off('click').on('click', function () {
-            //     var productData = {
-            //         name: $('#name').val(),
-            //         description: $('#description').val(),
-            //         price: $('#price').val(),
-            //         stockQuantity: $('#stockQuantity').val(),
-            //         brand: $('#brand').val(),
-            //         weight: $('#weight').val(),
-            //         discount: $('#discount').val(),
-            //         expiryDate: $('#expiryDate').val(),
-            //         manufacturingDate: $('#manufacturingDate').val(),
-            //         status: $('#status').val(),
-            //         category: $('#category').val()
-            //     };
-
-            //     // $.ajax({
-            //     //     url: 'https://localhost:7176/api/Products',
-            //     //     type: 'POST',
-            //     //     contentType: 'application/json;charset=utf-8',
-            //     //     data: JSON.stringify(productData),
-            //     //     success: function (result) {
-            //     //         alert("Product added successfully!");
-            //     //         $('#productModal').modal('hide');
-            //     //         loadData();
-            //     //     },
-            //     //     error: function (xhr, error) {
-            //     //         alert("Failed to add product: " + xhr.statusText);
-            //     //     }
-            //     // });
-            // });
-        }
     </script>
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Data.DTO.PaymentDTO;
 using KOIFARMSHOP.Data.Models;
@@ -26,6 +27,12 @@ namespace KOIFARMSHOP.Data.Mapper
 
             #region Payment
             CreateMap<PaymentCreateRequestModel, Payment>();
+            #endregion
+
+            #region Animal
+            CreateMap<AnimalReqModel, Animal>()
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.Now))
+                .ForMember(dest => dest.AnimalImages, opt => opt.Ignore());
             #endregion
         }
     }

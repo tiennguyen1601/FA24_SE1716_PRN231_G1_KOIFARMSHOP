@@ -4,7 +4,13 @@ using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data.Models;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+
 using KOIFARMSHOP.Service.Services.JWTService;
+
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IAnimalService
@@ -12,8 +18,12 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetByID(int id);
 
+
         Task<IBusinessResult> GetAllByUser(string token);
         Task<IBusinessResult> Save(Animal animal);
+
+        Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
+
         Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
 
@@ -22,29 +32,43 @@ namespace KOIFARMSHOP.Service.Services
     public class AnimalService : IAnimalService
     {
         private readonly UnitOfWork _unitOfWork;
+
         private readonly IJWTService _jwtService;
         public AnimalService(IJWTService jWTService)
         {
             _unitOfWork ??= new UnitOfWork();
             _jwtService = jWTService;
+
+        private readonly IMapper _mapper;
+        public AnimalService(UnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+
         }
+
         public async Task<IBusinessResult> GetAll()
         {
-            var list = await _unitOfWork.AnimalRepository.GetAllAsync();
-            if (list == null)
+            var queryableList = await _unitOfWork.AnimalRepository.GetAllAsync();
+
+            var list = await queryableList
+                               .Include(a => a.CreatedByNavigation)
+                               .Include(a => a.ModifiedByNavigation)
+                               .ToListAsync();
+
+            if (list == null || !list.Any())
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
             }
-            else
-            {
-                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
-            }
+
+            return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
         }
+
         public async Task<IBusinessResult> GetByID(int id)
         {
             #region Business rule
             #endregion
-            var list = await _unitOfWork.AnimalImageRepository.GetByIdAsync(id);
+            var list = await _unitOfWork.AnimalRepository.GetByIdAsync(id);
             if (list == null)
             {
                 return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
@@ -55,6 +79,7 @@ namespace KOIFARMSHOP.Service.Services
             }
 
         }
+
 
         public async Task<IBusinessResult> GetAllByUser(string token)
         {
@@ -76,40 +101,48 @@ namespace KOIFARMSHOP.Service.Services
         }
 
         public async Task<IBusinessResult> Save(Animal animal)
+
+        public async Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null)
+
         {
             try
             {
-                int result = -1;
-                var animalTmp = _unitOfWork.AnimalRepository.GetByIdAsync(animal.AnimalId);
-                if (animalTmp != null)
+                Animal animal;
+
+                if (animalId.HasValue)
                 {
-                    #region Business Rule
-                    #endregion Business Rule
-
-                    result = await _unitOfWork.AnimalRepository.UpdateAsync(animal);
-
-                    if (result > 0)
+                    animal = await _unitOfWork.AnimalRepository.GetByIdAsync(animalId.Value);
+                    if (animal == null)
                     {
-                        return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
+                        return new BusinessResult(Const.WARNING_NO_DATA_CODE, "Animal not found.");
                     }
-                    else
-                    {
-                        return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animal);
-                    }
+
+                    _mapper.Map(request, animal);
                 }
                 else
                 {
-                    result = await _unitOfWork.AnimalRepository.CreateAsync(animal);
-
-                    if (result > 0)
-                    {
-                        return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, new List<Animal>());
-                    }
-                    else
-                    {
-                        return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animal);
-                    }
+                    animal = _mapper.Map<Animal>(request);
+                    animal.CreatedAt = DateTime.Now;
+                    animal.CreatedBy = request.CreatedBy;
                 }
+
+                if (request.AnimalImages != null)
+                {
+                    animal.AnimalImages = request.AnimalImages
+                        .Select(url => new AnimalImage { ImageUrl = url })
+                        .ToList();
+                }
+
+                int result = animalId.HasValue
+                    ? await _unitOfWork.AnimalRepository.UpdateAsync(animal)
+                    : await _unitOfWork.AnimalRepository.CreateAsync(animal);
+
+                if (result > 0)
+                {
+                    return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, animal);
+                }
+
+                return new BusinessResult(Const.FAIL_CREATE_CODE, Const.FAIL_CREATE_MSG, animal);
             }
             catch (Exception ex)
             {

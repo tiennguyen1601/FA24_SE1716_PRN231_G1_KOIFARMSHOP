@@ -3,6 +3,7 @@ using KOIFARMSHOP.Data.Mapper;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service;
 using KOIFARMSHOP.Service.Base;
+using KOIFARMSHOP.Service.DecodeTokenHandler;
 using KOIFARMSHOP.Service.Services;
 using KOIFARMSHOP.Service.Services.CloudinaryServices;
 using KOIFARMSHOP.Service.Services.EmailServices;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IDecodeTokenHandler, DecodeTokenHandler>();
 builder.Services.AddSingleton<VerificationCodeCache>();
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 

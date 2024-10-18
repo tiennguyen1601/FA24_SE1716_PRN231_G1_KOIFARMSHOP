@@ -1,3 +1,4 @@
+using KOIFARMSHOP.Data;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Services;
 
@@ -10,6 +11,12 @@ builder.Services.AddControllersWithViews();
 
 //Dependency Injection
 builder.Services.AddScoped<FA24_SE1716_PRN231_G1_KOIFARMSHOPContext>();
+
+builder.Services.AddScoped<UnitOfWork>();
+
+
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
