@@ -72,7 +72,7 @@
 
         function loadData(page = 1, searchString = '') {
             $.ajax({
-                url: `/api/Animals/search?page=${page}&size=${PageSize}&searchValue=${encodeURIComponent(searchString)}`,
+                url: `https://localhost:7176/api/Animals/search?page=${page}&size=${PageSize}&searchValue=${encodeURIComponent(searchString)}`,
                 type: 'GET',
                 success: function (result) {
                     TotalItems = result.data.totalItems;
