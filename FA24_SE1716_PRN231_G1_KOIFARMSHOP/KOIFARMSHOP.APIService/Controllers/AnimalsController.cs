@@ -41,6 +41,14 @@ namespace KOIFARMSHOP.APIService.Controllers
             return await _animalService.GetByID(id);
         }
 
+        [HttpGet("User")]
+        public async Task<IBusinessResult> GetAnimalsByUser()
+        {
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            var animal = await _animalService.GetAllByUser(token);
+            return animal;
+        }
+
         // PUT: api/Animals/5
         [HttpPut("{id}")]
         public async Task<IBusinessResult> PutAnimal(int id, [FromBody] AnimalReqModel request)

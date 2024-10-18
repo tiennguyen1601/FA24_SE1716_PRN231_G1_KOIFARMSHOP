@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
+using NuGet.Common;
 
 namespace KoiFarmShop.APIService.Controllers
 {
@@ -22,14 +23,13 @@ namespace KoiFarmShop.APIService.Controllers
             _consignmentService = consignmentService;
         }
 
-        // GET: api/Consignments
         [HttpGet]
         public async Task<IBusinessResult> GetConsignments()
         {
-            return await _consignmentService.GetAll();
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            return await _consignmentService.GetAll(token);
         }
 
-        // GET: api/Consignments/5
         [HttpGet("{id}")]
         public async Task<IBusinessResult> GetConsignment(int id)
         {
@@ -38,23 +38,23 @@ namespace KoiFarmShop.APIService.Controllers
             return consignment;
         }
 
-        // PUT: api/Consignments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPut]
         public async Task<IBusinessResult> PutConsignment(Consignment consignment)
         {
-            return await _consignmentService.Save(consignment);
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            return await _consignmentService.Save(consignment, token);
         }
 
-        // POST: api/Consignments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPost]
         public async Task<IBusinessResult> PostConsignment(Consignment consignment)
         {
-            return await _consignmentService.Save(consignment);
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            return await _consignmentService.Save(consignment, token);
         }
 
-        // DELETE: api/Consignments/5
+       
         [HttpDelete("{id}")]
         public async Task<IBusinessResult> DeleteConsignment(int id)
         {
