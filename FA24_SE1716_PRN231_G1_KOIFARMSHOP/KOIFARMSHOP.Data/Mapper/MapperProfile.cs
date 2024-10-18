@@ -17,11 +17,10 @@ namespace KOIFARMSHOP.Data.Mapper
             #region Order
             CreateMap<Order, OrderResponseModel>();
             CreateMap<OrderDetail, OrderDetailResponseModel>();
-            CreateMap<OrderDetailRequest, OrderDetail>();
             #endregion
 
             #region OrderDetail
-            CreateMap<OrderRequestModel, Order>();
+            CreateMap<OrderCompleteRequest, Order>();
             #endregion
 
             #region Payment

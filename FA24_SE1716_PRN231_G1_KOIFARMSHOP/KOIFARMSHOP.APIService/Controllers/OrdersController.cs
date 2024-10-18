@@ -16,12 +16,19 @@ namespace KOIFARMSHOP.APIService.Controllers
             _orderService = orderService;
         }
 
-        // GET: api/Orders
+
         [HttpGet]
-        public async Task<IBusinessResult> GetOrders()
+        public async Task<IBusinessResult> GetProducts(int? page = 1, int? size = 10)
         {
-            return await _orderService.GetAll();
+            return await _orderService.GetAll(page, size);
         }
+
+        //// GET: api/Orders
+        //[HttpGet]
+        //public async Task<IBusinessResult> GetOrders()
+        //{
+        //    return await _orderService.GetAll();
+        //}
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
@@ -36,7 +43,7 @@ namespace KOIFARMSHOP.APIService.Controllers
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
 
-            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails, token);
+            return await _orderService.Save(orderCompleteRequest, token);
         }
 
         // POST: api/Orders
@@ -45,7 +52,7 @@ namespace KOIFARMSHOP.APIService.Controllers
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
 
-            return await _orderService.Save(orderCompleteRequest.Order, orderCompleteRequest.OrderDetails, token);
+            return await _orderService.Save(orderCompleteRequest, token);
         }
 
 
