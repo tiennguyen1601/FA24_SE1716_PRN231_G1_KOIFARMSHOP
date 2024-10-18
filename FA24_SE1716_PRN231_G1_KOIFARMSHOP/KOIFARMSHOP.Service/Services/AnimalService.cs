@@ -20,7 +20,6 @@ namespace KOIFARMSHOP.Service.Services
 
 
         Task<IBusinessResult> GetAllByUser(string token);
-        Task<IBusinessResult> Save(Animal animal);
 
         Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
 
@@ -34,17 +33,13 @@ namespace KOIFARMSHOP.Service.Services
         private readonly UnitOfWork _unitOfWork;
 
         private readonly IJWTService _jwtService;
-        public AnimalService(IJWTService jWTService)
-        {
-            _unitOfWork ??= new UnitOfWork();
-            _jwtService = jWTService;
 
         private readonly IMapper _mapper;
-        public AnimalService(UnitOfWork unitOfWork, IMapper mapper)
+        public AnimalService(UnitOfWork unitOfWork, IMapper mapper, IJWTService jWTService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-
+            _jwtService = jWTService;
         }
 
         public async Task<IBusinessResult> GetAll()
@@ -100,7 +95,6 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-        public async Task<IBusinessResult> Save(Animal animal)
 
         public async Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null)
 
