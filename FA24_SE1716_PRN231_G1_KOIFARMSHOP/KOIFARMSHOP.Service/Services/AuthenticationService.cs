@@ -64,7 +64,7 @@ namespace KOIFARMSHOP.Service.Services
             {
                 if (PasswordHasher.VerifyPassword(userLoginReqModel.Password, currStaff.Password))
                 {
-                    var token = _jWTService.GenerateJWT(currCustomer);
+                    var token = _jWTService.GenerateJWT(currStaff);
 
                     var userLoginRes = new LoginResModel
                     {

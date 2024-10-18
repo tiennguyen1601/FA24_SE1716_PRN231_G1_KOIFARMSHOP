@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="DAO\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

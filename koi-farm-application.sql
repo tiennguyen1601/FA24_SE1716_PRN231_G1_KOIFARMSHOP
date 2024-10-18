@@ -118,6 +118,7 @@ CREATE TABLE Payment (
 -- Create Animals table
 CREATE TABLE Animals (
     AnimalID INT PRIMARY KEY IDENTITY(1,1),
+	Name NVARCHAR(100),
     Origin NVARCHAR(100),
     Species NVARCHAR(100),
     Type NVARCHAR(50),

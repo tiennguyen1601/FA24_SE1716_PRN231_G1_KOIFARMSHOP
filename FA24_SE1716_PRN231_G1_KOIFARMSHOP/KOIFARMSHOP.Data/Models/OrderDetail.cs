@@ -19,7 +19,7 @@ public partial class OrderDetail
 
     public decimal? Amount { get; set; }
 
-    public decimal? Subtotal { get; set; }
+    public decimal Subtotal { get; set; }
 
     public decimal? Discount { get; set; }
 
