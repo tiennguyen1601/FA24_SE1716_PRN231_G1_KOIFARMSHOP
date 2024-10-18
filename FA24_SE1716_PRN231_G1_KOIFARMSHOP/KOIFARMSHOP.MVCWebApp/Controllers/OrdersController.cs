@@ -36,14 +36,14 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                         if (result != null && result.Data != null)
                         {
-                            var data = JsonConvert.DeserializeObject<List<Order>>(result.Data.ToString());
+                            var data = JsonConvert.DeserializeObject<List<OrderResponseModel>>(result.Data.ToString());
                             return View(data);
                         }
                     }
 
                 }
             }
-            return View(new List<Order>());
+            return View(new List<OrderResponseModel>());
         }
 
         // GET: Orders/Details/5
@@ -60,14 +60,14 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                         if (result != null && result.Data != null)
                         {
-                            var data = JsonConvert.DeserializeObject<Order>(result.Data.ToString());
+                            var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
                             return View(data);
                         }
                     }
 
                 }
             }
-            return View(new Order());
+            return View(new OrderResponseModel());
         }
 
         public async Task<List<Customer>> GetCustomer()

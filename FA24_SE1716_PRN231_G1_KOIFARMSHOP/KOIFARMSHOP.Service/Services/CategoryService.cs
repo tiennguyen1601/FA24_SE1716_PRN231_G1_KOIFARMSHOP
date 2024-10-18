@@ -16,6 +16,7 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetById(int categoryId);
         Task<IBusinessResult> Save(Category category);
         Task<IBusinessResult> DeleteById(int categoryId);
+        Task<Category> GetCategoryById(int categoryId);
     }
 
     public class CategoryService : ICategoryService
@@ -83,6 +84,13 @@ namespace KOIFARMSHOP.Service.Services
             {
                 return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, currCategory);
             }
+        }
+
+        public async Task<Category> GetCategoryById(int categoryId)
+        {
+            var currCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(categoryId);
+
+            return currCategory;
         }
 
         public async Task<IBusinessResult> Save(Category category)

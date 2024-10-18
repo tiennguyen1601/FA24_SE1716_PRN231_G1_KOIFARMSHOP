@@ -1,9 +1,11 @@
 ﻿using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data;
+using KOIFARMSHOP.Data.DTO.ProductDTO;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,16 +17,22 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetAll(int? page, int? size);
         Task<IBusinessResult> GetById(int productId);
-        Task<IBusinessResult> Save(Product product);
+        Task<Product> GetProductById(int productId);
+        Task<IBusinessResult> Save(Product product, List<string>? images);
         Task<IBusinessResult> DeleteById(int productId);
+
+        Task<IBusinessResult> SearchProducts( ProductFilterReqModel? productFilterReqModel, string? searchValue, int? page, int? size);
+        Task<IBusinessResult> GetBrandName();
     }
     public class ProductService : IProductService
     {
         private readonly UnitOfWork _unitOfWork;
+        private readonly IProductImageService _productImageService;
 
-        public ProductService()
+        public ProductService(IProductImageService productImageService)
         {
             _unitOfWork ??= new UnitOfWork();
+            _productImageService = productImageService;
         }
 
         public async Task<IBusinessResult> DeleteById(int productId)
@@ -39,7 +47,7 @@ namespace KOIFARMSHOP.Service.Services
                 }
                 else
                 {
-                    var result = await _unitOfWork.ProductRepository.RemoveAsync(currProduct);
+                    var result = await _unitOfWork.ProductRepository.Delete(currProduct);
 
                     if (result)
                     {
@@ -59,7 +67,7 @@ namespace KOIFARMSHOP.Service.Services
 
         public async Task<IBusinessResult> GetAll()
         {
-            var products = await _unitOfWork.ProductRepository.GetAllAsync();
+            var products = await _unitOfWork.ProductRepository.GetProducts();
 
             if (products == null)
             {
@@ -71,14 +79,40 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-        public Task<IBusinessResult> GetAll(int? page, int? size)
+        public async Task<IBusinessResult> GetAll(int? page, int? size)
         {
-            throw new NotImplementedException();
+            var products = await _unitOfWork.ProductRepository.GetProducts();
+
+            var totalItemCount = products.Count;
+
+            var pagedItem = products.Skip(((page ?? 1) - 1) * (size ?? 10))
+                    .Take(size ?? 10).ToList();
+
+            var result = new Pagination<Product>
+            {
+                TotalItems = totalItemCount,
+                PageSize = size ?? 10,
+                CurrentPage = page ?? 1,
+                Data = pagedItem
+            };
+
+            return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
+        }
+
+        public async Task<IBusinessResult> GetBrandName()
+        {
+            var allProducts = await _unitOfWork.ProductRepository.GetProducts();
+
+            var products = allProducts;
+
+            var brands = products.Select(x => x.Brand).Distinct().ToList();
+
+            return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, brands);
         }
 
         public async Task<IBusinessResult> GetById(int productId)
         {
-            var currProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productId);
+            var currProduct = await _unitOfWork.ProductRepository.GetProductById(productId);
 
             if (currProduct == null)
             {
@@ -90,7 +124,14 @@ namespace KOIFARMSHOP.Service.Services
             }
         }
 
-        public async Task<IBusinessResult> Save(Product product)
+        public async Task<Product> GetProductById(int productId)
+        {
+            var currProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productId);
+
+            return currProduct;
+        }
+
+        public async Task<IBusinessResult> Save(Product product, List<string> images)
         {
             try
             {
@@ -103,6 +144,8 @@ namespace KOIFARMSHOP.Service.Services
                     #endregion businessR
 
                     result = await _unitOfWork.ProductRepository.UpdateAsync(product);
+
+                    await _productImageService.SaveProductImage(currProduct.ProductId, images);
 
                     if (result > 0)
                     {
@@ -117,6 +160,9 @@ namespace KOIFARMSHOP.Service.Services
                 else
                 {
                     result = await _unitOfWork.ProductRepository.CreateAsync(product);
+
+                    await _productImageService.SaveProductImage(product.ProductId, images);
+
                     if (result > 0)
                     {
                         return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, product);
@@ -133,5 +179,94 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.ERROR_EXCEPTION, ex.Message);
             }
         }
+
+        public async Task<IBusinessResult> SearchProducts(ProductFilterReqModel? productFilterReqModel, string? searchValue, int? page, int? size)
+        {
+            var allProducts = await _unitOfWork.ProductRepository.GetProducts();
+
+            var products = allProducts;
+
+            int totalItemCount;
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                products = products.Where(x => x.Name.ToLower().Contains(searchValue.Trim().ToLower())).ToList();
+
+                totalItemCount = products.Count;
+            }
+            else
+            {
+                totalItemCount = allProducts.Count;
+            }
+
+            if (productFilterReqModel != null)
+            {
+                products = filterFashionItem(products, productFilterReqModel);
+            }
+
+            totalItemCount = products.Count;
+
+            var pagedItem = products.Skip(((page ?? 1) - 1) * (size ?? 10))
+                    .Take(size ?? 10).ToList();
+
+            var result = new Pagination<Product>
+            {
+                TotalItems = totalItemCount,
+                PageSize = size ?? 10,
+                CurrentPage = page ?? 1,
+                Data = pagedItem
+            };
+
+            return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
+        }
+
+        private List<Product> filterFashionItem(List<Product> products, ProductFilterReqModel productFilterReqModel)
+        {
+            if (productFilterReqModel.Category is not null && productFilterReqModel.Category.Any())
+            {
+                products = products
+                   .Where(x => productFilterReqModel.Category
+                   .Contains(x.Category.Name)).ToList();
+            }
+
+            if (productFilterReqModel.Brand is not null && productFilterReqModel.Brand.Any())
+            {
+                products = products
+                    .Where(x => productFilterReqModel.Brand
+                    .Contains(x.Brand)).ToList();
+            }
+
+            if (productFilterReqModel.MinPrice.HasValue)
+            {
+                products = products
+                    .Where(x => x.Price >= productFilterReqModel.MinPrice)
+                    .ToList();
+            }
+
+            if (productFilterReqModel.MaxPrice.HasValue)
+            {
+                products = products
+                    .Where(x => x.Price <= productFilterReqModel.MaxPrice)
+                    .ToList();
+            }
+
+            if (productFilterReqModel.MinDiscount.HasValue)
+            {
+                products = products
+                    .Where(x => x.Discount >= productFilterReqModel.MinDiscount)
+                    .ToList();
+            }
+
+            if (productFilterReqModel.MaxDiscount.HasValue)
+            {
+                products = products
+                    .Where(x => x.Discount <= productFilterReqModel.MaxDiscount)
+                    .ToList();
+            }
+
+
+            return products;
+        }
+
     }
 }

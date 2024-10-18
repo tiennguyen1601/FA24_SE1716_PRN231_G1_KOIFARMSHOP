@@ -13,6 +13,7 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
         public DateTime? OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public int? PromotionId { get; set; }
+
         public string? ShippingAddress { get; set; }
         public string? DeliveryMethod { get; set; }
         public string? PaymentStatus { get; set; }
@@ -20,6 +21,8 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
         public decimal? TotalAmountVat { get; set; }
         public string? Status { get; set; }
         public string CustomerName { get; set; }
+        public string PromotionTitle { get; set; }
+
 
         public ICollection<OrderDetailResponseModel> OrderDetails { get; set; } = new List<OrderDetailResponseModel>();
     }

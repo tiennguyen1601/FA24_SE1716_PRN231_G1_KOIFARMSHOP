@@ -23,6 +23,7 @@ namespace KOIFARMSHOP.Data.Repository
         {
             var order = await _context.Orders
             .Include(o => o.Customer)
+            .Include(o => o.Promotion)
             .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Animal)
                 .Include(o => o.OrderDetails)
@@ -36,6 +37,7 @@ namespace KOIFARMSHOP.Data.Repository
         {
             var orders = await _context.Orders
             .Include(o => o.Customer)
+            .Include(o => o.Promotion)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Animal)
                 .Include(o => o.OrderDetails)
@@ -44,8 +46,5 @@ namespace KOIFARMSHOP.Data.Repository
 
             return orders;
         }
-
-
-
     }
 }
