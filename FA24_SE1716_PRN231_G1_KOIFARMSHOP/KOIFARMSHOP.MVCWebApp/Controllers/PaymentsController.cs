@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Data.Models;
+using KOIFARMSHOP.Data.DTO.PaymentDTO;
+using KOIFARMSHOP.Data.Enums;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -73,6 +75,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["OrderId"] = new SelectList(orders, "OrderId", "OrderId");
+            ViewData["Orders"] = orders;
             return View();
         }
 
@@ -81,7 +84,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PaymentId,OrderId,CustomerId,Method,Status,TransactionId,PaymentDate,CreatedAt,UpdatedAt")] Payment payment)
+        public async Task<IActionResult> Create([Bind("PaymentId,OrderId,Method")] PaymentCreateRequestModel payment)
         {
             bool saveStatus = false;
 
@@ -114,7 +117,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CustomerId"] = new SelectList(await GetCustomers(), "CustomerId", "Name");
+            ViewData["CustomerId"] = new SelectList(await GetCustomers(), "CustomerId", "Username");
             ViewData["OrderId"] = new SelectList(await GetOrders(), "OrderId", "OrderId");
             return View(payment);
         }
@@ -146,6 +149,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 return NotFound();
             }
 
+            ViewData["Status"] = new SelectList(Enum.GetNames(typeof(PaymentEnums)).ToList());
             ViewData["CustomerId"] = new SelectList(await GetCustomers(), "CustomerId", "Name", payment.CustomerId);
             ViewData["OrderId"] = new SelectList(await GetOrders(), "OrderId", "OrderId", payment.OrderId);
             return View(payment);
@@ -156,7 +160,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PaymentId,OrderId,CustomerId,Method,Status,TransactionId,PaymentDate,CreatedAt,UpdatedAt")] Payment payment)
+        public async Task<IActionResult> Edit(int id, [Bind("PaymentId,OrderId,Method,Status,TransactionId")] PaymentCreateRequestModel payment)
         {
             bool saveStatus = false;
 
