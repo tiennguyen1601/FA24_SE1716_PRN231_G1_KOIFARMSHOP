@@ -32,7 +32,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _httpClient.PostAsJsonAsync(Const.APIEndPoint + "Authentication", loginReqModel);
+                var response = await _httpClient.PostAsJsonAsync(Const.APIEndPoint + "Authentication/login", loginReqModel);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -47,7 +47,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                         HttpContext.Session.SetString("Token", data.Token); 
                         HttpContext.Session.SetString("Username", data.Username); 
-                        HttpContext.Session.SetString("UserId", data.UserId.ToString()); 
+                        HttpContext.Session.SetString("UserId", data.UserId.ToString());
+                        return RedirectToAction("Index", "Home");
                     }
                     else
                     {
