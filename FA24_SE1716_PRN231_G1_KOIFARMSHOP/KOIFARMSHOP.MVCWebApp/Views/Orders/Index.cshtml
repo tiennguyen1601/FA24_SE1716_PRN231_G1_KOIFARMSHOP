@@ -10,39 +10,19 @@
     <a asp-action="Create" class="btn btn-success">Create New</a>
 </p>
 
-<table class="table table-striped table-hover">
+@* <table class="table table-striped table-hover">
     <thead class="table-light">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TotalAmount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ShippingAddress)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DeliveryMethod)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Vat)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TotalAmountVat)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CustomerName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PromotionTitle)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.OrderDate)</th>
+            <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
+            <th>@Html.DisplayNameFor(model => model.ShippingAddress)</th>
+            <th>@Html.DisplayNameFor(model => model.DeliveryMethod)</th>
+            <th>@Html.DisplayNameFor(model => model.PaymentStatus)</th>
+            <th>@Html.DisplayNameFor(model => model.Vat)</th>
+            <th>@Html.DisplayNameFor(model => model.TotalAmountVat)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.CustomerName) </th>
+            <th>@Html.DisplayNameFor(model => model.PromotionTitle)</th>
             <th class="text-center" style="width: 150px;">Actions</th>
         </tr>
     </thead>
@@ -52,36 +32,16 @@
             foreach (var item in Model)
             {
                 <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.OrderDate)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TotalAmount)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ShippingAddress)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DeliveryMethod)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.PaymentStatus)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Vat)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TotalAmountVat)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Status)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.CustomerName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.PromotionTitle)
-                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.OrderDate)</td>
+                    <td> @Html.DisplayFor(modelItem => item.TotalAmount)</td>
+                    <td> @Html.DisplayFor(modelItem => item.ShippingAddress)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DeliveryMethod)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PaymentStatus)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Vat)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TotalAmountVat)</td>
+                    <td> @Html.DisplayFor(modelItem => item.Status) </td>
+                    <td>@Html.DisplayFor(modelItem => item.CustomerName)</td>
+                    <td> @Html.DisplayFor(modelItem => item.PromotionTitle)</td>
                     <td class="text-center">
                         <a asp-action="Edit" asp-route-id="@item.OrderId" class="btn btn-warning btn-sm">Edit</a>
                         <a asp-action="Details" asp-route-id="@item.OrderId" class="btn btn-info btn-sm">Details</a>
@@ -97,4 +57,120 @@
             </tr>
         }
     </tbody>
-</table>
+</table> *@
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">OrderDate</th>
+                    <th class="card-title text-center">TotalAmount</th>
+                    <th class="card-title text-center">ShippingAddress</th>
+                    <th class="card-title text-center">DeliveryMethod</th>
+                    <th class="card-title text-center">PaymentStatus</th>
+                    <th class="card-title text-center">Vat</th>
+                    <th class="card-title text-center">TotalAmountVat</th>
+                    <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">CustomerName</th>
+                    <th class="card-title text-center">PromotionTitle</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="tblOrders">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center" id="paginationControls">
+            </ul>
+        </nav>
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+        });
+        function displayOrders(orders) {
+            var html = '';
+            $.each(orders, function (key, item) {
+                html += '<tr>';
+                html += '<td>' + item.orderDate + '</td>';
+                html += '<td>' + item.totalAmount + '</td>';
+                html += '<td>' + item.shippingAddress + '</td>';
+                html += '<td>' + item.deliveryMethod + '</td>';
+                html += '<td>' + item.paymentStatus + '</td>';
+                html += '<td>' + item.vat + '</td>';
+                html += '<td>' + item.totalAmountVat + '</td>';
+                html += '<td>' + item.status + '</td>';
+                html += '<td>' + item.customerName + '</td>';
+                html += '<td>' + item.promotionTitle + '</td>';
+
+                html += '<td>';
+                html += '<a class="btn btn-sm btn-info" href="/Orders/Edit/' + item.orderId + '">Edit</a> ';
+                html += '<a class="btn btn-sm btn-secondary" href="/Orders/Details/' + item.orderId + '">Details</a> ';
+                html += '<a class="btn btn-sm btn-secondary" href="/Orders/Deletes/' + item.orderId + '">Delete</a> ';
+                html += '</td>';
+                html += '</tr>';
+            });
+            $('.tblOrders').html(html);
+        }
+
+        var TotalItems = 0;
+        var PageSize = 10;
+        var CurrentPage = 1;
+
+        function loadData(page = 1) {
+            $.ajax({
+                url: 'https://localhost:7176/api/Orders?page=' + page + '&size=' + PageSize,
+                type: 'GET',
+                success: function (result) {
+                    TotalItems = result.data.totalItems;
+                    PageSize = result.data.pageSize;
+                    CurrentPage = result.data.currentPage;
+                    displayOrders(result.data.data);
+                    updatePaginationControls();
+                },
+                error: function (xhr, error) {
+                    alert("Failed to load orders: " + xhr.statusText);
+                }
+            });
+        }
+
+        function updatePaginationControls() {
+            var totalPages = Math.ceil(TotalItems / PageSize);
+            var paginationHtml = '';
+
+            // Previous button
+            paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+                    </li>`;
+
+            // Page numbers
+            for (var i = 1; i <= totalPages; i++) {
+                paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                        </li>`;
+            }
+
+            // Next button
+            paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+                    </li>`;
+
+            // Update the pagination controls
+            $('#paginationControls').html(paginationHtml);
+        }
+
+        function changePage(page) {
+            if (page >= 1 && page <= Math.ceil(TotalItems / PageSize)) {
+                loadData(page);
+            }
+        }
+    </script>
+}
