@@ -57,24 +57,26 @@ namespace KOIFARMSHOP.APIService.Controllers
         [HttpPut("{id}")]
         public async Task<IBusinessResult> PutAnimal(int id, [FromBody] AnimalReqModel request)
         {
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
             if (!ModelState.IsValid)
             {
                 return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid model state");
             }
 
-            return await _animalService.Save(request, id);
+            return await _animalService.Save(token, request, id);
         }
 
         // POST: api/Animals
         [HttpPost]
         public async Task<IBusinessResult> PostAnimal([FromBody] AnimalReqModel request)
         {
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
             if (!ModelState.IsValid)
             {
                 return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid model state");
             }
 
-            return await _animalService.Save(request);
+            return await _animalService.Save(token, request);
         }
 
         // DELETE: api/Animals/5

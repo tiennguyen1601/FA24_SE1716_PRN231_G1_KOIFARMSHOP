@@ -10,6 +10,7 @@ using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Common;
 using Newtonsoft.Json;
 using KOIFARMSHOP.Service.Base;
+using NuGet.Common;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -54,13 +55,19 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Animal animal)
         {
+            var token = HttpContext.Session.GetString("Token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Customers");
+            }
             if (!ModelState.IsValid)
             {
                 await LoadStaffData();
                 return View(animal);
             }
 
-            var saveStatus = await CreateAnimal(animal);
+            var saveStatus = await CreateAnimal(animal, token);
             if (saveStatus)
             {
                 return RedirectToAction(nameof(Index));
@@ -157,9 +164,10 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return null;
         }
 
-        private async Task<bool> CreateAnimal(Animal animal)
+        private async Task<bool> CreateAnimal(Animal animal, string token)
         {
             using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Animals", animal);
             return response.IsSuccessStatusCode;
         }

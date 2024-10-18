@@ -10,6 +10,7 @@ using KOIFARMSHOP.Service.Services.JWTService;
 using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 
 namespace KOIFARMSHOP.Service.Services
 {
@@ -21,7 +22,7 @@ namespace KOIFARMSHOP.Service.Services
 
         Task<IBusinessResult> GetAllByUser(string token);
 
-        Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
+        Task<IBusinessResult> Save(string token, AnimalReqModel request, int? animalId = null);
 
         Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
@@ -99,9 +100,13 @@ namespace KOIFARMSHOP.Service.Services
         }
 
 
-        public async Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null)
-
+        public async Task<IBusinessResult> Save(string token, AnimalReqModel request, int? animalId = null)
         {
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
             try
             {
                 Animal animal;
@@ -120,7 +125,8 @@ namespace KOIFARMSHOP.Service.Services
                 {
                     animal = _mapper.Map<Animal>(request);
                     animal.CreatedAt = DateTime.Now;
-                    animal.CreatedBy = request.CreatedBy;
+                    animal.CreatedBy = userId;
+                    animal.ModifiedBy = userId;
                 }
 
                 if (request.AnimalImages != null)
