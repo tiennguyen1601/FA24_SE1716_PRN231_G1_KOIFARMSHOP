@@ -205,7 +205,7 @@
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                    xhr.setRequestHeader('Authorization', 'Bearer @Context.Session.GetString("Token")');
                 },
                 success: function (result) {
                     // alert("Server response: ", result.message);
@@ -225,7 +225,7 @@
                         html += '<td>' + item.customer.name + '</td>';
                         html += '<td>' + item.order.totalAmountVat + '</td>';
                         html += '<td>' + item.orderId + '</td>';
-                        html += '<td>' +
+                        html += '<td class="d-flex gap-1">' +
                             `<button class="btn btn-primary p-1 me-1 ${editEnable}" onclick="showUpdateModal(${item.paymentId})">Edit</button>` +
                             `<button class="btn btn-danger p-1 me-1" onclick="deletePayment(${item.paymentId})">Delete</button>` +
                             '</td>';
@@ -266,7 +266,7 @@
                 contentType: "application/json;charset=utf-8",
                 data: JSON.stringify(payload),
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                    xhr.setRequestHeader('Authorization', 'Bearer @Context.Session.GetString("Token")');
                 },
                 success: function (result) {
                     alert("Payment added successfully!");
@@ -294,7 +294,7 @@
                 contentType: "application/json;charset=utf-8",
                 data: JSON.stringify(payload),
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                    xhr.setRequestHeader('Authorization', 'Bearer @Context.Session.GetString("Token")');
                 },
                 success: function (result) {
                     alert("Payment updated successfully!");
@@ -313,7 +313,7 @@
                     url: 'https://localhost:7176/api/Payments/' + paymentId,
                     type: "DELETE",
                     beforeSend: function (xhr) {
-                        xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                        xhr.setRequestHeader('Authorization', 'Bearer @Context.Session.GetString("Token")');
                     },
                     success: function (result) {
                         alert("Payment deleted successfully!");
@@ -335,7 +335,7 @@
                 url: 'https://localhost:7176/api/Payments/' + paymentId,
                 type: "GET",
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                    xhr.setRequestHeader('Authorization', 'Bearer @Context.Session.GetString("Token")');
                 },
                 success: function (result) {
                     const data = result.data;
