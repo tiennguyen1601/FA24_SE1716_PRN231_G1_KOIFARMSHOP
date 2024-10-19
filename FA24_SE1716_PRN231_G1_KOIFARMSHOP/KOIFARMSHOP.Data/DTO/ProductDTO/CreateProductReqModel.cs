@@ -45,6 +45,7 @@ namespace KOIFARMSHOP.Data.DTO.ProductDTO
         public int? CreatedBy { get; set; }
 
         [Required(ErrorMessage = "At least one image is required.")]
+        [MinLength(1, ErrorMessage ="At least one image is required")]
         public List<string> Images { get; set; } = new List<string>();
     }
 }
