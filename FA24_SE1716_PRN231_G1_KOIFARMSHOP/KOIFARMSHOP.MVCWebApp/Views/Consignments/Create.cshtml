@@ -14,7 +14,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="AnimalId" class="control-label">AnimalName</label>
-                <select asp-for="AnimalId" class="form-control" asp-items="ViewBag.AnimalOrigin"></select>
+                <select asp-for="AnimalId" class="form-control" asp-items="ViewBag.AnimalName"></select>
             </div>
             <div class="form-group">
                 <label asp-for="ConsignmentType" class="control-label"></label>
@@ -49,10 +49,14 @@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
+
         </form>
     </div>
 </div>
 
+<div>
+    <a asp-controller="Animals" asp-action="Create" class="btn btn-secondary ml-2">Create Animal</a>
+</div>
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
