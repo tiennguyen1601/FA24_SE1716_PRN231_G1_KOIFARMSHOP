@@ -42,13 +42,6 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
     public virtual DbSet<Staff> Staff { get; set; }
 
-
-    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseSqlServer("Data Source=NEITIV;Initial Catalog=FA24_SE1716_PRN231_G1_KOIFARMSHOP;User ID=sa;Password=12345;Encrypt=False");
-
-
-
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -66,7 +59,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
     {
         modelBuilder.Entity<Animal>(entity =>
         {
-            entity.HasKey(e => e.AnimalId).HasName("PK__Animals__A21A7327465594CD");
+            entity.HasKey(e => e.AnimalId).HasName("PK__Animals__A21A732730BA7758");
 
             entity.Property(e => e.AnimalId).HasColumnName("AnimalID");
             entity.Property(e => e.AmountFeed).HasColumnType("decimal(18, 2)");
@@ -80,6 +73,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
             entity.Property(e => e.Gender).HasMaxLength(10);
             entity.Property(e => e.HealthStatus).HasMaxLength(255);
             entity.Property(e => e.MaintenanceCost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Name).HasMaxLength(255);
             entity.Property(e => e.Origin).HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Size).HasMaxLength(50);
@@ -99,7 +93,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<AnimalImage>(entity =>
         {
-            entity.HasKey(e => e.AimageId).HasName("PK__AnimalIm__95341BED9E3CB8E9");
+            entity.HasKey(e => e.AimageId).HasName("PK__AnimalIm__95341BED7C6CF555");
 
             entity.Property(e => e.AimageId).HasColumnName("AImageID");
             entity.Property(e => e.AnimalId).HasColumnName("AnimalID");
@@ -114,7 +108,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BE2602FA6");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2B364A7508");
 
             entity.ToTable("Category");
 
@@ -128,7 +122,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Consignment>(entity =>
         {
-            entity.HasKey(e => e.ConsignmentId).HasName("PK__Consignm__2AB75863D05EA7FB");
+            entity.HasKey(e => e.ConsignmentId).HasName("PK__Consignm__2AB75863421F4DF1");
 
             entity.ToTable("Consignment");
 
@@ -161,7 +155,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64B80DDA3AC9");
+            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64B892F6C061");
 
             entity.ToTable("Customer");
 
@@ -188,7 +182,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__Order__C3905BAF668F4BE1");
+            entity.HasKey(e => e.OrderId).HasName("PK__Order__C3905BAF2CF4DD91");
 
             entity.ToTable("Order");
 
@@ -221,7 +215,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(e => e.OrderDetailId).HasName("PK__OrderDet__D3B9D30C97C6232C");
+            entity.HasKey(e => e.OrderDetailId).HasName("PK__OrderDet__D3B9D30C9C109B57");
 
             entity.Property(e => e.OrderDetailId).HasColumnName("OrderDetailID");
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
@@ -247,7 +241,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<OrderPromotion>(entity =>
         {
-            entity.HasKey(e => e.OrderPromotionId).HasName("PK__OrderPro__CE84A0E1E1B82A4C");
+            entity.HasKey(e => e.OrderPromotionId).HasName("PK__OrderPro__CE84A0E1D8319831");
 
             entity.ToTable("OrderPromotion");
 
@@ -266,7 +260,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__9B556A586647DAC7");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__9B556A5881377C3E");
 
             entity.ToTable("Payment");
 
@@ -297,7 +291,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__Products__B40CC6ED02DC4401");
+            entity.HasKey(e => e.ProductId).HasName("PK__Products__B40CC6ED2DBD3FBE");
 
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
             entity.Property(e => e.Brand).HasMaxLength(100);
@@ -328,7 +322,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<ProductImage>(entity =>
         {
-            entity.HasKey(e => e.PimageId).HasName("PK__ProductI__218DDF195E8BE20B");
+            entity.HasKey(e => e.PimageId).HasName("PK__ProductI__218DDF198CB36FB1");
 
             entity.Property(e => e.PimageId).HasColumnName("PImageID");
             entity.Property(e => e.ImageUrl)
@@ -343,7 +337,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Promotion>(entity =>
         {
-            entity.HasKey(e => e.PromotionId).HasName("PK__Promotio__52C42F2F3893473D");
+            entity.HasKey(e => e.PromotionId).HasName("PK__Promotio__52C42F2F4791ABCB");
 
             entity.ToTable("Promotion");
 
@@ -356,7 +350,7 @@ public partial class FA24_SE1716_PRN231_G1_KOIFARMSHOPContext : DbContext
 
         modelBuilder.Entity<Staff>(entity =>
         {
-            entity.HasKey(e => e.StaffId).HasName("PK__Staff__96D4AAF70EF4075D");
+            entity.HasKey(e => e.StaffId).HasName("PK__Staff__96D4AAF72FCBEE86");
 
             entity.Property(e => e.StaffId).HasColumnName("StaffID");
             entity.Property(e => e.Address).HasMaxLength(255);

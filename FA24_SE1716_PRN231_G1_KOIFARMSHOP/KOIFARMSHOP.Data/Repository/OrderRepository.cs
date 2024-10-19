@@ -36,6 +36,7 @@ namespace KOIFARMSHOP.Data.Repository
         public async Task<List<Order>> GetAllDetail()
         {
             var orders = await _context.Orders
+                 .Where(o => o.Status.Equals("Active"))
             .Include(o => o.Customer)
             .Include(o => o.Promotion)
                 .Include(o => o.OrderDetails)

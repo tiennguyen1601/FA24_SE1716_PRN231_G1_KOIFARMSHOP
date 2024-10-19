@@ -10,6 +10,7 @@ using KOIFARMSHOP.Service.Services.JWTService;
 using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 
 namespace KOIFARMSHOP.Service.Services
 {
@@ -19,12 +20,15 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetByID(int id);
         Task<IBusinessResult> GetAllByUser(string token);
 
-        Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null);
+        Task<IBusinessResult> Save(string token, AnimalReqModel request, int? animalId = null);
 
         Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes);
 
 
+        Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
+        Task<IBusinessResult> GetAll(int? page, int? size);
+        Task<IBusinessResult> SearchAnimals(AnimalFilterReqModel? filterReqModel, string? searchValue, int? page, int? size);
     }
     public class AnimalService : IAnimalService
     {
@@ -59,18 +63,21 @@ namespace KOIFARMSHOP.Service.Services
 
         public async Task<IBusinessResult> GetByID(int id)
         {
-            #region Business rule
-            #endregion
-            var list = await _unitOfWork.AnimalRepository.GetByIdAsync(id);
-            if (list == null)
+            var queryableList = await _unitOfWork.AnimalRepository.GetAllAsync();
+
+            var animal = await queryableList
+                                .Include(a => a.CreatedByNavigation)
+                                .Include(a => a.ModifiedByNavigation)
+                                .FirstOrDefaultAsync(a => a.AnimalId == id);
+
+            if (animal == null)
             {
-                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, new List<Animal>());
+                return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, null);
             }
             else
             {
-                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, list);
+                return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, animal);
             }
-
         }
 
 
@@ -94,9 +101,13 @@ namespace KOIFARMSHOP.Service.Services
         }
 
 
-        public async Task<IBusinessResult> Save(AnimalReqModel request, int? animalId = null)
-
+        public async Task<IBusinessResult> Save(string token, AnimalReqModel request, int? animalId = null)
         {
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
             try
             {
                 Animal animal;
@@ -115,7 +126,8 @@ namespace KOIFARMSHOP.Service.Services
                 {
                     animal = _mapper.Map<Animal>(request);
                     animal.CreatedAt = DateTime.Now;
-                    animal.CreatedBy = request.CreatedBy;
+                    animal.CreatedBy = userId;
+                    animal.ModifiedBy = userId;
                 }
 
                 if (request.AnimalImages != null)
@@ -168,6 +180,80 @@ namespace KOIFARMSHOP.Service.Services
         }
 
         public async Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes)
+        public async Task<IBusinessResult> GetAll(int? page, int? size)
+        {
+            var queryableAnimals = await _unitOfWork.AnimalRepository.GetAnimals();
+            var totalItemCount = queryableAnimals.Count();
+
+            var pagedAnimals = queryableAnimals
+                .Skip(((page ?? 1) - 1) * (size ?? 10))
+                .Take(size ?? 10)
+                .ToList();
+
+            var result = new Pagination<Animal>
+            {
+                TotalItems = totalItemCount,
+                PageSize = size ?? 10,
+                CurrentPage = page ?? 1,
+                Data = pagedAnimals
+            };
+
+            return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
+        }
+
+        public async Task<IBusinessResult> SearchAnimals(AnimalFilterReqModel? filterReqModel, string? searchValue, int? page, int? size)
+        {
+            var allAnimals = await _unitOfWork.AnimalRepository.GetAllAsync();
+
+            IQueryable<Animal> animalsQuery = allAnimals;
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                animalsQuery = animalsQuery.Where(a => a.Name.Contains(searchValue) || a.Species.Contains(searchValue));
+            }
+
+            if (filterReqModel != null)
+            {
+                if (filterReqModel.Species != null && filterReqModel.Species.Any())
+                {
+                    animalsQuery = animalsQuery.Where(a => filterReqModel.Species.Contains(a.Species));
+                }
+
+                if (filterReqModel.Status != null && filterReqModel.Status.Any())
+                {
+                    animalsQuery = animalsQuery.Where(a => filterReqModel.Status.Contains(a.Status));
+                }
+
+                if (filterReqModel.MinPrice.HasValue)
+                {
+                    animalsQuery = animalsQuery.Where(a => a.Price >= filterReqModel.MinPrice.Value);
+                }
+
+                if (filterReqModel.MaxPrice.HasValue)
+                {
+                    animalsQuery = animalsQuery.Where(a => a.Price <= filterReqModel.MaxPrice.Value);
+                }
+            }
+
+            var totalItemCount = await animalsQuery.CountAsync();
+
+            var pagedAnimals = await animalsQuery
+                .Skip(((page ?? 1) - 1) * (size ?? 10))
+                .Take(size ?? 10)
+                .ToListAsync();
+
+            var result = new Pagination<Animal>
+            {
+                TotalItems = totalItemCount,
+                PageSize = size ?? 10,
+                CurrentPage = page ?? 1,
+                Data = pagedAnimals
+            };
+
+            return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
+        }
+
+        public async Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds)
         {
             try
             {            

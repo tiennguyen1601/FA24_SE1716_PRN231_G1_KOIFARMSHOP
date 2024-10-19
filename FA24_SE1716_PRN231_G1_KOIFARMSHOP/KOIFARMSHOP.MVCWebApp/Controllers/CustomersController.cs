@@ -46,7 +46,9 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                             LoginResModel>(result.Data.ToString());
 
                         HttpContext.Session.SetString("Token", data.Token); 
-                        HttpContext.Session.SetString("Username", data.Username); 
+                        HttpContext.Session.SetString("Username", data.Username);
+                        HttpContext.Session.SetString("Role", data.Role);
+
                         HttpContext.Session.SetString("UserId", data.UserId.ToString());
                         return RedirectToAction("Index", "Home");
                     }
