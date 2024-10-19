@@ -80,7 +80,7 @@
         <thead style="background-color: #007bff; color: white;">
             <tr>
                 <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().ProductName)</th>
-                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().AnimalSpecies)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().AnimalName)</th>
                 <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Quantity)</th>
                 <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Price)</th>
                 <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Amount)</th>
@@ -93,7 +93,7 @@
             {
                 <tr>
                     <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.ProductName)</td>
-                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.AnimalSpecies)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.AnimalName)</td>
                     <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Quantity)</td>
                     <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Price)</td>
                     <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Amount)</td>

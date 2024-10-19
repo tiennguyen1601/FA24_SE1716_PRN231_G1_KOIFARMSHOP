@@ -329,7 +329,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         {
             var list = new List<Order>();
 
-            using (var response = await _httpClient.GetAsync($"Orders"))
+            using (var response = await _httpClient.GetAsync($"Orders/get-Order-by-user"))
             {
                 if (response.IsSuccessStatusCode)
                 {

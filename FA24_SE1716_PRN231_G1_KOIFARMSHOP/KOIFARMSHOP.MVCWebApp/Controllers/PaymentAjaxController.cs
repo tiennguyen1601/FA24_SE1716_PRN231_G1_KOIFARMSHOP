@@ -54,7 +54,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Orders"))
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Orders/get-Order-by-user"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
