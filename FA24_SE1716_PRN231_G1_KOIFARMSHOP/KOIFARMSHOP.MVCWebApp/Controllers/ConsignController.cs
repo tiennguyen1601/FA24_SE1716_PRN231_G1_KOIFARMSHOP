@@ -6,6 +6,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
     {
         public IActionResult Index()
         {
+            ViewData["Token"] = HttpContext.Session.GetString("Token");
             return View();
         }
     }

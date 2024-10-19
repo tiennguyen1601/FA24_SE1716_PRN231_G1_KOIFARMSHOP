@@ -146,7 +146,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.OrderId)
             </td>
-            <td>
+            <td class="d-flex gap-1">
                 <a class="btn btn-primary me-1 @(item.Status != "Unpaid" ? "disabled" : "")" asp-action="Edit" asp-route-id="@item.PaymentId">Edit</a>
                 <a class="btn btn-danger me-1" asp-action="Delete" asp-route-id="@item.PaymentId">Delete</a>
                 <a class="btn btn-info" asp-action="Details" asp-route-id="@item.PaymentId">Details</a>

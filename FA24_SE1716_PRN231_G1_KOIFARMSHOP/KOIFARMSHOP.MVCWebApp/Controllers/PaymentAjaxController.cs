@@ -15,7 +15,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var customers = await GetCustomers();
             var orders = await GetOrders();
 
-            ViewData["Token"] = HttpContext.Session.GetString("Token");
             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["OrderId"] = new SelectList(orders, "OrderId", "OrderId");
             ViewData["Orders"] = orders;

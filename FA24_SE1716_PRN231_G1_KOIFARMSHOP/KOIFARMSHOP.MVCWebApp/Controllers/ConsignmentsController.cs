@@ -123,7 +123,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var animals = await GetAnimals(token);
 
 
-            ViewData["AnimalOrigin"] = new SelectList(animals, "AnimalId", "Origin");
+            ViewData["AnimalName"] = new SelectList(animals, "AnimalId", "Name");
 
             return View();
         }

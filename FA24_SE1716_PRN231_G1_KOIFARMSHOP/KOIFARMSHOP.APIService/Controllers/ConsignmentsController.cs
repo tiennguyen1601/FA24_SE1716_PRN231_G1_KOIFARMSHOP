@@ -9,6 +9,7 @@ using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using NuGet.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KoiFarmShop.APIService.Controllers
 {
@@ -24,6 +25,7 @@ namespace KoiFarmShop.APIService.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IBusinessResult> GetConsignments()
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
@@ -40,6 +42,8 @@ namespace KoiFarmShop.APIService.Controllers
 
         
         [HttpPut]
+        [Authorize]
+
         public async Task<IBusinessResult> PutConsignment(Consignment consignment)
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
@@ -48,6 +52,8 @@ namespace KoiFarmShop.APIService.Controllers
 
        
         [HttpPost]
+        [Authorize]
+
         public async Task<IBusinessResult> PostConsignment(Consignment consignment)
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
