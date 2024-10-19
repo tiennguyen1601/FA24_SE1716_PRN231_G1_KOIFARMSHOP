@@ -40,7 +40,13 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonConvert.DeserializeObject<BusinessResult>(content);
 
-                    if (result != null && result.Data != null)
+                    if (result != null && (result.Status == 4 || result.Status == -1))
+                    {
+                        ModelState.AddModelError("", "Thông tin đăng nhập không chính xác.");
+                        return View();
+                    }
+
+                        if (result != null && result.Data != null)
                     {
                         var data = JsonConvert.DeserializeObject<
                             LoginResModel>(result.Data.ToString());
@@ -55,6 +61,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                     else
                     {
                         ModelState.AddModelError("", "Thông tin đăng nhập không chính xác.");
+                        return View();
                     }
                 }
                 else
