@@ -75,27 +75,26 @@
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            // Load consignments when the page is ready
             loadData();
 
-            // Show modal when Create New button is clicked
             $('#btnCreateConsignment').click(function () {
                 addConsignment();
             });
 
-            // Save consignment on Save button click
             $('#btSave').click(function () {
                 saveConsignment();
             });
         });
 
-        // Function to load consignments from API
         function loadData() {
             $.ajax({
                 url: 'https://localhost:7176/api/Consignments',
                 type: "GET",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                },
                 success: function (result) {
                     var html = '';
                     $.each(result.data, function (key, item) {
