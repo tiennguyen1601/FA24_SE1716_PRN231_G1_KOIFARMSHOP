@@ -4,19 +4,23 @@
     ViewData["Title"] = "Animal List";
 }
 
-<h1 class="text-center">Animal List</h1>
+<h1 class="text-center mb-4">Animal List</h1>
 
-<p>
+<p class="text-center">
     <a class="btn btn-primary mb-3" asp-action="Create">Create New</a>
 </p>
 
-<form id="searchForm" asp-controller="Animals" method="get" class="form-inline">
-    <input type="text" id="searchString" name="searchString" value="@ViewBag.SearchString" placeholder="Search by name" class="form-control mr-2" />
-    <button type="submit" class="btn btn-primary">Search</button>
+<form id="searchForm" asp-controller="Animals" method="get" class="form-inline justify-content-center mb-4">
+    <div class="input-group">
+        <input type="text" id="searchString" name="searchString" value="@ViewBag.SearchString" placeholder="Search by name" class="form-control" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
 </form>
 
 <div class="table-responsive mt-3">
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
             <tr>
                 <th>Name</th>
@@ -66,7 +70,7 @@
             });
         });
 
-        var PageSize = 5;
+        var PageSize = 2;
         var CurrentPage = 1;
         var TotalItems = 0;
 
@@ -90,32 +94,32 @@
             var html = '';
             $.each(animals, function (index, item) {
                 html += `
-                                    <tr>
-                                        <td>${item.name}</td>
-                                        <td>${item.origin}</td>
-                                        <td>${item.species}</td>
-                                        <td>${item.type}</td>
-                                        <td>${item.gender}</td>
-                                        <td>${item.size}</td>
-                                        <td>${item.certificate}</td>
-                                        <td>${item.price}</td>
-                                        <td>${item.status}</td>
-                                        <td>${item.createdAt}</td>
-                                        <td>${item.updatedAt}</td>
-                                        <td>${item.maintenanceCost}</td>
-                                        <td>${item.color}</td>
-                                        <td>${item.amountFeed}</td>
-                                        <td>${item.healthStatus}</td>
-                                        <td>${item.farmOrigin}</td>
-                                        <td>${item.birthYear}</td>
-                                        <td>${item.description}</td>
-                                        <td>${item.createdByNavigation?.fullName ?? 'N/A'}</td>
-                                        <td>${item.modifiedByNavigation?.fullName ?? 'N/A'}</td>
-                                        <td>
-                                            <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
-                                            <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
-                                        </td>
-                                    </tr>`;
+                                                    <tr>
+                                                        <td>${item.name}</td>
+                                                        <td>${item.origin}</td>
+                                                        <td>${item.species}</td>
+                                                        <td>${item.type}</td>
+                                                        <td>${item.gender}</td>
+                                                        <td>${item.size}</td>
+                                                        <td>${item.certificate}</td>
+                                                        <td>${item.price}</td>
+                                                        <td>${item.status}</td>
+                                                        <td>${item.createdAt}</td>
+                                                        <td>${item.updatedAt}</td>
+                                                        <td>${item.maintenanceCost}</td>
+                                                        <td>${item.color}</td>
+                                                        <td>${item.amountFeed}</td>
+                                                        <td>${item.healthStatus}</td>
+                                                        <td>${item.farmOrigin}</td>
+                                                        <td>${item.birthYear}</td>
+                                                        <td>${item.description}</td>
+                                                        <td>${item.createdByNavigation?.fullName ?? 'N/A'}</td>
+                                                        <td>${item.modifiedByNavigation?.fullName ?? 'N/A'}</td>
+                                                        <td>
+                                                            <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
+                                                            <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
+                                                        </td>
+                                                    </tr>`;
             });
             $('.tblAnimals').html(html);
         }
@@ -125,18 +129,18 @@
             var paginationHtml = '';
 
             paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
-                                                  <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
-                                               </li>`;
+                                                                  <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+                                                               </li>`;
 
             for (var i = 1; i <= totalPages; i++) {
                 paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
-                                                    <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-                                                   </li>`;
+                                                                    <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                                                                   </li>`;
             }
 
             paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
-                                                  <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
-                                               </li>`;
+                                                                  <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+                                                               </li>`;
 
             $('#paginationControls').html(paginationHtml);
         }

@@ -94,6 +94,11 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Animal animal)
         {
+            var token = HttpContext.Session.GetString("Token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Customers");
+            }
             if (id != animal.AnimalId) return NotFound();
 
             if (!ModelState.IsValid)
@@ -102,7 +107,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 return View(animal);
             }
 
-            var saveStatus = await UpdateAnimal(id, animal);
+            var saveStatus = await UpdateAnimal(id, animal,token);
             if (saveStatus)
             {
                 return RedirectToAction(nameof(Index));
@@ -172,9 +177,10 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return response.IsSuccessStatusCode;
         }
 
-        private async Task<bool> UpdateAnimal(int id, Animal animal)
+        private async Task<bool> UpdateAnimal(int id, Animal animal, string token)
         {
             using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             var response = await httpClient.PutAsJsonAsync($"{Const.APIEndPoint}Animals/{id}", animal);
             return response.IsSuccessStatusCode;
         }
