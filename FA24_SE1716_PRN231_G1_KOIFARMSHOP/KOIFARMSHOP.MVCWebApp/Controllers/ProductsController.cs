@@ -200,6 +200,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                     return View(product);
                 }
             }
+            ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name");
+            ViewData["CreatedBy"] = new SelectList(staffs, "StaffId", "FullName", product.CreatedBy);
             return View(product);
         }
 
@@ -295,6 +297,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 }
             }
 
+            ViewData["CategoryId"] = new SelectList(categories, "CategoryId", "Name", updateProductReqModel.CategoryId);
+            ViewData["ModifiedBy"] = new SelectList(staffs, "StaffId", "FullName", updateProductReqModel.ModifiedBy);
             return View(updateProductReqModel);
         }
 
