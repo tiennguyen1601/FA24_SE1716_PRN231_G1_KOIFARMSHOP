@@ -25,8 +25,6 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> DeleteByID(int id);
         Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes);
 
-
-        Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds);
         Task<IBusinessResult> GetAll(int? page, int? size);
         Task<IBusinessResult> SearchAnimals(AnimalFilterReqModel? filterReqModel, string? searchValue, int? page, int? size);
     }
@@ -179,7 +177,6 @@ namespace KOIFARMSHOP.Service.Services
             catch (Exception ex) { return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString()); }
         }
 
-        public async Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes)
         public async Task<IBusinessResult> GetAll(int? page, int? size)
         {
             var queryableAnimals = await _unitOfWork.AnimalRepository.GetAnimals();
@@ -253,7 +250,7 @@ namespace KOIFARMSHOP.Service.Services
             return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
         }
 
-        public async Task<IBusinessResult> CompareMultipleKoiFishPrices(List<int> koiFishIds)
+        public async Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes)
         {
             try
             {            
@@ -284,11 +281,11 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (currentKoi.Price < nextKoi.Price)
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} đắt hơn cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} đắt hơn cá koi {currentKoi.Name}.");
                         }
                         else if (currentKoi.Price == nextKoi.Price)
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có giá tương đương với cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có giá tương đương với cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -303,7 +300,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (!string.Equals(currentKoi.Size, nextKoi.Size, StringComparison.OrdinalIgnoreCase))
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} lớn hơn cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} lớn hơn cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -317,7 +314,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (!string.Equals(currentKoi.HealthStatus, nextKoi.HealthStatus, StringComparison.OrdinalIgnoreCase))
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có tình trạng sức khỏe khác với cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có tình trạng sức khỏe khác với cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -331,7 +328,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (!string.Equals(currentKoi.Gender, nextKoi.Gender, StringComparison.OrdinalIgnoreCase))
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có giới tính khác với cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có giới tính khác với cá koi  {currentKoi.Name}.");
                         }
                     }
                 }
@@ -345,7 +342,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (!string.Equals(currentKoi.FarmOrigin, nextKoi.FarmOrigin, StringComparison.OrdinalIgnoreCase))
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có nguồn gốc khác với cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có nguồn gốc khác với cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -359,7 +356,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (!string.Equals(currentKoi.Color, nextKoi.Color, StringComparison.OrdinalIgnoreCase))
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có màu sắc khác với cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có màu sắc khác với cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -374,7 +371,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (currentKoi.MaintenanceCost < nextKoi.MaintenanceCost)
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} có chi phí bảo trì cao hơn cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có chi phí bảo trì cao hơn cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -389,7 +386,7 @@ namespace KOIFARMSHOP.Service.Services
 
                         if (currentKoi.BirthYear < nextKoi.BirthYear)
                         {
-                            comparisonMessage.Add($"Cá koi ID {nextKoi.AnimalId} trẻ hơn cá koi ID {currentKoi.AnimalId}.");
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} trẻ hơn cá koi {currentKoi.Name}.");
                         }
                     }
                 }

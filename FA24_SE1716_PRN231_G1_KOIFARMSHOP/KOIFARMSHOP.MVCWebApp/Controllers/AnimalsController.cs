@@ -5,6 +5,8 @@ using KOIFARMSHOP.Common;
 using Newtonsoft.Json;
 using KOIFARMSHOP.Service.Base;
 using NuGet.Common;
+using KOIFARMSHOP.MVCWebApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -25,6 +27,23 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             return View();
         }
+
+        // GET: Animals/CustomerView
+        public async Task<IActionResult> CustomerView()
+        {
+            return View(); 
+        }
+
+        public async Task<IActionResult> Compare()
+        {
+            // Lấy danh sách các cá Koi từ API
+            var animals = await GetAnimals();
+
+            // Trả về View với ViewModel chứa danh sách cá
+            return View(animals);
+        }
+
+
 
         // GET: Animals/Details/5
         public async Task<IActionResult> Details(int id)
@@ -128,64 +147,64 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var saveStatus = await DeleteAnimal(id);
-            return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index)); 
+            return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index));
         }
 
-        // GET: Animals/Compare
-        public async Task<IActionResult> Compare()
+        public async Task<IActionResult> PerformComparison(int[] animalIds, string[] selectedAttributes)
         {
-            var model = new CompareAnimalsViewModel
+            var requestBody = new
             {
-                Animals = await GetAnimals(),
-                SelectedAnimalIds = new List<int>(),
-                ComparisonResults = new List<ComparisonResult>()
+                ids = animalIds.ToList(),
+                comparisonAttributes = selectedAttributes.ToList()
             };
 
-            if (!model.Animals.Any())
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Animals/CompareMultipleFish", requestBody);
+
+            if (response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError("", "No animals available for comparison.");
-                return View(model);
+                var content = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                if (apiResponse != null && apiResponse.Data != null)
+                {
+                    var comparisonData = JsonConvert.DeserializeObject<ComparisonData>(apiResponse.Data.ToString());
+
+                    // Tạo ComparisonResults từ koiFishList và selectedAttributes
+                    var comparisonResults = new List<ComparisonResult>();
+                    foreach (var attribute in selectedAttributes)
+                    {
+                        var result = new ComparisonResult { AttributeName = attribute };
+
+                        foreach (var koiFish in comparisonData.KoiFishList)
+                        {
+                            var attributeValue = GetAnimalAttribute(koiFish, attribute);
+                            result.Values[koiFish.AnimalId] = attributeValue;
+                        }
+
+                        comparisonResults.Add(result);
+                    }
+
+                    var viewModel = new CompareAnimalsViewModel
+                    {
+                        Animals = comparisonData.KoiFishList,
+                        ComparisonMessages = comparisonData.ComparisonMessage,
+                        ComparisonResults = comparisonResults // Đảm bảo ComparisonResults đã được tạo
+                    };
+
+                    return View("ComparisonResults", viewModel);
+                }
             }
 
-            return View(model);
+            ModelState.AddModelError("", "Có lỗi xảy ra khi so sánh các cá koi.");
+            return RedirectToAction("Compare");
         }
-
-        // POST: Animals/Compare
-        [HttpPost]
-        public async Task<IActionResult> Compare(CompareAnimalsViewModel model)
-        {
-            model.Animals = await GetAnimals();
-
-            if (model.SelectedAnimalIds == null || !model.SelectedAnimalIds.Any())
-            {
-                ModelState.AddModelError("", "No animal IDs provided.");
-                return View(model);
-            }
-
-            if (model.SelectedAttributes == null || !model.SelectedAttributes.Any())
-            {
-                ModelState.AddModelError("", "No attributes selected for comparison.");
-                return View(model);
-            }
-
-            model.ComparisonResults = await CompareMultipleFishAttributes(model.SelectedAnimalIds, model.SelectedAttributes);
-
-
-            if (model.ComparisonResults == null || !model.ComparisonResults.Any())
-            {
-                ModelState.AddModelError("", "No results to display for the selected attributes.");
-                return View(model);
-            }
-
-            return View("ComparisonResults", model);
-        }
-
 
 
         private async Task<List<Animal>> GetAnimals()
         {
             using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"{Const.APIEndPoint}Animals");
+            var response = await httpClient.GetAsync($"{Const.APIEndPoint}Animals/get-Animal-by-user");
             var animals = new List<Animal>();
 
             if (response.IsSuccessStatusCode)
@@ -242,25 +261,20 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
 
 
-        private static async Task<List<CompareAnimalsViewModel>> CompareMultipleFishAttributes(List<int> animalIds, List<string> selectedAttributes)
+        private string GetAnimalAttribute(Animal animal, string attribute)
         {
-            using var httpClient = new HttpClient();
-
-            var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Animals/CompareMultipleFish", animalIds, selectedAttributes);
-
-            if (response.IsSuccessStatusCode)
+            return attribute switch
             {
-                var content = await response.Content.ReadAsStringAsync();
-
-                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                if (result?.Data != null)
-                {
-                    return JsonConvert.DeserializeObject<List<CompareAnimalsViewModel>>(result.Data.ToString());
-                }
-            }
-
-            return new List<CompareAnimalsViewModel>();
+                "Size" => animal.Size ?? "Unknown", 
+                "Color" => animal.Color ?? "Unknown",
+                "Price" => animal.Price?.ToString("C") ?? "N/A", 
+                "HealthStatus" => animal.HealthStatus ?? "Unknown",
+                "Gender" => animal.Gender ?? "Unknown",
+                "FarmOrigin" => animal.FarmOrigin ?? "Unknown",
+                "MaintenanceCost" => animal.MaintenanceCost?.ToString("C") ?? "N/A", 
+                "BirthYear" => animal.BirthYear?.ToString() ?? "N/A",
+                _ => "N/A" 
+            };
         }
 
 

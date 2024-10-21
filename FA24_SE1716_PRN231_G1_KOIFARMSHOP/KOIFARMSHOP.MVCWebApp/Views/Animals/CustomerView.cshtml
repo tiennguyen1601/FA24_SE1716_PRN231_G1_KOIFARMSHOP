@@ -1,0 +1,130 @@
+﻿@model IEnumerable<KOIFARMSHOP.Data.Models.Animal>
+
+@{
+    ViewData["Title"] = "Animal List";
+}
+
+<h1 class="text-center">Animal List</h1>
+
+<!-- Search Form -->
+<form id="searchForm" asp-controller="Animals" method="get" class="form-inline">
+    <input type="text" id="searchString" name="searchString" value="@ViewBag.SearchString" placeholder="Search by name" class="form-control mr-2" />
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<!-- Animal Table -->
+<div class="table-responsive mt-3">
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Origin</th>
+                <th>Species</th>
+                <th>Type</th>
+                <th>Gender</th>
+                <th>Size</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Color</th>
+                <th>Health Status</th>
+                <th>Farm Origin</th>
+                <th>Birth Year</th>
+            </tr>
+        </thead>
+        <tbody class="tblAnimals"></tbody>
+    </table>
+</div>
+
+<!-- Compare Button -->
+<div class="text-center">
+    <button class="btn btn-danger" id="compareButton">Compare</button>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+
+            $('#searchForm').submit(function (event) {
+                event.preventDefault();
+                var searchTerm = $('#searchString').val();
+                loadData(1, searchTerm);
+            });
+
+            $('#compareButton').click(function () {
+                window.location.href = '@Url.Action("Compare", "Animals")';
+            });
+        });
+
+        var PageSize = 5;
+        var CurrentPage = 1;
+        var TotalItems = 0;
+
+        // Load Data Function
+        function loadData(page = 1, searchString = '') {
+            $.ajax({
+                url: `https://localhost:7176/api/Animals/search?page=${page}&size=${PageSize}&searchValue=${encodeURIComponent(searchString)}`,
+                type: 'GET',
+                success: function (result) {
+                    TotalItems = result.data.totalItems;
+                    CurrentPage = result.data.currentPage;
+                    displayAnimals(result.data.data);
+                    updatePaginationControls();
+                },
+                error: function (xhr) {
+                    alert(`Error: ${xhr.statusText}`);
+                }
+            });
+        }
+
+        function displayAnimals(animals) {
+            var html = '';
+            $.each(animals, function (index, item) {
+                html += `
+                                            <tr>
+                                                <td>${item.name}</td>
+                                                <td>${item.origin}</td>
+                                                <td>${item.species}</td>
+                                                <td>${item.type}</td>
+                                                <td>${item.gender}</td>
+                                                <td>${item.size}</td>
+                                                <td>${item.price}</td>
+                                                <td>${item.status}</td>
+                                                <td>${item.color}</td>
+                                                <td>${item.healthStatus}</td>
+                                                <td>${item.farmOrigin}</td>
+                                                <td>${item.birthYear}</td>
+                                            </tr>`;
+            });
+            $('.tblAnimals').html(html);
+        }
+
+        function updatePaginationControls() {
+            var totalPages = Math.ceil(TotalItems / PageSize);
+            var paginationHtml = '';
+
+            paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
+                                                            <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+                                                       </li>`;
+
+            for (var i = 1; i <= totalPages; i++) {
+                paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
+                                                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                                                           </li>`;
+            }
+
+            paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
+                                                            <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+                                                       </li>`;
+
+            $('#paginationControls').html(paginationHtml);
+        }
+
+        function changePage(page) {
+            if (page >= 1 && page <= Math.ceil(TotalItems / PageSize)) {
+                loadData(page);
+            }
+        }
+    </script>
+}
+        
