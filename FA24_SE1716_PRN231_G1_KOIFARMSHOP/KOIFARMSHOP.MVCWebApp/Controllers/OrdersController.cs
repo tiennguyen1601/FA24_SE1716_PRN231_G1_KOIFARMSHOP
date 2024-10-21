@@ -66,7 +66,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
             //ViewData["ProductId"] = new SelectList(products, "ProductId", "ProductName");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
 
             return View();
 
@@ -119,7 +119,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
 
             return View(order);
         }
@@ -172,7 +172,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
                             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
 
                             return View(orderCompleteRequest); 
                         }
@@ -230,7 +230,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             }
             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
             return View(order); 
         }
 
@@ -261,7 +261,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                             var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
                             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
                             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Species");
+                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
                             return View(data); 
                         }
                     }
@@ -365,7 +365,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var animals = new List<Animal>();
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Animals"))
+                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Animals/get-Animal-by-user"))
                 {
                     if (res.IsSuccessStatusCode)
                     {

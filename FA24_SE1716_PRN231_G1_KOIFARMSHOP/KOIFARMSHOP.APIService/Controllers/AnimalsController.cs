@@ -29,6 +29,13 @@ namespace KOIFARMSHOP.APIService.Controllers
         {
             return await _animalService.GetAll(page, size);
         }
+        
+        [HttpGet]
+        [Route("get-Animal-by-user")]
+        public async Task<IBusinessResult> GetAnimal123()
+        {
+            return await _animalService.GetAll();
+        }
 
         // GET: api/Animals/5
         [HttpGet("{id}")]

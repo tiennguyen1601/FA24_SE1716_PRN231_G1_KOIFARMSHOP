@@ -143,13 +143,18 @@
 
 @section scripts {
     <script type="text/javascript">
+
+        var isSearchActive = false;
+
         $(document).ready(function () {
+
             loadData();
             loadBrands();
             loadCategories();
 
             $('#searchForm').submit(function (e) {
                 e.preventDefault();
+                isSearchActive = true;
                 searchProducts();
             });
 
@@ -162,6 +167,7 @@
                 $('#minDiscount').val('');
                 $('#maxDiscount').val('');
 
+                isSearchActive = false;
                 loadData();
             });
 
@@ -354,7 +360,14 @@
 
         function changePage(page) {
             if (page >= 1 && page <= Math.ceil(TotalItems / PageSize)) {
-                loadData(page);
+                if (isSearchActive) {
+                    // console.log(page);
+                    searchProducts(page);
+                } else {
+                    // console.log(page);
+                    loadData(page);
+                }
+                // loadData(page)
             }
         }
 

@@ -65,12 +65,33 @@ namespace KOIFARMSHOP.Service.Services
         {
             var orders = await _unitOfWork.OrderRepository.GetAllDetail();
 
-            var totalItemCount = orders.Count;
+            var orderResponseList = _mapper.Map<List<OrderResponseModel>>(orders);
 
-            var pagedItem = orders.Skip(((page ?? 1) - 1) * (size ?? 10))
+            var orderBuyRequestModels = orderResponseList.Select(order => new OrderResponseModel
+            {
+                OrderId = order.OrderId,
+                CustomerId = order.CustomerId,
+                PromotionId = order.PromotionId,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                ShippingAddress = order.ShippingAddress,
+                DeliveryMethod = order.DeliveryMethod,
+                PaymentStatus = order.PaymentStatus,
+                Vat = order.Vat,
+                TotalAmountVat = order.TotalAmountVat,
+                Status = order.Status,
+                CustomerName = order.CustomerName,
+                PromotionTitle = order.PromotionTitle,
+                OrderDetails = order.OrderDetails
+            }).ToList();
+
+
+            var totalItemCount = orderBuyRequestModels.Count;
+
+            var pagedItem = orderBuyRequestModels.Skip(((page ?? 1) - 1) * (size ?? 10))
                     .Take(size ?? 10).ToList();
 
-            var result = new Pagination<Order>
+            var result = new Pagination<OrderResponseModel>
             {
                 TotalItems = totalItemCount,
                 PageSize = size ?? 10,

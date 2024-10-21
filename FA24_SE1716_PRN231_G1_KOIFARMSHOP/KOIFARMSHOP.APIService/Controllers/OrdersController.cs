@@ -24,11 +24,12 @@ namespace KOIFARMSHOP.APIService.Controllers
         }
 
         // GET: api/Orders
-        //[HttpGet]
-        //public async Task<IBusinessResult> GetOrders()
-        //{
-        //    return await _orderService.GetAll();
-        //}
+        [HttpGet]
+        [Route("get-Order-by-user")]
+        public async Task<IBusinessResult> GetOrders()
+        {
+            return await _orderService.GetAll();
+        }
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
