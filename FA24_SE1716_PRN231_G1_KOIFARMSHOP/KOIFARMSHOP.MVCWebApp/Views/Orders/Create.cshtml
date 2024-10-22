@@ -20,7 +20,6 @@
                 <span asp-validation-for="OrderId" class="text-danger"></span>
             </div>
 
-
             <div class="form-group">
                 <label asp-for="PromotionId" class="control-label"></label>
                 <select asp-for="PromotionId" class="form-control" asp-items="ViewBag.PromotionId"></select>
@@ -34,24 +33,41 @@
 
             <div class="form-group">
                 <label asp-for="DeliveryMethod" class="control-label"></label>
-                <input asp-for="DeliveryMethod" class="form-control" />
+                <select asp-for="DeliveryMethod" class="form-control">
+                    <option value="">Select Delivery Method</option>
+                    <option value="Grab">Grab</option>
+                    <option value="Uber">Uber</option>
+                    <option value="Can go to store">Can go to store</option>
+                </select>
                 <span asp-validation-for="DeliveryMethod" class="text-danger"></span>
             </div>
 
-
-
             <h4 style="margin-top: 20px; margin-bottom: 20px;">Order Detail</h4>
             <div class="order-detail" style="border: 1px solid #ced4da; border-radius: 5px; padding: 20px; background-color: #f8f9fa;">
-                <div class="form-group">
-                    <label class="control-label">Animal</label>
-                    <input type="text" class="form-control" value="@ViewData["AnimalName"]" readonly />
-                    <input type="hidden" asp-for="AnimalID" value="@ViewData["AnimalId"]" />
-                    <span asp-validation-for="AnimalID" class="text-danger"></span>
-                </div>
+                @if (ViewData["AnimalName"] != null && !string.IsNullOrEmpty(ViewData["AnimalName"].ToString()) && ViewData["AnimalName"].ToString() != "Unknown")
+                {
+                    <div class="form-group">
+                        <label class="control-label">Animal</label>
+                        <input type="text" class="form-control" value="@ViewData["AnimalName"]" readonly />
+                        <input type="hidden" asp-for="AnimalID" value="@ViewData["AnimalId"]" />
+                        <span asp-validation-for="AnimalID" class="text-danger"></span>
+                    </div>
+                }
+                else if (ViewData["ProductName"] != null && !string.IsNullOrEmpty(ViewData["ProductName"].ToString()) && ViewData["ProductName"].ToString() != "Unknown")
+                {
+                    <div class="form-group">
+                        <label class="control-label">Product</label>
+                        <input type="text" class="form-control" value="@ViewData["ProductName"]" readonly />
+                        <input type="hidden" asp-for="ProductID" value="@ViewData["ProductId"]" />
+                        <span asp-validation-for="ProductID" class="text-danger"></span>
+                    </div>
 
-
-
-
+                    <div class="form-group">
+                        <label asp-for="Quantity" class="control-label">Quantity</label>
+                        <input asp-for="Quantity" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
+                }
 
             </div>
 
@@ -59,6 +75,7 @@
                 <input type="submit" value="Create Order" class="btn btn-success" style="width: 100%;" />
             </div>
         </form>
+
     </div>
 </div>
 

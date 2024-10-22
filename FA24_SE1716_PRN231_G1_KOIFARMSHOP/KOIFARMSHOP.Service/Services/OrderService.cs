@@ -124,10 +124,10 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
             }
 
-            var task = await _unitOfWork.CustomerRepository.GetByIdAsync(userId);
+            var customer = await _unitOfWork.CustomerRepository.GetByIdAsync(userId);
             try
             {
-                if (orderCompleteRequest == null || orderCompleteRequest == null)
+                if (orderCompleteRequest == null)
                 {
                     return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid request.", null);
                 }
@@ -137,30 +137,69 @@ namespace KOIFARMSHOP.Service.Services
                 order.OrderDetails = new List<OrderDetail>();
                 decimal totalAmountVat = 0;
 
-                
-                    decimal price = 0;
-                     if (orderCompleteRequest.AnimalID.HasValue)
-                    {
-                        var animal = await _unitOfWork.AnimalRepository.GetByIdAsync(orderCompleteRequest.AnimalID.Value);
-                        price = animal?.Price ?? 0;
-                    }
+                decimal price = 0;
+
+                if (orderCompleteRequest.AnimalID.HasValue)
+                {
+                    var animal = await _unitOfWork.AnimalRepository.GetByIdAsync(orderCompleteRequest.AnimalID.Value);
+                    price = animal?.Price ?? 0;
 
                     var orderDetailEntity = new OrderDetail
                     {
                         ProductId = null,
                         AnimalId = orderCompleteRequest.AnimalID,
-                        Quantity = 1,
-                        Amount = price ,
+                        Quantity = 1, 
+                        Amount = price,
                         Subtotal = price,
                         Price = price
                     };
-                    order.TotalAmount = 1;
                     order.OrderDetails.Add(orderDetailEntity);
-                    order.Vat = 10;
-                    order.TotalAmountVat = 1;
-                decimal amountWithVat = orderDetailEntity.Subtotal * (1 + (order.Vat ?? 0) / 100);
-                totalAmountVat += amountWithVat; 
-                
+                }
+                else if (orderCompleteRequest.ProductID.HasValue)
+                {
+                    var product = await _unitOfWork.ProductRepository.GetByIdAsync(orderCompleteRequest.ProductID.Value);
+
+                    if (product == null)
+                    {
+                        return new BusinessResult(Const.FAIL_CREATE_CODE, "Product not found.", null);
+                    }
+
+                    int availableQuantity = product.StockQuantity; 
+                    int quantity = orderCompleteRequest.Quantity ?? 1;
+
+                    if (availableQuantity < quantity)
+                    {
+                        return new BusinessResult(Const.FAIL_CREATE_CODE, "Out of quantity", null);
+                    }
+
+                    product.StockQuantity -= quantity;
+
+                    await _unitOfWork.ProductRepository.UpdateAsync(product);
+
+                    price = product.Price;
+
+                    var orderDetailEntity = new OrderDetail
+                    {
+                        ProductId = orderCompleteRequest.ProductID,
+                        AnimalId = null,
+                        Quantity = quantity,
+                        Amount = price * quantity,
+                        Subtotal = price * quantity,
+                        Price = price
+                    };
+                    order.OrderDetails.Add(orderDetailEntity);
+                }
+
+
+                else
+                {
+                    return new BusinessResult(Const.FAIL_CREATE_CODE, "No item selected for purchase.", null);
+                }
+
+                order.TotalAmount = price * (orderCompleteRequest.Quantity ?? 1); 
+                order.Vat = 10;
+                decimal amountWithVat = order.TotalAmount * (1 + (order.Vat ?? 0) / 100);
+                totalAmountVat += amountWithVat;
 
                 order.TotalAmountVat = totalAmountVat;
 
@@ -190,7 +229,6 @@ namespace KOIFARMSHOP.Service.Services
                     order.Status = "Active";
                     order.PaymentStatus = "Unpaid";
 
-
                     var result = await _unitOfWork.OrderRepository.CreateAsync(order);
 
                     return result > 0
@@ -203,9 +241,6 @@ namespace KOIFARMSHOP.Service.Services
                 return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
             }
         }
-
-
-
 
 
 

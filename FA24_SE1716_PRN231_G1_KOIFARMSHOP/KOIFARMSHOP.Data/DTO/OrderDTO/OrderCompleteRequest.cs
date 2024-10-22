@@ -21,6 +21,8 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
         public string DeliveryMethod { get; set; }
 
         public int? AnimalID { get; set; }
+        public int? ProductID { get; set; }
+        public int? Quantity { get; set; }
 
        
     }
