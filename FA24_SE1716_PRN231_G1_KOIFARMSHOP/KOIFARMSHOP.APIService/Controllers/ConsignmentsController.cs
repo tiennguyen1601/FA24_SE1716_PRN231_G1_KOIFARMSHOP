@@ -9,7 +9,7 @@ using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using NuGet.Common;
-using Microsoft.AspNetCore.Authorization;
+using KOIFARMSHOP.Data.DTO.ConsignmentDTO;
 
 namespace KoiFarmShop.APIService.Controllers
 {
@@ -25,7 +25,6 @@ namespace KoiFarmShop.APIService.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IBusinessResult> GetConsignments()
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
@@ -42,8 +41,6 @@ namespace KoiFarmShop.APIService.Controllers
 
         
         [HttpPut]
-        [Authorize]
-
         public async Task<IBusinessResult> PutConsignment(Consignment consignment)
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
@@ -52,12 +49,22 @@ namespace KoiFarmShop.APIService.Controllers
 
        
         [HttpPost]
-        [Authorize]
-
-        public async Task<IBusinessResult> PostConsignment(Consignment consignment)
+        public async Task<IBusinessResult> PostConsignment(CreateConsignmentReq consignment)
         {
             string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
-            return await _consignmentService.Save(consignment, token);
+
+            Consignment newConsignment = new Consignment
+            {
+                AnimalId = consignment.AnimalId,
+                ConsignmentType = consignment.ConsignmentType,
+                StartDate = consignment.StartDate,
+                EndDate = consignment.EndDate,
+                Price = consignment.Price,
+                Notes = consignment.Notes,
+                CommissionRate = consignment.CommissionRate
+            };
+
+            return await _consignmentService.Save(newConsignment, token);
         }
 
        
