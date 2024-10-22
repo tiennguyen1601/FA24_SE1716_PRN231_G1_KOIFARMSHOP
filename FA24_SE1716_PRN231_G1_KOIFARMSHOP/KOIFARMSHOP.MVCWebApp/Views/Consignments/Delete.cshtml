@@ -6,93 +6,52 @@
 
 <h1 class="text-danger">Delete Consignment</h1>
 
-<div class="alert alert-warning" role="alert">
-    <h4 class="alert-heading">Warning!</h4>
-    <p>Are you sure you want to delete the following product? This action cannot be undone.</p>
-</div>
-<div>
-    <h4>Consignment</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ConsignmentType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ConsignmentType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Notes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Notes)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CommissionRate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CommissionRate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Animal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Animal.AnimalId)
-        </dd>
-    </dl>
-    
-@*     <form asp-action="Delete">
-        <input type="hidden" asp-for="ConsignmentId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form> *@
+<div class="card border-warning">
+    <div class="card-body">
+        <h4 class="alert-heading">Warning!</h4>
+        <p>Are you sure you want to delete the following consignment? This action cannot be undone.</p>
 
-    <div class="mt-4">
-        <form asp-action="Delete">
-            <input type="hidden" asp-for="ConsignmentId" />
+        <h4>Consignment Details</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ConsignmentType)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ConsignmentType)</dd>
 
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash-alt"></i> Delete
-            </button>
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StartDate)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.StartDate)</dd>
 
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-        </form>
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.EndDate)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.EndDate)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Price)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Price)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Status)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedAt)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Notes)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Notes)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CommissionRate)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.CommissionRate)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Species)</dd>
+        </dl>
+
+        <div class="mt-4">
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="ConsignmentId" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </form>
+        </div>
     </div>
 </div>

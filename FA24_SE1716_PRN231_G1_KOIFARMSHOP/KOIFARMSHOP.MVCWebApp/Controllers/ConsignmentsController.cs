@@ -11,6 +11,7 @@ using KOIFARMSHOP.Service.Base;
 using Newtonsoft.Json;
 using Azure;
 using System.Net.Http.Headers;
+using KOIFARMSHOP.Data.DTO.ConsignmentDTO;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -149,7 +150,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Consignment consignment)
+        public async Task<IActionResult> Create(CreateConsignmentReq consignment)
         {
             bool saveStatus = false;
 
