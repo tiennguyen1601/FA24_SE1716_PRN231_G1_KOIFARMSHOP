@@ -287,6 +287,10 @@ namespace KOIFARMSHOP.Service.Services
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} có giá tương đương với cá koi {currentKoi.Name}.");
                         }
+                        else 
+                        {
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có giá tương đương với cá koi {currentKoi.Name}.");
+                        }
                     }
                 }
 
@@ -302,6 +306,10 @@ namespace KOIFARMSHOP.Service.Services
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} lớn hơn cá koi {currentKoi.Name}.");
                         }
+                        else
+                        {
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có kích thước giống với cá koi {currentKoi.Name}.");
+                        }
                     }
                 }
 
@@ -312,9 +320,20 @@ namespace KOIFARMSHOP.Service.Services
                         var currentKoi = koiFishList[i];
                         var nextKoi = koiFishList[i + 1];
 
-                        if (!string.Equals(currentKoi.HealthStatus, nextKoi.HealthStatus, StringComparison.OrdinalIgnoreCase))
+                        int currentKoiRank = GetHealthRank(currentKoi.HealthStatus);
+                        int nextKoiRank = GetHealthRank(nextKoi.HealthStatus);
+
+                        if (currentKoiRank > nextKoiRank)
                         {
-                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có tình trạng sức khỏe khác với cá koi {currentKoi.Name}.");
+                            comparisonMessage.Add($"Cá koi {currentKoi.Name} có tình trạng sức khỏe tốt hơn cá koi {nextKoi.Name}.");
+                        }
+                        else if (currentKoiRank < nextKoiRank)
+                        {
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có tình trạng sức khỏe tốt hơn cá koi {currentKoi.Name}.");
+                        }
+                        else if (currentKoiRank == nextKoiRank)
+                        {
+                            comparisonMessage.Add($"Cá koi {currentKoi.Name} và cá koi {nextKoi.Name} có tình trạng sức khỏe tương đương.");
                         }
                     }
                 }
@@ -330,6 +349,10 @@ namespace KOIFARMSHOP.Service.Services
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} có giới tính khác với cá koi  {currentKoi.Name}.");
                         }
+                        else
+                        {
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có nguồn gốc giống với cá koi {currentKoi.Name}.");
+                        }
                     }
                 }
 
@@ -344,6 +367,10 @@ namespace KOIFARMSHOP.Service.Services
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} có nguồn gốc khác với cá koi {currentKoi.Name}.");
                         }
+                        else
+                        {
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có nguồn gốc giống với cá koi {currentKoi.Name}.");
+                        }
                     }
                 }
 
@@ -357,6 +384,10 @@ namespace KOIFARMSHOP.Service.Services
                         if (!string.Equals(currentKoi.Color, nextKoi.Color, StringComparison.OrdinalIgnoreCase))
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} có màu sắc khác với cá koi {currentKoi.Name}.");
+                        }
+                        else
+                        {
+                            comparisonMessage.Add($"Cá koi {nextKoi.Name} có màu sắc giống với cá koi {currentKoi.Name}.");
                         }
                     }
                 }
@@ -373,6 +404,14 @@ namespace KOIFARMSHOP.Service.Services
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} có chi phí bảo trì cao hơn cá koi {currentKoi.Name}.");
                         }
+                        else if (currentKoi.MaintenanceCost > nextKoi.MaintenanceCost)
+                        {
+                            comparisonMessage.Add($"Cá koi {currentKoi.Name} có chi phí bảo trì cao hơn cá koi {nextKoi.Name}.");
+                        }
+                        else
+                        {
+                            comparisonMessage.Add($"Cá koi {currentKoi.Name} và cá koi {nextKoi.Name} có chi phí bảo trì giống nhau.");
+                        }
                     }
                 }
 
@@ -388,6 +427,14 @@ namespace KOIFARMSHOP.Service.Services
                         {
                             comparisonMessage.Add($"Cá koi {nextKoi.Name} trẻ hơn cá koi {currentKoi.Name}.");
                         }
+                        else if (currentKoi.BirthYear > nextKoi.BirthYear)
+                        {
+                            comparisonMessage.Add($"Cá koi {currentKoi.Name} trẻ hơn cá koi {nextKoi.Name}.");
+                        }
+                        else
+                        {
+                            comparisonMessage.Add($"Cá koi {currentKoi.Name} và cá koi {nextKoi.Name} có năm sinh giống nhau.");
+                        }
                     }
                 }
 
@@ -402,6 +449,23 @@ namespace KOIFARMSHOP.Service.Services
             catch (Exception ex)
             {
                 return new BusinessResult(Const.ERROR_EXCEPTION, ex.ToString());
+            }
+        }
+
+        private int GetHealthRank(string healthStatus)
+        {
+            switch (healthStatus?.ToLower())
+            {
+                case "excellent":
+                    return 3; 
+                case "good":
+                    return 2; 
+                case "fair":
+                    return 1; 
+                case "poor":
+                    return 0; 
+                default:
+                    return -1; 
             }
         }
 
