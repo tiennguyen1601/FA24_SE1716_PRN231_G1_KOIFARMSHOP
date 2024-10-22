@@ -56,21 +56,22 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
 
         // GET: Orders/Create
-        public async Task<IActionResult> Create()
+        // GET: Orders/Create
+        public async Task<IActionResult> Create(int? animalId, string animalName)
         {
             var customers = await GetCustomer();
             var promotions = await GetPromotion();
-            var animals = await GetAnimal();
-            //var products = await GetProduct();
 
             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-            //ViewData["ProductId"] = new SelectList(products, "ProductId", "ProductName");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
+            ViewData["AnimalName"] = animalName ?? "Unknown";  
+            ViewData["AnimalId"] = animalId ?? 0;            
 
             return View();
-
         }
+
+
+
 
         // POST: Orders/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -159,15 +160,9 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                             var orderCompleteRequest = new OrderCompleteRequest
                             {
                                 OrderId = data.OrderId,
-                                TotalAmount = data.TotalAmount,
                                 PromotionId = data.PromotionId,
                                 ShippingAddress = data.ShippingAddress,
                                 DeliveryMethod = data.DeliveryMethod,
-                                PaymentStatus = data.PaymentStatus,
-                                Vat = data.Vat,
-                                Amount = totalAmount, 
-                                Subtotal = totalSubtotal,
-                                Discount = totalDiscount
                             };
 
                             ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");

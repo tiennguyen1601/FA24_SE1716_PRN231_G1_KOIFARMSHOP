@@ -116,7 +116,6 @@ namespace KOIFARMSHOP.Service.Services
 
             return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderResponse);
         }
-
         public async Task<IBusinessResult> Save(OrderCompleteRequest orderCompleteRequest, string token)
         {
             var userIdString = _jwtService.decodeToken(token, "userid");
@@ -150,16 +149,17 @@ namespace KOIFARMSHOP.Service.Services
                     {
                         ProductId = null,
                         AnimalId = orderCompleteRequest.AnimalID,
-                        Quantity = orderCompleteRequest.Quantity,
-                        Amount = price * orderCompleteRequest.Quantity,
-                        Subtotal = price * orderCompleteRequest.Quantity,
+                        Quantity = 1,
+                        Amount = price ,
+                        Subtotal = price,
                         Price = price
                     };
-
+                    order.TotalAmount = 1;
                     order.OrderDetails.Add(orderDetailEntity);
-
-                    decimal amountWithVat = orderDetailEntity.Subtotal * (1 + (orderCompleteRequest.Vat ?? 0));
-                    totalAmountVat += amountWithVat; 
+                    order.Vat = 10;
+                    order.TotalAmountVat = 1;
+                decimal amountWithVat = orderDetailEntity.Subtotal * (1 + (order.Vat ?? 0) / 100);
+                totalAmountVat += amountWithVat; 
                 
 
                 order.TotalAmountVat = totalAmountVat;
@@ -188,6 +188,9 @@ namespace KOIFARMSHOP.Service.Services
                 else
                 {
                     order.Status = "Active";
+                    order.PaymentStatus = "Unpaid";
+
+
                     var result = await _unitOfWork.OrderRepository.CreateAsync(order);
 
                     return result > 0

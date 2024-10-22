@@ -118,6 +118,8 @@
                                                         <td>
                                                             <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
                                                             <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
+                                                            <a class="btn btn-sm btn-secondary" href="/Orders/Create?animalId=${item.animalId}&animalName=${encodeURIComponent(item.name)}">Buy</a>
+
                                                         </td>
                                                     </tr>`;
             });
