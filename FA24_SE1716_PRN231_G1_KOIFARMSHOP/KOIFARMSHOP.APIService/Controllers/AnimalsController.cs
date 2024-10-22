@@ -95,33 +95,35 @@ namespace KOIFARMSHOP.APIService.Controllers
 
         // POST: api/Animals/CompareMultipleFish
         [HttpPost("CompareMultipleFish")]
-        public async Task<IActionResult> CompareMultipleAnimal(List<int> ids)
+        public async Task<IBusinessResult> CompareMultipleAnimal([FromBody] CompareMultipleAnimalRequestModels request)
         {
             var koiFishList = new List<Animal>();
 
-            foreach (var id in ids)
+            foreach (var id in request.Ids)
             {
                 var result = await _animalService.GetByID(id);
 
                 if (result == null)
                 {
-                    return NotFound($"Koi fish with ID {id} was not found.");
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, $"Koi fish with ID {id} was not found.");
                 }
 
                 var fish = result.Data as Animal;
 
                 if (fish == null)
                 {
-                    return NotFound($"Koi fish with ID {id} was not found.");
+                    return new BusinessResult(Const.WARNING_NO_DATA_CODE, Const.WARNING_NO_DATA_MSG, $"Koi fish with ID {id} was not found.");
                 }
 
                 koiFishList.Add(fish);
             }
 
             var koiFishIds = koiFishList.Select(f => f.AnimalId).ToList();
-            var comparisonResult = await _animalService.CompareMultipleKoiFishPrices(koiFishIds);
 
-            return Ok(comparisonResult);
+            var comparisonResult = await _animalService.CompareMultipleKoiFishAttributes(koiFishIds, request.ComparisonAttributes);
+
+            return comparisonResult;
         }
+
     }
 }
