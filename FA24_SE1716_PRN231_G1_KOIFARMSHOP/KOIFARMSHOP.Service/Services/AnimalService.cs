@@ -269,7 +269,7 @@ namespace KOIFARMSHOP.Service.Services
                     return new BusinessResult(Const.WARNING_NO_DATA_CODE, "Cần ít nhất hai cá koi để so sánh.");
                 }
 
-                var comparisonMessage = new List<string> { "So sánh các thuộc tính của cá koi:" };
+                var comparisonMessage = new List<string> {};
 
                 if (comparisonAttributes.Contains("Price"))
                 {

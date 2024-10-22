@@ -150,6 +150,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
         public async Task<IActionResult> PerformComparison(int[] animalIds, string[] selectedAttributes)
         {
             var requestBody = new
@@ -170,35 +171,36 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 {
                     var comparisonData = JsonConvert.DeserializeObject<ComparisonData>(apiResponse.Data.ToString());
 
-                    // Tạo ComparisonResults từ koiFishList và selectedAttributes
+                    // Prepare comparison results
                     var comparisonResults = new List<ComparisonResult>();
                     foreach (var attribute in selectedAttributes)
                     {
                         var result = new ComparisonResult { AttributeName = attribute };
-
                         foreach (var koiFish in comparisonData.KoiFishList)
                         {
                             var attributeValue = GetAnimalAttribute(koiFish, attribute);
                             result.Values[koiFish.AnimalId] = attributeValue;
                         }
-
                         comparisonResults.Add(result);
                     }
 
-                    var viewModel = new CompareAnimalsViewModel
+                    // Prepare the view model
+                    var viewModel = new
                     {
+                        ComparisonResults = comparisonResults,
                         Animals = comparisonData.KoiFishList,
-                        ComparisonMessages = comparisonData.ComparisonMessage,
-                        ComparisonResults = comparisonResults // Đảm bảo ComparisonResults đã được tạo
+                        ComparisonMessages = comparisonData.ComparisonMessage
                     };
 
-                    return View("ComparisonResults", viewModel);
+                    // Return JSON result for AJAX
+                    return Json(new { success = true, data = viewModel });
                 }
             }
 
-            ModelState.AddModelError("", "Có lỗi xảy ra khi so sánh các cá koi.");
-            return RedirectToAction("Compare");
+            // Return error in case of failure
+            return Json(new { success = false, message = "Có lỗi xảy ra khi so sánh các cá koi." });
         }
+
 
 
         private async Task<List<Animal>> GetAnimals()

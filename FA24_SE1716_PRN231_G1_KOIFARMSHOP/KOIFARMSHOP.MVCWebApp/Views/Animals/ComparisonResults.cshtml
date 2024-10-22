@@ -33,7 +33,19 @@
                 @foreach (var entry in result.Values)
                 {
                     <tr>
-                        <td>Cá Koi @entry.Key</td>
+                        <td>
+                            @{
+                                var animal = Model.Animals.FirstOrDefault(a => a.AnimalId == entry.Key);
+                                if (animal != null)
+                                {
+                                    @animal.Name
+                                }
+                                else
+                                {
+                                    @($"Cá Koi {entry.Key}")
+                                }
+                            }
+                        </td>
                         <td>@entry.Value</td>
                     </tr>
                 }
@@ -43,6 +55,12 @@
 }
 else
 {
-   <div class="alert alert-warning">Không có thuộc tính nào được so sánh.</div>
+    <div class="alert alert-warning">Không có thuộc tính nào được so sánh.</div>
 }
+
+<!-- Back button using JavaScript to go to the previous page -->
+<div class="text-center mt-4">
+    <button class="btn btn-secondary" onclick="window.history.back()">Quay lại</button>
+</div>
+
 
