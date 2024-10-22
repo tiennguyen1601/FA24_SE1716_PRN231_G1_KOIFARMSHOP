@@ -1,0 +1,66 @@
+﻿@model KOIFARMSHOP.MVCWebApp.Models.CompareAnimalsViewModel
+
+<h1 class="text-center">Kết quả so sánh cá Koi</h1>
+
+<!-- Hiển thị thông báo so sánh -->
+@if (Model.ComparisonMessages != null && Model.ComparisonMessages.Any())
+{
+    <div class="alert alert-info">
+        <h4>Thông báo so sánh:</h4>
+        <ul>
+            @foreach (var message in Model.ComparisonMessages)
+            {
+                <li>@message</li>
+            }
+        </ul>
+    </div>
+}
+
+<!-- Hiển thị kết quả so sánh theo thuộc tính -->
+@if (Model.ComparisonResults != null && Model.ComparisonResults.Any())
+{
+    @foreach (var result in Model.ComparisonResults)
+    {
+        <h3>@result.AttributeName</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Cá Koi</th>
+                    <th>Giá trị thuộc tính</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in result.Values)
+                {
+                    <tr>
+                        <td>
+                            @{
+                                var animal = Model.Animals.FirstOrDefault(a => a.AnimalId == entry.Key);
+                                if (animal != null)
+                                {
+                                    @animal.Name
+                                }
+                                else
+                                {
+                                    @($"Cá Koi {entry.Key}")
+                                }
+                            }
+                        </td>
+                        <td>@entry.Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <div class="alert alert-warning">Không có thuộc tính nào được so sánh.</div>
+}
+
+<!-- Back button using JavaScript to go to the previous page -->
+<div class="text-center mt-4">
+    <button class="btn btn-secondary" onclick="window.history.back()">Quay lại</button>
+</div>
+
+
