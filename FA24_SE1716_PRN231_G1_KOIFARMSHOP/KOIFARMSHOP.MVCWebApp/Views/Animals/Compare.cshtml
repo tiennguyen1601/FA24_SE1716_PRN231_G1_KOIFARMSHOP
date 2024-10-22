@@ -26,6 +26,7 @@
                     <th>Màu sắc</th>
                     <th>Trang trại</th>
                     <th>Năm sinh</th>
+                    <th>Chi phí chăm sóc</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,13 +44,13 @@
                         <td>@fish.Color</td>
                         <td>@fish.FarmOrigin</td>
                         <td>@fish.BirthYear</td>
+                        <td>@fish.MaintenanceCost?.ToString("C")</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 
-    <!-- Danh sách các thuộc tính để so sánh -->
     <div class="mt-3">
         <h4>Chọn thuộc tính để so sánh</h4>
         <div class="form-check">
@@ -72,24 +73,32 @@
             <input type="checkbox" class="form-check-input" name="selectedAttributes" value="Color" />
             <label class="form-check-label">Màu sắc</label>
         </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="selectedAttributes" value="FarmOrigin" />
+            <label class="form-check-label">Trang Trại</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="selectedAttributes" value="BirthYear" />
+            <label class="form-check-label">Năm sinh</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="selectedAttributes" value="MaintenanceCost" />
+            <label class="form-check-label">Chi phí chăm sóc</label>
+        </div>
     </div>
 
-    <!-- Nút So sánh -->
     <div class="text-center mt-3">
         <button class="btn btn-primary" type="submit">So sánh</button>
     </div>
 </form>
 
-<!-- Placeholder for comparison results -->
 <div id="comparisonResults" class="mt-4"></div>
-<!-- Placeholder for comparison messages -->
+
 <div id="comparisonMessages" class="mt-3"></div>
 
 
-<!-- Add jQuery from CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Your custom AJAX script here -->
 <script>
     $(document).ready(function () {
         $('#compareForm').submit(function (e) {
@@ -100,13 +109,11 @@
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function (response) {
-                    console.log(response);  // Log the full response to inspect the structure
+                    console.log(response); 
 
                     if (response.success) {
-                        // Display comparison messages
                         $('#comparisonMessages').html(renderComparisonMessages(response.data.comparisonMessages));
 
-                        // Display comparison results
                         $('#comparisonResults').html(renderComparisonResults(response.data));
                     } else {
                         alert(response.message);
@@ -127,7 +134,7 @@
                 html += '</ul></div>';
                 return html;
             }
-            return ''; // Return empty string if no messages
+            return ''; 
         }
 
 
