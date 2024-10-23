@@ -7,6 +7,11 @@ using KOIFARMSHOP.Service.Base;
 using NuGet.Common;
 using KOIFARMSHOP.MVCWebApp.Models;
 using Microsoft.EntityFrameworkCore;
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Org.BouncyCastle.Tls;
+using System.Drawing;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -66,7 +71,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // POST: Animals/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Animal animal)
+        public async Task<IActionResult> Create(AnimalReqModel animal)
         {
             var token = HttpContext.Session.GetString("Token");
 
@@ -98,21 +103,42 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             var animal = await GetAnimal(id);
             if (animal == null) return NotFound();
 
+            var animalReqModel = new AnimalReqModel();
+
+            animalReqModel.animalId = animal.AnimalId;
+            animalReqModel.Name = animal.Name;
+            animalReqModel.Origin = animal.Origin;
+            animalReqModel.Species = animal.Species;
+            animalReqModel.Type = animal.Type;
+            animalReqModel.Gender = animal.Gender;
+            animalReqModel.Size = animal.Size;
+            animalReqModel.Certificate = animal.Certificate;
+            animalReqModel.Price = animal.Price;
+            animalReqModel.Status = animal.Status;
+            animalReqModel.MaintenanceCost = animal.MaintenanceCost;
+            animalReqModel.Color = animal.Color;
+            animalReqModel.AmountFeed = animal.AmountFeed;
+            animalReqModel.HealthStatus = animal.HealthStatus;
+            animalReqModel.FarmOrigin = animal.FarmOrigin;
+            animalReqModel.BirthYear = animal.BirthYear;
+            animalReqModel.Description = animal.Description;
+            animalReqModel.Images = animal.AnimalImages.Select(x => x.ImageUrl).ToList();
+
             await LoadStaffData();
-            return View(animal);
+            return View(animalReqModel);
         }
 
         // POST: Animals/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Animal animal)
+        public async Task<IActionResult> Edit(int id, AnimalReqModel animal)
         {
             var token = HttpContext.Session.GetString("Token");
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Login", "Customers");
             }
-            if (id != animal.AnimalId) return NotFound();
+            //if (id != animal.AnimalId) return NotFound();
 
             if (!ModelState.IsValid)
             {
@@ -239,7 +265,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return null;
         }
 
-        private async Task<bool> CreateAnimal(Animal animal, string token)
+        private async Task<bool> CreateAnimal(AnimalReqModel animal, string token)
         {
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -247,7 +273,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             return response.IsSuccessStatusCode;
         }
 
-        private async Task<bool> UpdateAnimal(int id, Animal animal, string token)
+        private async Task<bool> UpdateAnimal(int id, AnimalReqModel animal, string token)
         {
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
