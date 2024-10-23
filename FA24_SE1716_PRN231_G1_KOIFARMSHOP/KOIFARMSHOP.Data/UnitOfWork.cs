@@ -54,15 +54,15 @@ namespace KOIFARMSHOP.Data
         {
             get { return orderRepository ??= new OrderRepository(context); }
         }
-        private OrderDetailRepository OrderDetailRepository
+        public OrderDetailRepository OrderDetailRepository
         {
             get { return orderDetailRepository ??= new OrderDetailRepository(context); }
         }
-        private OrderPromotionRepository OrderPromotionRepository
+        public OrderPromotionRepository OrderPromotionRepository
         {
             get { return orderPromotionRepository ??= new OrderPromotionRepository(context); }
         }
-        private PaymentRepository PaymentRepository
+        public PaymentRepository PaymentRepository
         {
             get { return paymentRepository ??= new PaymentRepository(context); }
         }
@@ -74,11 +74,11 @@ namespace KOIFARMSHOP.Data
         {
             get { return productImageRepository ??= new ProductImageRepository(context); }
         }
-        private PromotionRepository PromotionRepository
+        public PromotionRepository PromotionRepository
         {
             get { return promotionRepository ??= new PromotionRepository(context); }
         }
-        private StaffRepository StaffRepository
+        public StaffRepository StaffRepository
         {
             get { return staffRepository ??= new StaffRepository(context); }
         }

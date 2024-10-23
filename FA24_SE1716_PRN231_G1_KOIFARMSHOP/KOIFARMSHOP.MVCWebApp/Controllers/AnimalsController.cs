@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Common;
 using Newtonsoft.Json;
 using KOIFARMSHOP.Service.Base;
-using System.Net.Http;
-using System.Data;
+using NuGet.Common;
+using KOIFARMSHOP.MVCWebApp.Models;
+using Microsoft.EntityFrameworkCore;
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Org.BouncyCastle.Tls;
+using System.Drawing;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -26,232 +27,143 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // GET: Animals
         public async Task<IActionResult> Index()
         {
-            using (var httpClient = new HttpClient())
-            {
-                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals"))
-                { 
-                    if (respone.IsSuccessStatusCode)
-                    {
-                        var content = await respone.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+            //var animals = await GetAnimals();
+            //return View(animals);
 
-                        if(result != null && result.Data != null)
-                        {
-                            var data = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
-                            return View(data);
-                        }
-                    }
-            
-                }
-            }
-            return View(new List<Animal>());
+            return View();
         }
 
-        // GET: Animals/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Animals/CustomerView
+        public async Task<IActionResult> CustomerView()
         {
-            //if (id == null)
-            //{
-            //    return NotFound();
-            //}
+            return View(); 
+        }
 
-            //var animal = await _context.Animals
-            //    .Include(a => a.CreatedByNavigation)
-            //    .Include(a => a.ModifiedByNavigation)
-            //    .FirstOrDefaultAsync(m => m.AnimalId == id);
-            //if (animal == null)
-            //{
-            //    return NotFound();
-            //}
+        public async Task<IActionResult> Compare()
+        {
+            // Lấy danh sách các cá Koi từ API
+            var animals = await GetAnimals();
 
-            //return View(animal);
-            using (var httpClient = new HttpClient())
-            {
-                using (var respone = await httpClient.GetAsync(Const.APIEndPoint + "Animals/" + id))
-                {
-                    if (respone.IsSuccessStatusCode)
-                    {
-                        var content = await respone.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                        if (result != null && result.Data != null)
-                        {
-                            var data = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
-                            return View(data);
-                        }
-                    }
-
-                }
-            }
-            return View(new Animal());
+            // Trả về View với ViewModel chứa danh sách cá
+            return View(animals);
+        }
 
 
+
+        // GET: Animals/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            if (id <= 0) return NotFound();
+
+            var animal = await GetAnimal(id);
+            if (animal == null) return NotFound();
+
+            return View(animal);
         }
 
         // GET: Animals/Create
-        public async  Task<IActionResult> Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-                ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-               return View();
+            await LoadStaffData();
+            return View();
         }
 
-
         // POST: Animals/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Animal animal)
+        public async Task<IActionResult> Create(AnimalReqModel animal)
         {
+            var token = HttpContext.Session.GetString("Token");
 
-
-            //    if (ModelState.IsValid)
-            //    {
-            //        _context.Add(animal);
-            //        await _context.SaveChangesAsync();
-            //        return RedirectToAction(nameof(Index));
-            //    }
-            //    ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
-            //    ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
-            //    return View(animal);
-            bool savaStatus = false;
-
-            using (var httpClient = new HttpClient())
+            if (string.IsNullOrEmpty(token))
             {
-                using (var respone = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Animals", animal))
-                {
-                    if (respone.IsSuccessStatusCode)
-                    {
-                        var content = await respone.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                        if (result != null && result.Status == Const.SUCCESS_CREATE_CODE)
-                        {
-                            savaStatus = true;
-                        }
-                        else
-                        {
-                            savaStatus = false;
-                        }
-                    }
-
-
-                }
+                return RedirectToAction("Login", "Customers");
             }
-
-            if (savaStatus)
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
-                ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName");
+                await LoadStaffData();
                 return View(animal);
             }
 
+            var saveStatus = await CreateAnimal(animal, token);
+            if (saveStatus)
+            {
+                return RedirectToAction(nameof(Index));
+            }
 
+            await LoadStaffData();
+            return View(animal);
         }
 
         // GET: Animals/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            Animal animal = null;
-            using (var httpClient = new HttpClient())
-            {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Animals/{id}"))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+            if (id <= 0) return NotFound();
 
-                        if (result != null && result.Data != null)
-                        {
-                            animal = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
-                        }
-                    }
-                }
-            }
+            var animal = await GetAnimal(id);
+            if (animal == null) return NotFound();
 
-            if (animal == null)
-            {
-                return NotFound();
-            }
+            var animalReqModel = new AnimalReqModel();
 
-            ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
-            ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
-            return View(animal);
+            animalReqModel.animalId = animal.AnimalId;
+            animalReqModel.Name = animal.Name;
+            animalReqModel.Origin = animal.Origin;
+            animalReqModel.Species = animal.Species;
+            animalReqModel.Type = animal.Type;
+            animalReqModel.Gender = animal.Gender;
+            animalReqModel.Size = animal.Size;
+            animalReqModel.Certificate = animal.Certificate;
+            animalReqModel.Price = animal.Price;
+            animalReqModel.Status = animal.Status;
+            animalReqModel.MaintenanceCost = animal.MaintenanceCost;
+            animalReqModel.Color = animal.Color;
+            animalReqModel.AmountFeed = animal.AmountFeed;
+            animalReqModel.HealthStatus = animal.HealthStatus;
+            animalReqModel.FarmOrigin = animal.FarmOrigin;
+            animalReqModel.BirthYear = animal.BirthYear;
+            animalReqModel.Description = animal.Description;
+            animalReqModel.Images = animal.AnimalImages.Select(x => x.ImageUrl).ToList();
+
+            await LoadStaffData();
+            return View(animalReqModel);
         }
 
-
         // POST: Animals/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("AnimalId,Origin,Species,Type,Gender,Size,Certificate,Price,Status,CreatedAt,UpdatedAt,MaintenanceCost,Color,AmountFeed,HealthStatus,FarmOrigin,BirthYear,Description,CreatedBy,ModifiedBy")] Animal animal)
+        public async Task<IActionResult> Edit(int id, AnimalReqModel animal)
         {
-            
-
-            bool updateStatus = false;
-
-            using (var httpClient = new HttpClient())
+            var token = HttpContext.Session.GetString("Token");
+            if (string.IsNullOrEmpty(token))
             {
-                using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + $"Animals/{id}", animal))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                return RedirectToAction("Login", "Customers");
+            }
+            //if (id != animal.AnimalId) return NotFound();
 
-                        if (result != null && result.Status == Const.SUCCESS_UPDATE_CODE)
-                        {
-                            updateStatus = true;
-                        }
-                        else
-                        {
-                            updateStatus = false;
-                        }
-                    }
-                }
+            if (!ModelState.IsValid)
+            {
+                await LoadStaffData();
+                return View(animal);
             }
 
-            if (updateStatus)
+            var saveStatus = await UpdateAnimal(id, animal,token);
+            if (saveStatus)
             {
                 return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                ViewData["CreatedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.CreatedBy);
-                ViewData["ModifiedBy"] = new SelectList(_context.Staff, "StaffId", "FullName", animal.ModifiedBy);
-                return View(animal);
-            }
+
+            await LoadStaffData();
+            return View(animal);
         }
 
-
         // GET: Animals/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var animal = new Animal();
-            using (var httpClient = new HttpClient())
-            {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"Animals/{id}"))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+            if (id <= 0) return NotFound();
 
-                        if (result != null && result.Status == Const.SUCCESS_UPDATE_CODE)
-                        {
-                           animal = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
-                        }
-                        
-                    }
-                }
-            }
+            var animal = await GetAnimal(id);
+            if (animal == null) return NotFound();
+
             return View(animal);
         }
 
@@ -260,43 +172,155 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            bool deleteStatus = false;
+            var saveStatus = await DeleteAnimal(id);
+            return saveStatus ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Index));
+        }
 
-            using (var httpClient = new HttpClient())
+        [HttpPost]
+        public async Task<IActionResult> PerformComparison(int[] animalIds, string[] selectedAttributes)
+        {
+            var requestBody = new
             {
-                using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + $"Animals/{id}"))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                ids = animalIds.ToList(),
+                comparisonAttributes = selectedAttributes.ToList()
+            };
 
-                        if (result != null && result.Status == Const.SUCCESS_DELETE_CODE)
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Animals/CompareMultipleFish", requestBody);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                if (apiResponse != null && apiResponse.Data != null)
+                {
+                    var comparisonData = JsonConvert.DeserializeObject<ComparisonData>(apiResponse.Data.ToString());
+
+                    // Prepare comparison results
+                    var comparisonResults = new List<ComparisonResult>();
+                    foreach (var attribute in selectedAttributes)
+                    {
+                        var result = new ComparisonResult { AttributeName = attribute };
+                        foreach (var koiFish in comparisonData.KoiFishList)
                         {
-                            deleteStatus = true;
+                            var attributeValue = GetAnimalAttribute(koiFish, attribute);
+                            result.Values[koiFish.AnimalId] = attributeValue;
                         }
-                        else
-                        {
-                            deleteStatus = false;
-                        }
+                        comparisonResults.Add(result);
                     }
+
+                    // Prepare the view model
+                    var viewModel = new
+                    {
+                        ComparisonResults = comparisonResults,
+                        Animals = comparisonData.KoiFishList,
+                        ComparisonMessages = comparisonData.ComparisonMessage
+                    };
+
+                    // Return JSON result for AJAX
+                    return Json(new { success = true, data = viewModel });
                 }
             }
 
-            if (deleteStatus)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                return RedirectToAction(nameof(Delete)) ; 
-            }
+            // Return error in case of failure
+            return Json(new { success = false, message = "Có lỗi xảy ra khi so sánh các cá koi." });
         }
 
-        private bool AnimalExists(int id)
+
+
+        private async Task<List<Animal>> GetAnimals()
         {
-            return _context.Animals.Any(e => e.AnimalId == id);
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{Const.APIEndPoint}Animals/get-Animal-by-user");
+            var animals = new List<Animal>();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                if (result != null && result.Data != null)
+                {
+                    animals = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString()) ?? new List<Animal>();
+                }
+            }
+            return animals;
         }
 
+
+        private async Task<Animal> GetAnimal(int id)
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{Const.APIEndPoint}Animals/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                if (result?.Data != null)
+                {
+                    return JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
+                }
+            }
+            return null;
+        }
+
+        private async Task<bool> CreateAnimal(AnimalReqModel animal, string token)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Animals", animal);
+            return response.IsSuccessStatusCode;
+        }
+
+        private async Task<bool> UpdateAnimal(int id, AnimalReqModel animal, string token)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await httpClient.PutAsJsonAsync($"{Const.APIEndPoint}Animals/{id}", animal);
+            return response.IsSuccessStatusCode;
+        }
+
+        private async Task<bool> DeleteAnimal(int id)
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.DeleteAsync($"{Const.APIEndPoint}Animals/{id}");
+            return response.IsSuccessStatusCode;
+        }
+
+
+        private string GetAnimalAttribute(Animal animal, string attribute)
+        {
+            return attribute switch
+            {
+                "Size" => animal.Size ?? "Unknown", 
+                "Color" => animal.Color ?? "Unknown",
+                "Price" => animal.Price?.ToString("C") ?? "N/A", 
+                "HealthStatus" => animal.HealthStatus ?? "Unknown",
+                "Gender" => animal.Gender ?? "Unknown",
+                "FarmOrigin" => animal.FarmOrigin ?? "Unknown",
+                "MaintenanceCost" => animal.MaintenanceCost?.ToString("C") ?? "N/A", 
+                "BirthYear" => animal.BirthYear?.ToString() ?? "N/A",
+                _ => "N/A" 
+            };
+        }
+
+
+        private async Task LoadStaffData()
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{Const.APIEndPoint}Staffs");
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                if (result?.Data != null)
+                {
+                    var staff = JsonConvert.DeserializeObject<List<Staff>>(result.Data.ToString());
+                    ViewData["CreatedBy"] = new SelectList(staff, "StaffId", "FullName");
+                    ViewData["ModifiedBy"] = new SelectList(staff, "StaffId", "FullName");
+                }
+            }
+        }
     }
 }

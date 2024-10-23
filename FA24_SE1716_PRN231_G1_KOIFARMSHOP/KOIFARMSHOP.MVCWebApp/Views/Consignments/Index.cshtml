@@ -1,0 +1,88 @@
+﻿@model IEnumerable<KOIFARMSHOP.Data.Models.Consignment>
+
+@{
+    ViewData["Title"] = "Consignments Index";
+}
+
+<h1>Consignments</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
+
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ConsignmentType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().CreatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Notes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().CommissionRate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Animal.Species)
+            </th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ConsignmentType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price) 
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedAt)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Notes)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CommissionRate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Animal.Species)
+                </td>
+                <td class="text-center">
+                    <a asp-action="Details" asp-route-id="@item.ConsignmentId" class="btn btn-info btn-sm">Details</a>
+                    @if (item.Status != "Deleted")
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ConsignmentId" class="btn btn-warning btn-sm">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.ConsignmentId" class="btn btn-danger btn-sm">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

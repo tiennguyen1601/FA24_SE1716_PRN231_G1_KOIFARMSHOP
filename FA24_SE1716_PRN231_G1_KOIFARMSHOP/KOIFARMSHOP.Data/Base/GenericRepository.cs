@@ -26,10 +26,12 @@ namespace KOIFARMSHOP.Data.Base
         {
             return _context.Set<T>().ToList();
         }
-        public async Task<List<T>> GetAllAsync()
+
+        public async Task<IQueryable<T>> GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return _context.Set<T>().AsQueryable();
         }
+
         public void Create(T entity)
         {
             _context.Add(entity);

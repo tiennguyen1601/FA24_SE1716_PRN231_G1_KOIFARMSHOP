@@ -1,0 +1,211 @@
+﻿@page
+@model KOIFARMSHOP.MVCWebApp.Views.Demo.IndexModel
+@{
+}
+
+<div class="row">
+
+</div>
+
+<div><button class="btn btn-primary" onclick="add()">open</button>
+</div>
+
+<div class="modal fade" id="animalModal" tabindex="-1" aria-labelledby="animalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="animalModalLabel">Animal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">Origin</th>
+                    <th class="card-title text-center">Species</th>
+                    <th class="card-title text-center">Type</th>
+                    <th class="card-title text-center">Gender</th>
+                    <th class="card-title text-center">Size</th>
+                    <th class="card-title text-center">Certificate</th>
+                    <th class="card-title text-center">Price</th>
+                    <th class="card-title text-center">Color</th>
+                    <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">MaintenanceCost</th>
+                    <th class="card-title text-center">AmountFeed</th>
+                    <th class="card-title text-center">HealthStatus</th>
+                    <th class="card-title text-center">FarmOrigin</th>
+                    <th class="card-title text-center">BirthYear</th>
+                    <th class="card-title text-center">Description</th>
+
+                </tr>
+            </thead>
+            <tbody class="tblAnimals">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+        });
+        function loadData() {
+            alert("Load data progressing ...");
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Animals/get-animal-by-user',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    alert('Server response: ' + result.message);
+                    console.log(result);
+                    var html = '';
+                    $.each(result.data, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.origin + '</td>';
+                        html += '<td>' + item.species + '</td>';
+                        html += '<td>' + item.type + '</td>';
+                        html += '<td>' + item.gender + '</td>';
+                        html += '<td>' + item.size + '</td>';
+                        html += '<td>' + item.certificate + '</td>';
+                        html += '<td>' + item.price + '</td>';
+                        html += '<td>' + item.color + '</td>';
+                        html += '<td>' + item.status + '</td>';
+                        html += '<td>' + item.maintenanceCost + '</td>';
+                        html += '<td>' + item.amountFeed + '</td>';
+                        html += '<td>' + item.healthStatus + '</td>';
+                        html += '<td>' + item.farmOrigin + '</td>';
+                        html += '<td>' + item.birthYear + '</td>';
+                        html += '<td>' + item.description + '</td>';
+                        html += '</tr>';
+                    });
+                    $('.tblAnimals').html(html); 
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+        }
+        function add() {
+            $(".modal-body").html(`
+                <div class="form-group">
+                    <label for="origin">Origin:</label>
+                    <input type="text" id="origin" name="origin" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="species">Species:</label>
+                    <input type="text" id="species" name="species" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Type:</label>
+                    <input type="text" id="type" name="type" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <input type="text" id="gender" name="gender" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="size">Size:</label>
+                    <input type="text" id="size" name="size" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="certificate">Certificate:</label>
+                    <input type="text" id="certificate" name="certificate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="number" id="price" name="price" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Status:</label>
+                    <input type="text" id="status" name="status" class="form-control" required>
+                </div>
+                <div class="form-group">
+                     <label for="price">MaintenanceCost:</label>
+                     <input type="text" id="maintenancecost" name="maintenancecost" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="color">Color:</label>
+                    <input type="text" id="color" name="color" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="amountFeed">Amount Feed:</label>
+                    <input type="text" id="amountFeed" name="amountFeed" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="healthStatus">Health Status:</label>
+                    <input type="text" id="healthStatus" name="healthStatus" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmOrigin">Farm Origin:</label>
+                    <input type="text" id="farmOrigin" name="farmOrigin" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="birthYear">Birth Year:</label>
+                    <input type="number" id="birthYear" name="birthYear" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" class="form-control" required></textarea>
+                </div>
+            `);
+
+            $("#animalModalLabel").html("Add New Animal");
+
+            $('#animalModal').modal('show');
+
+            $('#btSave').off('click').on('click', function () {
+                var animalData = {
+                    origin: $('#origin').val(),
+                    species: $('#species').val(),
+                    type: $('#type').val(),
+                    gender: $('#gender').val(),
+                    size: $('#size').val(),
+                    certificate: $('#certificate').val(),
+                    price: $('#price').val(),
+                    status: $('#status').val(),
+                    status: $('#maintenancecost').val(),
+                    color: $('#color').val(),
+                    amountFeed: $('#amountFeed').val(),
+                    healthStatus: $('#healthStatus').val(),
+                    farmOrigin: $('#farmOrigin').val(),
+                    birthYear: $('#birthYear').val(),
+                    description: $('#description').val()
+                };
+
+                $.ajax({
+                    url: 'https://localhost:7176/api/Animals', 
+                    type: 'POST',
+                    contentType: 'application/json;charset=utf-8',
+                    data: JSON.stringify(animalData), 
+                    success: function (result) {
+                        alert("Animal added successfully!");
+                        $('#animalModal').modal('hide'); 
+                        loadData();
+                    },
+                    error: function (xhr, error) {
+                        alert("Failed to add animal: " + xhr.statusText);
+                    }
+                });
+            });
+        }
+    </script>
+}

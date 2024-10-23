@@ -1,0 +1,223 @@
+﻿@model KOIFARMSHOP.Data.DTO.ProductDTO.UpdateProductReqModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1 class="text-center my-4">Edit Product</h1>
+
+<div class="card shadow-lg p-4 mb-5 bg-white rounded">
+    <h4 class="card-title mb-3">Edit Product Details</h4>
+    <hr />
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form asp-action="Edit" enctype="multipart/form-data" id="productForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <input type="hidden" asp-for="ProductId" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" placeholder="Enter product description" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label"></label>
+                        <input asp-for="Price" class="form-control" placeholder="Enter product price" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StockQuantity" class="form-label"></label>
+                        <input asp-for="StockQuantity" class="form-control" placeholder="Enter stock quantity" />
+                        <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Brand" class="form-label"></label>
+                        <input asp-for="Brand" class="form-control" placeholder="Enter product brand" />
+                        <span asp-validation-for="Brand" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Weight" class="form-label"></label>
+                        <input asp-for="Weight" class="form-control" placeholder="Enter product weight (kg)" />
+                        <span asp-validation-for="Weight" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Discount" class="form-label"></label>
+                        <input asp-for="Discount" class="form-control" placeholder="Enter discount (%)" />
+                        <span asp-validation-for="Discount" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ExpiryDate" class="form-label"></label>
+                        <input asp-for="ExpiryDate" class="form-control" type="date" />
+                        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ManufacturingDate" class="form-label"></label>
+                        <input asp-for="ManufacturingDate" class="form-control" type="date" />
+                        <span asp-validation-for="ManufacturingDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoryId" class="form-label"></label>
+                        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ModifiedBy" class="form-label"></label>
+                    <select asp-for="ModifiedBy" class="form-control" asp-items="ViewBag.ModifiedBy">
+                        <option value="">Select Modifier</option>
+                        @* Modifier options are populated here *@
+                    </select>
+                    <span asp-validation-for="ModifiedBy" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Product Images</label>
+
+                    <!-- Display current images -->
+                    @if (Model.Images != null && Model.Images.Count > 0)
+                    {
+                        <div id="currentImagePreview" class="row g-0">
+                            @foreach (var imageUrl in Model.Images)
+                            {
+                                <div class="col-md-2 mb-3" data-url="@imageUrl">
+                                    <img src="@imageUrl" class="img-fluid img-thumbnail w-100" alt="Product Image" />
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No images uploaded yet.</p>
+                    }
+
+                    <!-- File upload for new images -->
+                    <input type="file" id="ProductImages" class="form-control" accept="image/*" multiple />
+                    <span asp-validation-for="Images" class="text-danger"></span>
+                </div>
+
+                <!-- Hidden field for storing current and new image URLs -->
+                <input type="hidden" asp-for="Images" id="UploadedImages" value="@string.Join(", ", Model.Images ?? new List<string>())" />
+
+                <!-- New image preview section -->
+                <div id="imagePreview" class="row"></div>
+
+                <div class="text-center">
+                    <input type="submit" value="Save Changes" class="btn btn-primary btn-lg" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-secondary btn-lg">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#ProductImages').on('change', function () {
+                let uploadedImages = [];
+
+                var files = $('#ProductImages')[0].files;
+
+                if (files.length === 0) {
+                    return;
+                }
+
+                var formData = new FormData();
+                $.each(files, function (i, file) {
+                    formData.append('images', file);
+                });
+
+                $.ajax({
+                    url: 'https://localhost:7176/api/File/cloudinary/image',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result && result.data) {
+                            $('#imagePreview').empty();
+
+                            uploadedImages = result.data; // Assuming result.data is an array of URLs
+
+                            $.each(uploadedImages, function (i, imageUrl) {
+                                $('#imagePreview').append(`
+                                    <div class="col-md-3 mb-3" data-url="${imageUrl}">
+                                        <img src="${imageUrl}" class="img-fluid img-thumbnail w-50" alt="Uploaded Image" />
+                                        <button type="button" class="btn btn-danger btn-sm remove-image">Remove</button>
+                                    </div>
+                                `);
+                            });
+
+                            // Set the hidden input to a JSON stringified array
+                            $('#UploadedImages').val(uploadedImages.join(", "));
+
+                            console.log(uploadedImages); // Check the array
+                            console.log($('#UploadedImages').val()); // Check the value set in the hidden input
+
+                            alert('Uploaded image successfully!');
+                        } else {
+                            alert('Error: Failed to upload images.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Upload error:', error);
+                        alert('Error: Unable to upload images.');
+                    }
+                });
+            });
+
+            $('#imagePreview').on('click', '.remove-image', function () {
+                var imageUrl = $(this).closest('div').data('url');
+
+                var uploadedImages = JSON.parse($('#UploadedImages').val()).filter(img => img !== imageUrl);
+                $('#UploadedImages').val(JSON.stringify(uploadedImages));
+
+                // Remove the image preview from the UI
+                $(this).closest('div').remove();
+            });
+
+            $('#productForm').on('submit', function (e) {
+                var uploadedImages = $('#UploadedImages').val().trim();
+
+                if (!uploadedImages || uploadedImages.length === 0) {
+                    e.preventDefault(); // Prevent form submission
+                    alert("Please upload at least one image before submitting the form.");
+                }
+            });
+
+        });
+    </script>
+}

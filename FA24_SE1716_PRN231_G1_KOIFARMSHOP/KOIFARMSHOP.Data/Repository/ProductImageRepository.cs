@@ -13,5 +13,10 @@ namespace KOIFARMSHOP.Data.Repository
     {
         public ProductImageRepository() { }
         public ProductImageRepository(FA24_SE1716_PRN231_G1_KOIFARMSHOPContext context) => _context = context;
+
+        public async Task<List<ProductImage>> GetProductImagesByProductId(int productId)
+        {
+            return await _context.ProductImages.Where(x => x.ProductId == productId).ToListAsync();
+        }
     }
 }

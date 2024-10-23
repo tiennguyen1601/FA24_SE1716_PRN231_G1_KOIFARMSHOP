@@ -1,0 +1,158 @@
+﻿@page
+@model KOIFARMSHOP.MVCWebApp.Views.Consign.IndexModel
+@{
+}
+
+<div>
+    <button class="btn btn-primary" id="btnCreateConsignment">Create new</button>
+</div>
+
+<!-- Modal for Consignment form -->
+<div class="modal fade" id="consignmentModal" tabindex="-1" aria-labelledby="consignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="consignmentModalLabel">Consignment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="consignmentType">Consignment Type:</label>
+                        <input type="text" id="consignmentType" name="consignmentType" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" id="startDate" name="startDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date:</label>
+                        <input type="date" id="endDate" name="endDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price:</label>
+                        <input type="number" id="price" name="price" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <textarea id="notes" name="notes" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="commissionRate">Commission Rate (%):</label>
+                        <input type="number" step="0.01" id="commissionRate" name="commissionRate" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">ConsignmentType</th>
+                    <th class="card-title text-center">StartDate</th>
+                    <th class="card-title text-center">EndDate</th>
+                    <th class="card-title text-center">Price</th>
+                    <th class="card-title text-center">Note</th>
+                    <th class="card-title text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody class="tblConsignments">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+
+            $('#btnCreateConsignment').click(function () {
+                addConsignment();
+            });
+
+            $('#btSave').click(function () {
+                saveConsignment();
+            });
+        });
+
+        function loadData() {
+            $.ajax({
+                url: 'https://localhost:7176/api/Consignments',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                },
+                success: function (result) {
+                    var html = '';
+                    $.each(result.data, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.consignmentType + '</td>';
+                        html += '<td>' + item.startDate + '</td>';
+                        html += '<td>' + item.endDate + '</td>';
+                        html += '<td>' + item.price + '</td>';
+                        html += '<td>' + item.notes + '</td>';
+                        html += '<td>' + item.status + '</td>';
+                        html += '</tr>';
+                    });
+                    $('.tblConsignments').html(html);
+                },
+                error: function (xhr, error) {
+                    alert("Error loading consignments: " + xhr.statusText);
+                }
+            });
+        }
+
+        // Function to show modal for adding consignment
+        function addConsignment() {
+            // Reset form fields before showing modal
+            $("#customerId, #animalId, #consignmentType, #startDate, #endDate, #price, #status, #notes, #commissionRate, #orderId").val('');
+            $("#consignmentModalLabel").html("Add New Consignment");
+            $("#consignmentModal").modal('show');
+        }
+
+        // Function to save consignment
+        function saveConsignment() {
+            var consignmentData = {
+                customerId: $("#customerId").val(),
+                animalId: $("#animalId").val(),
+                consignmentType: $("#consignmentType").val(),
+                startDate: $("#startDate").val(),
+                endDate: $("#endDate").val(),
+                price: $("#price").val(),
+                status: $("#status").val(),
+                notes: $("#notes").val(),
+                commissionRate: $("#commissionRate").val(),
+                orderId: $("#orderId").val()
+            };
+
+            $.ajax({
+                url: 'https://localhost:7176/api/Consignments',
+                type: 'POST',
+                contentType: 'application/json;charset=utf-8',
+                data: JSON.stringify(consignmentData),
+                success: function (result) {
+                    alert("Consignment added successfully!");
+                    $("#consignmentModal").modal('hide');
+                    loadData(); // Reload consignment list
+                },
+                error: function (xhr, error) {
+                    alert("Failed to add consignment: " + xhr.statusText);
+                    console.error("Error details: ", xhr.responseText);
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,111 @@
+﻿@model KOIFARMSHOP.Data.DTO.OrderDTO.OrderResponseModel;
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1 style="text-align: center; margin-bottom: 20px;">Order Details</h1>
+
+<div style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ced4da; border-radius: 5px; background-color: #f8f9fa;">
+    <h4 style="margin-bottom: 20px;">Order Information</h4>
+    <hr />
+    <dl class="row" style="font-size: 16px;">
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.OrderDate)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.OrderDate)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.TotalAmount)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.TotalAmount)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.ShippingAddress)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.ShippingAddress)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.DeliveryMethod)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.DeliveryMethod)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.PaymentStatus)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.PaymentStatus)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.Vat)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Vat)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.TotalAmountVat)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.TotalAmountVat)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.CustomerName)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.CustomerName)
+        </dd>
+        <dt class="col-sm-4" style="font-weight: bold;">
+            @Html.DisplayNameFor(model => model.PromotionTitle)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.PromotionTitle)
+        </dd>
+    </dl>
+</div>
+
+<div style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ced4da; border-radius: 5px; background-color: #f8f9fa; margin-top: 20px;">
+    <h4 style="margin-bottom: 20px;">Order Details</h4>
+    <hr />
+    <table class="table" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead style="background-color: #007bff; color: white;">
+            <tr>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().ProductName)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().AnimalName)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Quantity)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Price)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Amount)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Subtotal)</th>
+                <th style="padding: 10px;">@Html.DisplayNameFor(model => model.OrderDetails.First().Discount)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model.OrderDetails)
+            {
+                <tr>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.ProductName)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.AnimalName)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Quantity)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Price)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Amount)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Subtotal)</td>
+                    <td style="padding: 10px;">@Html.DisplayFor(modelItem => detail.Discount)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a asp-action="Edit" asp-route-id="@Model?.OrderId" style="margin-right: 10px; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Edit</a>
+    <a asp-action="Index" style="text-decoration: none; color: #007bff;">Back to List</a>
+</div>

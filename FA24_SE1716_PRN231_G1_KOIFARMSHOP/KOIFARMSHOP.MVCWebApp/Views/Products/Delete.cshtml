@@ -1,0 +1,112 @@
+﻿@model KOIFARMSHOP.Data.Models.Product
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1 class="text-danger">Delete Product</h1>
+
+<div class="alert alert-warning" role="alert">
+    <h4 class="alert-heading">Warning!</h4>
+    <p>Are you sure you want to delete the following product? This action cannot be undone.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h4>Product Images</h4>
+        <hr />
+        <div id="productImageCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @if (Model.ProductImages != null && Model.ProductImages.Any())
+                {
+                    var isFirstImage = true;
+                    foreach (var image in Model.ProductImages)
+                    {
+                        <div class="carousel-item @(isFirstImage ? "active" : "")">
+                            <img src="@image.ImageUrl" class="d-block w-100" alt="Product Image" />
+                        </div>
+                        isFirstImage = false;
+                    }
+                }
+                else
+                {
+                    <div class="carousel-item active">
+                        <img src="~/images/default-product.png" class="d-block w-75" alt="Default Image" />
+                    </div>
+                }
+            </div>
+
+            @if (Model.ProductImages != null && Model.ProductImages.Count > 1)
+            {
+                <!-- Carousel controls -->
+                <a class="carousel-control-prev" href="#productImageCarousel" role="button" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only text-secondary">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#productImageCarousel" role="button" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only text-secondary">Next</span>
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Product Details</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Name)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Name)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Description)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Description)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Price)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Price)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.StockQuantity)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.StockQuantity)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Brand)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Brand)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Weight)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Weight)</dd>
+
+            @{
+                var categoryName = Model.Category != null ? Model.Category.Name : "N/A";
+            }
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Category)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => categoryName)</dd>
+
+            @{
+                var createdBy = Model.CreatedByNavigation != null ? Model.CreatedByNavigation.FullName : "N/A";
+            }
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.CreatedByNavigation)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => createdBy)</dd>
+
+            @{
+                var modifyBy = Model.ModifiedByNavigation != null ? Model.ModifiedByNavigation.FullName : "N/A";
+            }
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ModifiedByNavigation)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => modifyBy)</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4">
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ProductId" />
+
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt"></i> Delete
+        </button>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </form>
+</div>
