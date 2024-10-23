@@ -32,15 +32,12 @@
                 <th>Certificate</th>
                 <th>Price</th>
                 <th>Status</th>
-                <th>Created At</th>
-                <th>Updated At</th>
                 <th>Maintenance Cost</th>
                 <th>Color</th>
                 <th>Amount Feed</th>
                 <th>Health Status</th>
                 <th>Farm Origin</th>
                 <th>Birth Year</th>
-                <th>Description</th>
                 <th>Created By</th>
                 <th>Modified By</th>
                 <th>Actions</th>
@@ -94,33 +91,31 @@
             var html = '';
             $.each(animals, function (index, item) {
                 html += `
-                                                    <tr>
-                                                        <td>${item.name}</td>
-                                                        <td>${item.origin}</td>
-                                                        <td>${item.species}</td>
-                                                        <td>${item.type}</td>
-                                                        <td>${item.gender}</td>
-                                                        <td>${item.size}</td>
-                                                        <td>${item.certificate}</td>
-                                                        <td>${item.price}</td>
-                                                        <td>${item.status}</td>
-                                                        <td>${item.createdAt}</td>
-                                                        <td>${item.updatedAt}</td>
-                                                        <td>${item.maintenanceCost}</td>
-                                                        <td>${item.color}</td>
-                                                        <td>${item.amountFeed}</td>
-                                                        <td>${item.healthStatus}</td>
-                                                        <td>${item.farmOrigin}</td>
-                                                        <td>${item.birthYear}</td>
-                                                        <td>${item.description}</td>
-                                                        <td>${item.createdByNavigation?.fullName ?? 'N/A'}</td>
-                                                        <td>${item.modifiedByNavigation?.fullName ?? 'N/A'}</td>
-                                                        <td>
-                                                            <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
-                                                            <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
-                                                            <a class="btn btn-sm btn-secondary" href="/Orders/Create?animalId=${item.animalId}&animalName=${encodeURIComponent(item.name)}">Buy</a>
-                                                        </td>
-                                                    </tr>`;
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.origin}</td>
+                        <td>${item.species}</td>
+                        <td>${item.type}</td>
+                        <td>${item.gender}</td>
+                        <td>${item.size}</td>
+                        <td>${item.certificate}</td>
+                        <td>${item.price}</td>
+                        <td>${item.status}</td>
+                        <td>${item.maintenanceCost}</td>
+                        <td>${item.color}</td>
+                        <td>${item.amountFeed}</td>
+                        <td>${item.healthStatus}</td>
+                        <td>${item.farmOrigin}</td>
+                        <td>${item.birthYear}</td>
+                        <td>${item.createdByNavigation?.fullName ?? 'N/A'}</td>
+                        <td>${item.modifiedByNavigation?.fullName ?? 'N/A'}</td>
+                        <td>
+                            <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
+                            <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
+                            <a class="btn btn-sm btn-danger" href="/Animals/Delete/${item.animalId}">Delete</a>
+                            <a class="btn btn-sm btn-secondary" href="/Orders/Create?animalId=${item.animalId}&animalName=${encodeURIComponent(item.name)}">Buy</a>
+                        </td>
+                    </tr>`;
             });
             $('.tblAnimals').html(html);
         }
@@ -130,18 +125,18 @@
             var paginationHtml = '';
 
             paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
-                                                                  <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
-                                                               </li>`;
+                               <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+                               </li>`;
 
             for (var i = 1; i <= totalPages; i++) {
                 paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
-                                                                    <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-                                                                   </li>`;
+                                   <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                                   </li>`;
             }
 
             paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
-                                                                  <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
-                                                               </li>`;
+                               <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+                               </li>`;
 
             $('#paginationControls').html(paginationHtml);
         }

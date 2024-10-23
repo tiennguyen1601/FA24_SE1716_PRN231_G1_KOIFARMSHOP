@@ -1,4 +1,4 @@
-﻿@model KOIFARMSHOP.Data.Models.Animal
+﻿@model KOIFARMSHOP.Data.DTO.AniamlDTO.AnimalReqModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,9 +10,9 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" id="animalForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="AnimalId" />
+            <input type="hidden" asp-for="animalId" />
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
@@ -59,16 +59,6 @@
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="MaintenanceCost" class="control-label"></label>
                 <input asp-for="MaintenanceCost" class="form-control" />
                 <span asp-validation-for="MaintenanceCost" class="text-danger"></span>
@@ -103,6 +93,38 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
+
+            <div class="mb-4">
+                <label class="form-label">Animals Images</label>
+
+                <!-- Display current images -->
+                @if (Model.Images != null && Model.Images.Count > 0)
+                {
+                    <div id="currentImagePreview" class="row g-0">
+                        @foreach (var imageUrl in Model.Images)
+                        {
+                            <div class="col-md-2 mb-3" data-url="@imageUrl">
+                                <img src="@imageUrl" class="img-fluid img-thumbnail w-100" alt="Product Image" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>No images uploaded yet.</p>
+                }
+
+                <!-- File upload for new images -->
+                <input type="file" id="AnimalImages" class="form-control" accept="image/*" multiple />
+                <span asp-validation-for="Images" class="text-danger"></span>
+            </div>
+
+            <!-- Hidden field for storing current and new image URLs -->
+            <input type="hidden" asp-for="Images" id="UploadedImages" value="@string.Join(", ", Model.Images ?? new List<string>())" />
+
+            <!-- New image preview section -->
+            <div id="imagePreview" class="row"></div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -117,5 +139,84 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
     }
+
+    <script>
+        $(document).ready(function () {
+            $('#AnimalImages').on('change', function () {
+                let uploadedImages = [];
+
+                var files = $('#AnimalImages')[0].files;
+
+                if (files.length === 0) {
+                    return;
+                }
+
+                var formData = new FormData();
+                $.each(files, function (i, file) {
+                    formData.append('images', file);
+                });
+
+                $.ajax({
+                    url: 'https://localhost:7176/api/File/cloudinary/image',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result && result.data) {
+                            $('#imagePreview').empty();
+
+                            uploadedImages = result.data; // Assuming result.data is an array of URLs
+
+                            $.each(uploadedImages, function (i, imageUrl) {
+                                $('#imagePreview').append(`
+                                            <div class="col-md-3 mb-3" data-url="${imageUrl}">
+                                                <img src="${imageUrl}" class="img-fluid img-thumbnail w-50" alt="Uploaded Image" />
+                                                <button type="button" class="btn btn-danger btn-sm remove-image">Remove</button>
+                                            </div>
+                                        `);
+                            });
+
+                            // Set the hidden input to a JSON stringified array
+                            $('#UploadedImages').val(uploadedImages.join(", "));
+
+                            console.log(uploadedImages); // Check the array
+                            console.log($('#UploadedImages').val()); // Check the value set in the hidden input
+
+                            alert('Uploaded image successfully!');
+                        } else {
+                            alert('Error: Failed to upload images.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Upload error:', error);
+                        alert('Error: Unable to upload images.');
+                    }
+                });
+            });
+
+            $('#imagePreview').on('click', '.remove-image', function () {
+                var imageUrl = $(this).closest('div').data('url');
+
+                var uploadedImages = JSON.parse($('#UploadedImages').val()).filter(img => img !== imageUrl);
+                $('#UploadedImages').val(JSON.stringify(uploadedImages));
+
+                // Remove the image preview from the UI
+                $(this).closest('div').remove();
+            });
+
+            $('#animalForm').on('submit', function (e) {
+                var uploadedImages = $('#UploadedImages').val().trim();
+
+                if (!uploadedImages || uploadedImages.length === 0) {
+                    e.preventDefault(); // Prevent form submission
+                    alert("Please upload at least one image before submitting the form.");
+                }
+            });
+
+        });
+    </script>
 }
+

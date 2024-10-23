@@ -163,9 +163,8 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         {
                             var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
 
-                            var totalAmount = data.OrderDetails.Sum(od => od.Amount ?? 0);
-                            var totalSubtotal = data.OrderDetails.Sum(od => od.Subtotal ?? 0);
-                            var totalDiscount = data.OrderDetails.Sum(od => od.Discount ?? 0);
+                            var animalId = data.OrderDetails.Sum(od => od.AnimalId);
+                            var productId = data.OrderDetails.Sum(od => od.ProductId);
 
 
                             var orderCompleteRequest = new OrderCompleteRequest
@@ -175,6 +174,22 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                                 ShippingAddress = data.ShippingAddress,
                                 DeliveryMethod = data.DeliveryMethod,
                             };
+
+
+                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
+                            if (animalId.HasValue)
+                            {
+                                var animal = await GetAnimalById(animalId ?? 0);
+                                ViewData["AnimalId"] = animalId ?? 0;
+                                ViewData["AnimalName"] = animal?.Name ?? "Unknown";
+
+                            }else if (productId.HasValue)
+                            {
+                                var product = await GetProductById(productId ?? 0);
+                                ViewData["ProductId"] = productId ?? 0;
+                                ViewData["ProductName"] = product?.Name ?? "Unknown";
+                            }
+
                             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
                             return View(orderCompleteRequest); 
                         }
@@ -225,9 +240,10 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (saveStatus)
             {
-                ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-                return RedirectToAction(nameof(Index));
+                
+                return RedirectToAction("Index", "Orders");
             }
+            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
             return View(order); 
         }
 
@@ -293,7 +309,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             }
             else
             {
-                return RedirectToAction();
+                return RedirectToAction("Index", "Orders");
             }
         }
 

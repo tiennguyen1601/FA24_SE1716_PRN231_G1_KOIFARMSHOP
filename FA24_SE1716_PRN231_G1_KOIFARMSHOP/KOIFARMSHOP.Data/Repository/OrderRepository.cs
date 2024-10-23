@@ -28,6 +28,7 @@ namespace KOIFARMSHOP.Data.Repository
                     .ThenInclude(od => od.Animal)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
             .FirstOrDefaultAsync(c => c.OrderId == id);
 
             return order;
@@ -43,6 +44,7 @@ namespace KOIFARMSHOP.Data.Repository
                     .ThenInclude(od => od.Animal)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             return orders;
