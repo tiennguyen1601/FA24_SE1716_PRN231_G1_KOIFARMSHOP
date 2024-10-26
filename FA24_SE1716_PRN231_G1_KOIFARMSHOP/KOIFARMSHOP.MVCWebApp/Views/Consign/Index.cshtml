@@ -63,6 +63,8 @@
                     <th class="card-title text-center">EndDate</th>
                     <th class="card-title text-center">Price</th>
                     <th class="card-title text-center">Note</th>
+                    <th class="card-title text-center">CreatedAt</th>
+                    <th class="card-title text-center">CommissionRate</th>
                     <th class="card-title text-center">Status</th>
                 </tr>
             </thead>
@@ -104,6 +106,8 @@
                         html += '<td>' + item.endDate + '</td>';
                         html += '<td>' + item.price + '</td>';
                         html += '<td>' + item.notes + '</td>';
+                        html += '<td>' + item.createdAt + '</td>';
+                        html += '<td>' + item.commissionRate + '</td>';
                         html += '<td>' + item.status + '</td>';
                         html += '</tr>';
                     });
