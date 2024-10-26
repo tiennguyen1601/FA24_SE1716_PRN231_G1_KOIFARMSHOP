@@ -114,7 +114,7 @@
                 html += '<td>';
                 html += '<a class="btn btn-sm btn-info" href="/Orders/Edit/' + item.orderId + '">Edit</a> ';
                 html += '<a class="btn btn-sm btn-secondary" href="/Orders/Details/' + item.orderId + '">Details</a> ';
-                html += '<a class="btn btn-sm btn-secondary" href="/Orders/Deletes/' + item.orderId + '">Delete</a> ';
+                html += '<a class="btn btn-sm btn-secondary" href="/Orders/Delete/' + item.orderId + '">Delete</a> ';
                 html += '</td>';
                 html += '</tr>';
             });
@@ -122,7 +122,7 @@
         }
 
         var TotalItems = 0;
-        var PageSize = 10;
+        var PageSize = 5;
         var CurrentPage = 1;
 
         function loadData(page = 1) {

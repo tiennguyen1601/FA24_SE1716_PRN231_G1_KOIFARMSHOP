@@ -56,20 +56,19 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
 
         // GET: Orders/Create
-        public async Task<IActionResult> Create()
+        // GET: Orders/Create
+        public async Task<IActionResult> Create(int? animalId, string animalName, int? productId, string productName)
         {
-            var customers = await GetCustomer();
+            var animal = await GetAnimalById(animalId);
             var promotions = await GetPromotion();
-            var animals = await GetAnimal();
-            //var products = await GetProduct();
 
-            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-            //ViewData["ProductId"] = new SelectList(products, "ProductId", "ProductName");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
+            ViewData["AnimalName"] = animalName ?? "Unknown";  
+            ViewData["AnimalId"] = animalId ?? 0;
+            ViewData["ProductName"] = productName ?? "Unknown";
+            ViewData["ProductId"] = productId ?? 0;
 
             return View();
-
         }
 
         // POST: Orders/Create
@@ -77,12 +76,10 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( OrderCompleteRequest order)
+        public async Task<IActionResult> Create(OrderCompleteRequest order, int? animalId, int? productId)
         {
-            var customers = await GetCustomer();
-            var promotions = await GetPromotion();
-            var animals = await GetAnimal();
-
+            var promotions = await GetPromotion(); 
+            
             bool saveStatus = false;
             var token = HttpContext.Session.GetString("Token");
 
@@ -98,7 +95,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                 Console.WriteLine(JsonConvert.SerializeObject(order));
 
-                var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "Orders", order);
+                var response = await httpClient.PostAsJsonAsync($"{Const.APIEndPoint}Orders", order);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -109,20 +106,38 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                     {
                         saveStatus = true;
                     }
+                    else if (result != null && result.Message.Contains("Out of quantity"))
+                    {
+                        ModelState.AddModelError("", result.Message);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "An error occurred while creating the order.");
                 }
             }
 
-            if (saveStatus)
+            if (!saveStatus)
             {
-                return RedirectToAction(nameof(Index));
+                var animal = await GetAnimalById(animalId ?? 0);
+                var product = await GetProductById(productId ?? 0);
+
+                ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
+                ViewData["AnimalId"] = animalId ?? 0;
+                ViewData["ProductId"] = productId ?? 0; 
+
+                ViewData["AnimalName"] = animal?.Name ?? "Unknown";
+                ViewData["ProductName"] = product?.Name ?? "Unknown";
+
+                order.AnimalID = animalId;
+                order.ProductID = productId;
+                order.Quantity = order.Quantity;
+
+                return View(order);
             }
-
-            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
-            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
-
-            return View(order);
+            return RedirectToAction(nameof(Index));
         }
+
 
 
 
@@ -133,10 +148,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             {
                 return NotFound();
             }
-
-            var customers = await GetCustomer();
             var promotions = await GetPromotion();
-            var animals = await GetAnimal();
 
             using (var httpClient = new HttpClient())
             {
@@ -151,29 +163,34 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         {
                             var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
 
-                            var totalAmount = data.OrderDetails.Sum(od => od.Amount ?? 0);
-                            var totalSubtotal = data.OrderDetails.Sum(od => od.Subtotal ?? 0);
-                            var totalDiscount = data.OrderDetails.Sum(od => od.Discount ?? 0);
+                            var animalId = data.OrderDetails.Sum(od => od.AnimalId);
+                            var productId = data.OrderDetails.Sum(od => od.ProductId);
 
 
                             var orderCompleteRequest = new OrderCompleteRequest
                             {
                                 OrderId = data.OrderId,
-                                TotalAmount = data.TotalAmount,
                                 PromotionId = data.PromotionId,
                                 ShippingAddress = data.ShippingAddress,
                                 DeliveryMethod = data.DeliveryMethod,
-                                PaymentStatus = data.PaymentStatus,
-                                Vat = data.Vat,
-                                Amount = totalAmount, 
-                                Subtotal = totalSubtotal,
-                                Discount = totalDiscount
                             };
 
-                            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
-                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
 
+                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
+                            if (animalId.HasValue)
+                            {
+                                var animal = await GetAnimalById(animalId ?? 0);
+                                ViewData["AnimalId"] = animalId ?? 0;
+                                ViewData["AnimalName"] = animal?.Name ?? "Unknown";
+
+                            }else if (productId.HasValue)
+                            {
+                                var product = await GetProductById(productId ?? 0);
+                                ViewData["ProductId"] = productId ?? 0;
+                                ViewData["ProductName"] = product?.Name ?? "Unknown";
+                            }
+
+                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
                             return View(orderCompleteRequest); 
                         }
                     }
@@ -192,10 +209,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             {
                 return NotFound();
             }
-
-            var customers = await GetCustomer();
             var promotions = await GetPromotion();
-            var animals = await GetAnimal();
             bool saveStatus = false;
 
             var token = HttpContext.Session.GetString("Token");
@@ -226,11 +240,10 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             if (saveStatus)
             {
-                return RedirectToAction(nameof(Index));
+                
+                return RedirectToAction("Index", "Orders");
             }
-            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
             ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
             return View(order); 
         }
 
@@ -242,10 +255,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             {
                 return NotFound();
             }
-
-            var customers = await GetCustomer();
-            var promotions = await GetPromotion();
-            var animals = await GetAnimal();
 
             using (var httpClient = new HttpClient())
             {
@@ -259,9 +268,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         if (result != null && result.Data != null)
                         {
                             var data = JsonConvert.DeserializeObject<OrderResponseModel>(result.Data.ToString());
-                            ViewData["CustomerId"] = new SelectList(customers, "CustomerId", "Name");
-                            ViewData["PromotionId"] = new SelectList(promotions, "PromotionId", "Title");
-                            ViewData["AnimalId"] = new SelectList(animals, "AnimalId", "Name");
                             return View(data); 
                         }
                     }
@@ -303,7 +309,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             }
             else
             {
-                return RedirectToAction();
+                return RedirectToAction("Index", "Orders");
             }
         }
 
@@ -314,12 +320,12 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
 
 
-        public async Task<List<Customer>> GetCustomer()
+        public async Task<Product> GetProductById(int? id)
         {
-            var customers = new List<Customer>();
+            var products = new Product();
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Customers"))
+                using (var res = await httpClient.GetAsync($"{Const.APIEndPoint}Products/{id}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -328,13 +334,13 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                         if (result != null && result.Data != null)
                         {
-                            customers = JsonConvert.DeserializeObject<List<Customer>>(result.Data.ToString());
+                            products = JsonConvert.DeserializeObject<Product>(result.Data.ToString());
 
                         }
                     }
                 }
             }
-            return customers;
+            return products;
         }
 
 
@@ -360,12 +366,12 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             }
             return promotions;
         }
-        public async Task<List<Animal>> GetAnimal()
+        public async Task<Animal> GetAnimalById(int? id)
         {
-            var animals = new List<Animal>();
+            var animals = new Animal();
             using (var httpClient = new HttpClient())
             {
-                using (var res = await httpClient.GetAsync(Const.APIEndPoint + "Animals/get-Animal-by-user"))
+                using (var res = await httpClient.GetAsync($"{Const.APIEndPoint}Animals/{id}"))
                 {
                     if (res.IsSuccessStatusCode)
                     {
@@ -374,7 +380,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
                         if (result != null && result.Data != null)
                         {
-                            animals = JsonConvert.DeserializeObject<List<Animal>>(result.Data.ToString());
+                            animals = JsonConvert.DeserializeObject<Animal>(result.Data.ToString());
 
                         }
                     }

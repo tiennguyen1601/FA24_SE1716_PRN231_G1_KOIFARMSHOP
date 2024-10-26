@@ -10,7 +10,6 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
 
         [Required(ErrorMessage = "Total amount is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Total amount must be greater than 0.")]
-        public decimal TotalAmount { get; set; }
 
         public int? PromotionId { get; set; }
 
@@ -21,19 +20,10 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
         [Required(ErrorMessage = "Delivery method is required.")]
         public string DeliveryMethod { get; set; }
 
-        [Required(ErrorMessage = "Payment status is required.")]
-        public string PaymentStatus { get; set; }
-
-        public decimal? Vat { get; set; }
         public int? AnimalID { get; set; }
+        public int? ProductID { get; set; }
+        public int? Quantity { get; set; }
 
-        [Required(ErrorMessage = "Quantity is required.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
-        public int Quantity { get; set; }
-
-        public decimal? Amount { get; set; }
-        public decimal? Subtotal { get; set; }
-        public decimal? Discount { get; set; }
        
     }
 

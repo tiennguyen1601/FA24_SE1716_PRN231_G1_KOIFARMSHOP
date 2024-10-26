@@ -35,6 +35,8 @@ namespace KOIFARMSHOP.Data.DTO.OrderDTO
         public decimal? Amount { get; set; }
         public decimal? Subtotal { get; set; }
         public decimal? Discount { get; set; }
+        public int? AnimalId { get; set; }
+        public int? ProductId { get; set; }
         public string AnimalName { get; set; }
         public string ProductName { get; set; }
     }
