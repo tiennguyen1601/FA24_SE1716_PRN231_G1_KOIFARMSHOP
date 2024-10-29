@@ -6,78 +6,52 @@
 
 <h1 class="text-center mb-4">Order List</h1>
 
-<p class="text-center">
-    <a asp-action="Create" class="btn btn-success">Create New</a>
-</p>
+<button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#searchFormCollapse" aria-expanded="false" aria-controls="searchFormCollapse">
+    Search
+</button>
 
-@* <table class="table table-striped table-hover">
-    <thead class="table-light">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.OrderDate)</th>
-            <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
-            <th>@Html.DisplayNameFor(model => model.ShippingAddress)</th>
-            <th>@Html.DisplayNameFor(model => model.DeliveryMethod)</th>
-            <th>@Html.DisplayNameFor(model => model.PaymentStatus)</th>
-            <th>@Html.DisplayNameFor(model => model.Vat)</th>
-            <th>@Html.DisplayNameFor(model => model.TotalAmountVat)</th>
-            <th>@Html.DisplayNameFor(model => model.Status)</th>
-            <th>@Html.DisplayNameFor(model => model.CustomerName) </th>
-            <th>@Html.DisplayNameFor(model => model.PromotionTitle)</th>
-            <th class="text-center" style="width: 150px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Any())
-        {
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.OrderDate)</td>
-                    <td> @Html.DisplayFor(modelItem => item.TotalAmount)</td>
-                    <td> @Html.DisplayFor(modelItem => item.ShippingAddress)</td>
-                    <td>@Html.DisplayFor(modelItem => item.DeliveryMethod)</td>
-                    <td>@Html.DisplayFor(modelItem => item.PaymentStatus)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Vat)</td>
-                    <td>@Html.DisplayFor(modelItem => item.TotalAmountVat)</td>
-                    <td> @Html.DisplayFor(modelItem => item.Status) </td>
-                    <td>@Html.DisplayFor(modelItem => item.CustomerName)</td>
-                    <td> @Html.DisplayFor(modelItem => item.PromotionTitle)</td>
-                    <td class="text-center">
-                        <a asp-action="Edit" asp-route-id="@item.OrderId" class="btn btn-warning btn-sm">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.OrderId" class="btn btn-info btn-sm">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.OrderId" class="btn btn-danger btn-sm">Delete</a>
-                    </td>
-                </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="11" class="text-center">No orders found.</td>
-            </tr>
-        }
-    </tbody>
-</table> *@
+<form id="searchForm" asp-controller="Orders" method="get" class="form-inline justify-content-center mb-4">
+    <div class="input-group mb-2">
+        <input type="text" id="searchString" name="searchString" value="@ViewBag.SearchString" placeholder="Search by name" class="form-control" />
+    </div>
+    <div class="input-group mb-2">
+        <input type="text" id="shippingAddress" placeholder="Shipping Address" class="form-control" />
+    </div>
+    <div class="input-group mb-2">
+        <input type="text" id="deliveryMethod" placeholder="Delivery Method" class="form-control" />
+    </div>
+    <div class="input-group mb-2">
+        <input type="text" id="paymentStatus" placeholder="Payment Status" class="form-control" />
+    </div>
+    <div class="input-group mb-2">
+        <input type="number" id="totalAmountVAT" placeholder="Total Amount VAT" class="form-control" />
+    </div>
+    <div class="input-group-append">
+        <button type="button" class="btn btn-primary" onclick="loadData()">Search</button>
+    </div>
+</form>
+
+
 
 <div class="row">
     <div class="col-md-12">
         <table class="table table-striped table-bordered table-hover">
             <thead>
                 <tr class="card-header">
-                    <th class="card-title text-center">OrderDate</th>
-                    <th class="card-title text-center">TotalAmount</th>
-                    <th class="card-title text-center">ShippingAddress</th>
-                    <th class="card-title text-center">DeliveryMethod</th>
-                    <th class="card-title text-center">PaymentStatus</th>
-                    <th class="card-title text-center">Vat</th>
-                    <th class="card-title text-center">TotalAmountVat</th>
-                    <th class="card-title text-center">Status</th>
-                    <th class="card-title text-center">CustomerName</th>
-                    <th class="card-title text-center">PromotionTitle</th>
+                    <th class="text-center">Order Date</th>
+                    <th class="text-center">Shipping Address</th>
+                    <th class="text-center">Delivery Method</th>
+                    <th class="text-center">Payment Status</th>
+                    <th class="text-center">VAT</th>
+                    <th class="text-center">Total Amount (VAT)</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Customer Name</th>
+                    <th class="text-center">Promotion Title</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody class="tblOrders">
+                <!-- Dữ liệu sẽ được chèn vào đây bằng JavaScript -->
             </tbody>
         </table>
     </div>
@@ -87,54 +61,58 @@
     <div class="col-md-12">
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center" id="paginationControls">
+                <!-- Các nút phân trang sẽ được chèn vào đây bằng JavaScript -->
             </ul>
         </nav>
     </div>
 </div>
+
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            loadData();
+            loadData(); // Tải dữ liệu khi trang được tải
         });
-        function displayOrders(orders) {
-            var html = '';
-            $.each(orders, function (key, item) {
-                html += '<tr>';
-                html += '<td>' + item.orderDate + '</td>';
-                html += '<td>' + item.totalAmount + '</td>';
-                html += '<td>' + item.shippingAddress + '</td>';
-                html += '<td>' + item.deliveryMethod + '</td>';
-                html += '<td>' + item.paymentStatus + '</td>';
-                html += '<td>' + item.vat + '</td>';
-                html += '<td>' + item.totalAmountVat + '</td>';
-                html += '<td>' + item.status + '</td>';
-                html += '<td>' + item.customerName + '</td>';
-                html += '<td>' + item.promotionTitle + '</td>';
-
-                html += '<td>';
-                html += '<a class="btn btn-sm btn-info" href="/Orders/Edit/' + item.orderId + '">Edit</a> ';
-                html += '<a class="btn btn-sm btn-secondary" href="/Orders/Details/' + item.orderId + '">Details</a> ';
-                html += '<a class="btn btn-sm btn-secondary" href="/Orders/Delete/' + item.orderId + '">Delete</a> ';
-                html += '</td>';
-                html += '</tr>';
-            });
-            $('.tblOrders').html(html);
-        }
 
         var TotalItems = 0;
         var PageSize = 5;
         var CurrentPage = 1;
 
         function loadData(page = 1) {
+            var searchString = $('#searchString').val();
+            var shippingAddress = $('#shippingAddress').val();
+            var deliveryMethod = $('#deliveryMethod').val();
+            var paymentStatus = $('#paymentStatus').val();
+            var totalAmountVAT = $('#totalAmountVAT').val();
+
+            // Build the query string with filters
+            var query = `https://localhost:7176/api/Orders/search?searchValue=${searchString}&page=${page}&size=${PageSize}`;
+
+            if (shippingAddress) {
+                query += `&ShippingAddress=${encodeURIComponent(shippingAddress)}`;
+            }
+            if (deliveryMethod) {
+                query += `&DeliveryMethod=${encodeURIComponent(deliveryMethod)}`;
+            }
+            if (paymentStatus) {
+                query += `&PaymentStatus=${encodeURIComponent(paymentStatus)}`;
+            }
+            if (totalAmountVAT) {
+                query += `&TotalAmountVAT=${totalAmountVAT}`;
+            }
+
             $.ajax({
-                url: 'https://localhost:7176/api/Orders?page=' + page + '&size=' + PageSize,
+                url: query,
                 type: 'GET',
                 success: function (result) {
-                    TotalItems = result.data.totalItems;
-                    PageSize = result.data.pageSize;
-                    CurrentPage = result.data.currentPage;
-                    displayOrders(result.data.data);
-                    updatePaginationControls();
+                    if (result.data) {
+                        TotalItems = result.data.totalItems;
+                        PageSize = result.data.pageSize;
+                        CurrentPage = result.data.currentPage;
+                        displayOrders(result.data.data);
+                        updatePaginationControls();
+                    } else {
+                        $('.tblOrders').html('<tr><td colspan="10" class="text-center">No orders found.</td></tr>');
+                    }
                 },
                 error: function (xhr, error) {
                     alert("Failed to load orders: " + xhr.statusText);
@@ -142,28 +120,55 @@
             });
         }
 
+
+
+        function displayOrders(orders) {
+            $('.tblOrders').empty();
+
+            var html = '';
+            $.each(orders, function (key, item) {
+                html += '<tr>';
+                html += `<td>${item.orderDate}</td>`;
+                html += `<td>${item.shippingAddress}</td>`;
+                html += `<td>${item.deliveryMethod}</td>`;
+                html += `<td>${item.paymentStatus}</td>`;
+                html += `<td>${item.vat}</td>`;
+                html += `<td>${item.totalAmountVat}</td>`;
+                html += `<td>${item.status}</td>`;
+                html += `<td>${item.customerName}</td>`;
+                html += `<td>${item.promotionTitle}</td>`;
+                html += `<td class="text-center">
+                            <a class="btn btn-sm btn-warning" href="/Orders/Edit/${item.orderId}">Edit</a>
+                            <a class="btn btn-sm btn-info" href="/Orders/Details/${item.orderId}">Details</a>
+                            <a class="btn btn-sm btn-danger" href="/Orders/Delete/${item.orderId}">Delete</a>
+                         </td>`;
+                html += '</tr>';
+            });
+            $('.tblOrders').html(html); // Cập nhật nội dung bảng
+        }
+
+
         function updatePaginationControls() {
             var totalPages = Math.ceil(TotalItems / PageSize);
             var paginationHtml = '';
 
             // Previous button
             paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
-                        <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
-                    </li>`;
+                                        <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+                                       </li>`;
 
             // Page numbers
             for (var i = 1; i <= totalPages; i++) {
                 paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
-                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-                        </li>`;
+                                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                                           </li>`;
             }
 
             // Next button
             paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
-                        <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
-                    </li>`;
+                                        <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+                                       </li>`;
 
-            // Update the pagination controls
             $('#paginationControls').html(paginationHtml);
         }
 

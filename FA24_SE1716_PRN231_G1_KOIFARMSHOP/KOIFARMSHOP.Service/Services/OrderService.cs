@@ -1,16 +1,19 @@
 ﻿using AutoMapper;
 using KOIFARMSHOP.Common;
 using KOIFARMSHOP.Data;
+using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Data.Models;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services.JWTService;
+using Microsoft.EntityFrameworkCore;
 namespace KOIFARMSHOP.Service.Services
 {
     public interface IOrderService
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetAll(int? page, int? size);
+        Task<IBusinessResult> SearchAndPaginateOrders(OrderFilterReqModel? filterReqModel, string? searchValue, int? page, int? size);
         Task<IBusinessResult> GetByID(int id);
         Task<IBusinessResult> Save(OrderCompleteRequest orderCompleteRequest, string token);
         Task<IBusinessResult> DeleteByID(int id);
@@ -59,6 +62,62 @@ namespace KOIFARMSHOP.Service.Services
 
             return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, orderBuyRequestModels);
         }
+        public async Task<IBusinessResult> SearchAndPaginateOrders(OrderFilterReqModel? filterReqModel, string? searchValue, int? page, int? size)
+        {
+            var ordersList = await _unitOfWork.OrderRepository.GetAllDetail();
+
+            if (filterReqModel != null)
+            {
+                if (filterReqModel.ShippingAddress != null && filterReqModel.ShippingAddress.Any())
+                {
+                    ordersList = ordersList.Where(o => filterReqModel.ShippingAddress.Contains(o.ShippingAddress)).ToList();
+                }
+
+                if (filterReqModel.DeliveryMethod != null && filterReqModel.DeliveryMethod.Any())
+                {
+                    ordersList = ordersList.Where(o => filterReqModel.DeliveryMethod.Contains(o.DeliveryMethod)).ToList();
+                }
+
+                if (filterReqModel.PaymentStatus != null && filterReqModel.PaymentStatus.Any())
+                {
+                    ordersList = ordersList.Where(o => filterReqModel.PaymentStatus.Contains(o.PaymentStatus)).ToList();
+                }
+
+                if (filterReqModel.TotalAmountVAT.HasValue)
+                {
+                    ordersList = ordersList.Where(o => o.TotalAmount >= filterReqModel.TotalAmountVAT.Value).ToList();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                ordersList = ordersList.Where(o => o.ShippingAddress.Contains(searchValue) ||
+                                                                   o.DeliveryMethod.Contains(searchValue) ||
+                                                                   o.PaymentStatus.Contains(searchValue)).ToList();
+            }
+
+            var totalItemCount = ordersList.Count;
+
+            var pagedOrders = ordersList
+                .Skip(((page ?? 1) - 1) * (size ?? 10))
+                .Take(size ?? 10)
+                .ToList();
+
+            var orderResponseList = _mapper.Map<List<OrderResponseModel>>(pagedOrders);
+
+            var result = new Pagination<OrderResponseModel>
+            {
+                TotalItems = totalItemCount,
+                PageSize = size ?? 10,
+                CurrentPage = page ?? 1,
+                Data = orderResponseList
+            };
+
+            return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
+        }
+
+
+
 
 
         public async Task<IBusinessResult> GetAll(int? page, int? size)
