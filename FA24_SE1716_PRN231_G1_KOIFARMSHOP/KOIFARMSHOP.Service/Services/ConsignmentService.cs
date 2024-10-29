@@ -18,6 +18,7 @@ namespace KOIFARMSHOP.Service.Services
         Task<IBusinessResult> GetByID(int id);
         Task<IBusinessResult> Save(Consignment consignment, string token);
         Task<IBusinessResult> DeleteByID(int id);
+        Task<IBusinessResult> Search(string consignmentType, decimal? price, string status, string token);
     }
     public class ConsignmentService : IConsignmentService
     {
@@ -29,6 +30,30 @@ namespace KOIFARMSHOP.Service.Services
             _unitOfWork ??= new UnitOfWork();
             _jwtService = jWTService;
         }
+
+        public async Task<IBusinessResult> Search(string consignmentType, decimal? price, string status, string token)
+        {
+            var userIdString = _jwtService.decodeToken(token, "userid");
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return new BusinessResult(Const.FAIL_CREATE_CODE, "Invalid user ID.", null);
+            }
+
+            var consignments = await _unitOfWork.ConsignmentRepository.GetAllDetail(userId);
+
+            consignments = consignments
+                .Where(c =>
+                    (string.IsNullOrEmpty(consignmentType) || c.ConsignmentType?.Contains(consignmentType) == true) &&
+                    (!price.HasValue || c.Price == price.Value) &&
+                    (string.IsNullOrEmpty(status) || c.Status?.Equals(status, StringComparison.OrdinalIgnoreCase) == true)
+                ).ToList();
+
+            return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, consignments);
+        }
+
+
+
+
         public async Task<IBusinessResult> GetAll(string token)
         {
             var userIdString = _jwtService.decodeToken(token, "userid");
