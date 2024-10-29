@@ -25,7 +25,7 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
         }
 
         // GET: Consignments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string consignmentType, decimal? price, string status)
         {
             var token = HttpContext.Session.GetString("Token");
 
@@ -36,9 +36,17 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Consignments"))
+                var url = $"{Const.APIEndPoint}Consignments?ConsignmentType={consignmentType}&Price={price}&Status={status}";
+
+                if (consignmentType != null && price != null && status != null)
+                {
+                    url = $"{Const.APIEndPoint}Consignments/search?ConsignmentType={consignmentType}&Price={price}&Status={status}";
+                }
+
+
+                using (var response = await httpClient.GetAsync(url))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -48,15 +56,20 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         if (result != null && result.Data != null)
                         {
                             var data = JsonConvert.DeserializeObject<List<Consignment>>(result.Data.ToString());
-                            return View(data);
+
+
+                            if (data != null && data.Any())
+                            {
+                                return View(data);
+                            }
                         }
                     }
                 }
             }
 
-            // If the request fails or no data is returned, return an empty list
             return View(new List<Consignment>());
         }
+
 
 
         // GET: Consignments/Details/5

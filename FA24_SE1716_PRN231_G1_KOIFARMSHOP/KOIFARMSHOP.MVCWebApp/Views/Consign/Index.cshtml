@@ -20,6 +20,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
+                        <label for="animalId">Animal Id:</label>
+                        <input type="text" id="animalId" name="animalId" class="form-control" required>
+                    </div>
+                    <div class="form-group">
                         <label for="consignmentType">Consignment Type:</label>
                         <input type="text" id="consignmentType" name="consignmentType" class="form-control" required>
                     </div>
@@ -63,7 +67,10 @@
                     <th class="card-title text-center">EndDate</th>
                     <th class="card-title text-center">Price</th>
                     <th class="card-title text-center">Note</th>
+                    <th class="card-title text-center">CreatedAt</th>
+                    <th class="card-title text-center">CommissionRate</th>
                     <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">Actions</th>
                 </tr>
             </thead>
             <tbody class="tblConsignments">
@@ -83,6 +90,11 @@
 
             $('#btSave').click(function () {
                 saveConsignment();
+            });
+
+            $(document).on('click', '.btn-delete', function () {
+                var consignmentId = $(this).data('id');
+                deleteConsignment(consignmentId);
             });
         });
 
@@ -104,7 +116,10 @@
                         html += '<td>' + item.endDate + '</td>';
                         html += '<td>' + item.price + '</td>';
                         html += '<td>' + item.notes + '</td>';
+                        html += '<td>' + item.createdAt + '</td>';
+                        html += '<td>' + item.commissionRate + '</td>';
                         html += '<td>' + item.status + '</td>';
+                        html += '<td><button class="btn btn-danger btn-delete" data-id="' + item.consignmentId + '">Delete</button></td>';
                         html += '</tr>';
                     });
                     $('.tblConsignments').html(html);
@@ -115,27 +130,21 @@
             });
         }
 
-        // Function to show modal for adding consignment
         function addConsignment() {
-            // Reset form fields before showing modal
-            $("#customerId, #animalId, #consignmentType, #startDate, #endDate, #price, #status, #notes, #commissionRate, #orderId").val('');
+            $("#animalId, #consignmentType, #startDate, #endDate, #price, #notes, #commissionRate").val('');
             $("#consignmentModalLabel").html("Add New Consignment");
             $("#consignmentModal").modal('show');
         }
 
-        // Function to save consignment
         function saveConsignment() {
             var consignmentData = {
-                customerId: $("#customerId").val(),
                 animalId: $("#animalId").val(),
                 consignmentType: $("#consignmentType").val(),
                 startDate: $("#startDate").val(),
                 endDate: $("#endDate").val(),
                 price: $("#price").val(),
-                status: $("#status").val(),
                 notes: $("#notes").val(),
-                commissionRate: $("#commissionRate").val(),
-                orderId: $("#orderId").val()
+                commissionRate: $("#commissionRate").val()
             };
 
             $.ajax({
@@ -143,16 +152,39 @@
                 type: 'POST',
                 contentType: 'application/json;charset=utf-8',
                 data: JSON.stringify(consignmentData),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                },
                 success: function (result) {
                     alert("Consignment added successfully!");
                     $("#consignmentModal").modal('hide');
-                    loadData(); // Reload consignment list
+                    loadData();
                 },
                 error: function (xhr, error) {
                     alert("Failed to add consignment: " + xhr.statusText);
                     console.error("Error details: ", xhr.responseText);
                 }
             });
+        }
+
+        function deleteConsignment(id) {
+            if (confirm("Are you sure you want to delete this consignment?")) {
+                $.ajax({
+                    url: 'https://localhost:7176/api/Consignments/' + id,
+                    type: 'DELETE',
+                    // beforeSend: function (xhr) {
+                    //     xhr.setRequestHeader('Authorization', 'Bearer @ViewBag.Token');
+                    // },
+                    success: function (result) {
+                        alert("Consignment deleted successfully!");
+                        loadData();
+                    },
+                    error: function (xhr, error) {
+                        alert("Failed to delete consignment: " + xhr.statusText);
+                        console.error("Error details: ", xhr.responseText);
+                    }
+                });
+            }
         }
     </script>
 }

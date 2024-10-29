@@ -24,6 +24,14 @@ namespace KoiFarmShop.APIService.Controllers
             _consignmentService = consignmentService;
         }
 
+        [HttpGet("search")]
+        public async Task<IBusinessResult> Search([FromQuery] string consignmentType, [FromQuery] decimal? price, [FromQuery] string status)
+        {
+            string token = Request.Headers["Authorization"].ToString().Split(" ")[1];
+            return await _consignmentService.Search(consignmentType, price, status, token);
+        }
+
+
         [HttpGet]
         public async Task<IBusinessResult> GetConsignments()
         {
