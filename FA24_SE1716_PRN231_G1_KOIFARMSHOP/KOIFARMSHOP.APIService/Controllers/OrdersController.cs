@@ -1,4 +1,5 @@
-﻿using KOIFARMSHOP.Data.DTO.OrderDTO;
+﻿using KOIFARMSHOP.Data.DTO.AniamlDTO;
+using KOIFARMSHOP.Data.DTO.OrderDTO;
 using KOIFARMSHOP.Service.Base;
 using KOIFARMSHOP.Service.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +17,14 @@ namespace KOIFARMSHOP.APIService.Controllers
             _orderService = orderService;
         }
 
+        [HttpGet("search")]
+        public async Task<IBusinessResult> SearchOrders([FromQuery] OrderFilterReqModel? filterModel, [FromQuery] string? searchValue, int? page = 1, int? size = 10)
+        {
+            return await _orderService.SearchAndPaginateOrders(filterModel, searchValue, page, size);
+        }
 
         [HttpGet]
-        public async Task<IBusinessResult> GetProducts(int? page = 1, int? size = 10)
+        public async Task<IBusinessResult> GetOrders(int? page = 1, int? size = 10)
         {
             return await _orderService.GetAll(page, size);
         }

@@ -31,6 +31,15 @@
 
             <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Customer)</dt>
             <dd class="col-sm-9">@Html.DisplayFor(model => model.Customer.Name)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedAt)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Order)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.OrderId)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CommissionRate)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.CommissionRate)</dd>
         </dl>
 
         <a asp-action="Index" class="btn btn-secondary">
