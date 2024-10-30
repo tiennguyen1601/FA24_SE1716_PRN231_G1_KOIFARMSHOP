@@ -10,9 +10,12 @@
     <a class="btn btn-primary mb-3" asp-action="Create">Create New</a>
 </p>
 
+<!-- Search Form with Filters for Species, Name, and Origin -->
 <form id="searchForm" asp-controller="Animals" method="get" class="form-inline justify-content-center mb-4">
     <div class="input-group">
-        <input type="text" id="searchString" name="searchString" value="@ViewBag.SearchString" placeholder="Search by name" class="form-control" />
+        <input type="text" id="species" name="species" placeholder="Species" class="form-control mx-2" />
+        <input type="text" id="name" name="name" placeholder="Name" class="form-control mx-2" />
+        <input type="text" id="origin" name="origin" placeholder="Origin" class="form-control mx-2" />
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
@@ -62,18 +65,49 @@
 
             $('#searchForm').submit(function (event) {
                 event.preventDefault();
-                var searchTerm = $('#searchString').val();
-                loadData(1, searchTerm);
+                const species = $('#species').val();
+                const name = $('#name').val();
+                const origin = $('#origin').val();
+                loadData(1, species, name, origin);
             });
         });
 
-        var PageSize = 2;
+        var PageSize = 10;
         var CurrentPage = 1;
         var TotalItems = 0;
 
-        function loadData(page = 1, searchString = '') {
+        function loadData(page = 1, species = '', name = '', origin = '') {
+            let url;
+
+            // Determine the correct URL based on filter presence
+            if (!species && !name && !origin) {
+                // No filters applied
+                url = `https://localhost:7176/api/Animals/search?page=${page}&size=${PageSize}`;
+            } else if (species && !name && !origin) {
+                // Only Species filter applied
+                url = `https://localhost:7176/api/Animals/search?Species=${encodeURIComponent(species)}&page=${page}&size=${PageSize}`;
+            } else if (!species && name && !origin) {
+                // Only Name filter applied
+                url = `https://localhost:7176/api/Animals/search?Name=${encodeURIComponent(name)}&page=${page}&size=${PageSize}`;
+            } else if (!species && !name && origin) {
+                // Only Origin filter applied
+                url = `https://localhost:7176/api/Animals/search?Origin=${encodeURIComponent(origin)}&page=${page}&size=${PageSize}`;
+            } else if (species && name && !origin) {
+                // Species and Name filters applied
+                url = `https://localhost:7176/api/Animals/search?Species=${encodeURIComponent(species)}&Name=${encodeURIComponent(name)}&page=${page}&size=${PageSize}`;
+            } else if (species && !name && origin) {
+                // Species and Origin filters applied
+                url = `https://localhost:7176/api/Animals/search?Species=${encodeURIComponent(species)}&Origin=${encodeURIComponent(origin)}&page=${page}&size=${PageSize}`;
+            } else if (!species && name && origin) {
+                // Name and Origin filters applied
+                url = `https://localhost:7176/api/Animals/search?Name=${encodeURIComponent(name)}&Origin=${encodeURIComponent(origin)}&page=${page}&size=${PageSize}`;
+            } else {
+                // All filters applied
+                url = `https://localhost:7176/api/Animals/search?Species=${encodeURIComponent(species)}&Name=${encodeURIComponent(name)}&Origin=${encodeURIComponent(origin)}&page=${page}&size=${PageSize}`;
+            }
+
             $.ajax({
-                url: `https://localhost:7176/api/Animals/search?page=${page}&size=${PageSize}&searchValue=${encodeURIComponent(searchString)}`,
+                url: url,
                 type: 'GET',
                 success: function (result) {
                     TotalItems = result.data.totalItems;
@@ -88,62 +122,65 @@
         }
 
         function displayAnimals(animals) {
-            var html = '';
+            let html = '';
             $.each(animals, function (index, item) {
                 html += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${item.origin}</td>
-                        <td>${item.species}</td>
-                        <td>${item.type}</td>
-                        <td>${item.gender}</td>
-                        <td>${item.size}</td>
-                        <td>${item.certificate}</td>
-                        <td>${item.price}</td>
-                        <td>${item.status}</td>
-                        <td>${item.maintenanceCost}</td>
-                        <td>${item.color}</td>
-                        <td>${item.amountFeed}</td>
-                        <td>${item.healthStatus}</td>
-                        <td>${item.farmOrigin}</td>
-                        <td>${item.birthYear}</td>
-                        <td>${item.createdByNavigation?.fullName ?? 'N/A'}</td>
-                        <td>${item.modifiedByNavigation?.fullName ?? 'N/A'}</td>
-                        <td>
-                            <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
-                            <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
-                            <a class="btn btn-sm btn-danger" href="/Animals/Delete/${item.animalId}">Delete</a>
-                            <a class="btn btn-sm btn-secondary" href="/Orders/Create?animalId=${item.animalId}&animalName=${encodeURIComponent(item.name)}">Buy</a>
-                        </td>
-                    </tr>`;
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>${item.origin}</td>
+                                <td>${item.species}</td>
+                                <td>${item.type}</td>
+                                <td>${item.gender}</td>
+                                <td>${item.size}</td>
+                                <td>${item.certificate}</td>
+                                <td>${item.price}</td>
+                                <td>${item.status}</td>
+                                <td>${item.maintenanceCost}</td>
+                                <td>${item.color}</td>
+                                <td>${item.amountFeed}</td>
+                                <td>${item.healthStatus}</td>
+                                <td>${item.farmOrigin}</td>
+                                <td>${item.birthYear}</td>
+                                <td>${item.createdByNavigation?.fullName ?? 'N/A'}</td>
+                                <td>${item.modifiedByNavigation?.fullName ?? 'N/A'}</td>
+                                <td>
+                                    <a class="btn btn-sm btn-info" href="/Animals/Edit/${item.animalId}">Edit</a>
+                                    <a class="btn btn-sm btn-secondary" href="/Animals/Details/${item.animalId}">Details</a>
+                                    <a class="btn btn-sm btn-danger" href="/Animals/Delete/${item.animalId}">Delete</a>
+                                    <a class="btn btn-sm btn-secondary" href="/Orders/Create?animalId=${item.animalId}&animalName=${encodeURIComponent(item.name)}">Buy</a>
+                                </td>
+                            </tr>`;
             });
             $('.tblAnimals').html(html);
         }
 
         function updatePaginationControls() {
-            var totalPages = Math.ceil(TotalItems / PageSize);
-            var paginationHtml = '';
+            const totalPages = Math.ceil(TotalItems / PageSize);
+            let paginationHtml = '';
 
             paginationHtml += `<li class="page-item ${CurrentPage === 1 ? 'disabled' : ''}">
-                               <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
-                               </li>`;
+                                       <a class="page-link" href="#" onclick="changePage(${CurrentPage - 1})">&laquo;</a>
+                                       </li>`;
 
-            for (var i = 1; i <= totalPages; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 paginationHtml += `<li class="page-item ${i === CurrentPage ? 'active' : ''}">
-                                   <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-                                   </li>`;
+                                           <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                                           </li>`;
             }
 
             paginationHtml += `<li class="page-item ${CurrentPage === totalPages ? 'disabled' : ''}">
-                               <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
-                               </li>`;
+                                       <a class="page-link" href="#" onclick="changePage(${CurrentPage + 1})">&raquo;</a>
+                                       </li>`;
 
             $('#paginationControls').html(paginationHtml);
         }
 
         function changePage(page) {
             if (page >= 1 && page <= Math.ceil(TotalItems / PageSize)) {
-                loadData(page);
+                const species = $('#species').val();
+                const name = $('#name').val();
+                const origin = $('#origin').val();
+                loadData(page, species, name, origin);
             }
         }
     </script>

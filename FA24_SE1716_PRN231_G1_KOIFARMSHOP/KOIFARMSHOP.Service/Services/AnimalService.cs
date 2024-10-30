@@ -11,6 +11,7 @@ using KOIFARMSHOP.Data.DTO.AniamlDTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using MailKit.Search;
 
 namespace KOIFARMSHOP.Service.Services
 {
@@ -176,16 +177,11 @@ namespace KOIFARMSHOP.Service.Services
                 else
                 {
 
-                    var animalImages = await _unitOfWork.AnimalImageRepository.GetAnimalImagesByAnimalId(animalById.AnimalId);
+                    animalById.Status = "Inactive";
+                    var result = await _unitOfWork.AnimalRepository.UpdateAsync(animalById);
+                    await _unitOfWork.AnimalRepository.SaveAsync();
 
-                    foreach (var animalImage in animalImages)
-                    {
-                        await _unitOfWork.AnimalImageRepository.RemoveAsync(animalImage);
-                    }
-
-
-                    var result = await _unitOfWork.AnimalRepository.RemoveAsync(animalById);
-                    if (result)
+                    if (result > 0)
                     {
                         
                         return new BusinessResult(Const.SUCCESS_CREATE_CODE, Const.SUCCESS_CREATE_MSG, animalById);
@@ -230,7 +226,8 @@ namespace KOIFARMSHOP.Service.Services
 
             IQueryable<Animal> animalsQuery = allAnimals
                 .Include(a => a.CreatedByNavigation)
-                .Include(a => a.ModifiedByNavigation);
+                .Include(a => a.ModifiedByNavigation)
+                .Where(a => a.Status.Equals("Active"));
 
             if (!string.IsNullOrEmpty(searchValue))
             {
@@ -244,24 +241,23 @@ namespace KOIFARMSHOP.Service.Services
                     animalsQuery = animalsQuery.Where(a => filterReqModel.Species.Contains(a.Species));
                 }
 
-                if (filterReqModel.Status != null && filterReqModel.Status.Any())
+                if (filterReqModel.Name != null && filterReqModel.Name.Any())
                 {
-                    animalsQuery = animalsQuery.Where(a => filterReqModel.Status.Contains(a.Status));
+                    animalsQuery = animalsQuery.Where(a => filterReqModel.Name.Contains(a.Name));
                 }
 
-                if (filterReqModel.MinPrice.HasValue)
+                if (filterReqModel.Origin != null && filterReqModel.Origin.Any())
                 {
-                    animalsQuery = animalsQuery.Where(a => a.Price >= filterReqModel.MinPrice.Value);
+                    animalsQuery = animalsQuery.Where(a => filterReqModel.Origin.Contains(a.Origin));
                 }
 
-                if (filterReqModel.MaxPrice.HasValue)
+                if (filterReqModel.Price.HasValue)
                 {
-                    animalsQuery = animalsQuery.Where(a => a.Price <= filterReqModel.MaxPrice.Value);
+                    animalsQuery = animalsQuery.Where(a => a.Price == filterReqModel.Price.Value);
                 }
             }
 
             var totalItemCount = await animalsQuery.CountAsync();
-
             var pagedAnimals = await animalsQuery
                 .Skip(((page ?? 1) - 1) * (size ?? 10))
                 .Take(size ?? 10)
@@ -277,6 +273,7 @@ namespace KOIFARMSHOP.Service.Services
 
             return new BusinessResult(Const.SUCCESS_READ_CODE, Const.SUCCESS_READ_MSG, result);
         }
+
 
         public async Task<IBusinessResult> CompareMultipleKoiFishAttributes(List<int> koiFishIds, List<string> comparisonAttributes)
         {
