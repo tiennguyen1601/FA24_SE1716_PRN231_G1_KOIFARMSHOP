@@ -85,8 +85,9 @@ namespace KOIFARMSHOP.Service.Services
 
                 if (filterReqModel.TotalAmountVAT.HasValue)
                 {
-                    ordersList = ordersList.Where(o => o.TotalAmount >= filterReqModel.TotalAmountVAT.Value).ToList();
+                    ordersList = ordersList.Where(o => o.TotalAmountVat == filterReqModel.TotalAmountVAT).ToList();
                 }
+
             }
 
             if (!string.IsNullOrEmpty(searchValue))
