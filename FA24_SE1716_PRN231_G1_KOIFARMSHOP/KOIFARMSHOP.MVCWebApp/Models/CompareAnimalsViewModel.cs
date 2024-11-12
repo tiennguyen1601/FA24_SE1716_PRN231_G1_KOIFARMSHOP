@@ -1,13 +1,15 @@
 ﻿
 
 using KOIFARMSHOP.Data.Models;
+using Attribute = KOIFARMSHOP.Data.Models.Attribute;
 
 namespace KOIFARMSHOP.MVCWebApp.Models
 {
     public class CompareAnimalsViewModel
     {
         public List<Animal> Animals { get; set; } = new List<Animal>(); 
-        public List<int> SelectedAnimalIds { get; set; } = new List<int>(); 
+        public List<int> SelectedAnimalIds { get; set; } = new List<int>();
+        public List<Attribute> Attributes { get; set; } = new List<Attribute>();
         public List<string> SelectedAttributes { get; set; } = new List<string>();
         public List<ComparisonResult> ComparisonResults { get; set; } = new List<ComparisonResult>(); 
         public List<string> ComparisonMessages { get; set; } = new List<string>(); 

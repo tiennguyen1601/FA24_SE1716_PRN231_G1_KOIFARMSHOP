@@ -1,0 +1,35 @@
+﻿@model IEnumerable<KOIFARMSHOP.Data.Models.Attribute>
+@{
+    ViewData["Title"] = "Attribute List";
+}
+
+<h1 class="text-center my-4">Attribute List</h1>
+<a asp-action="Create" class="btn btn-primary mb-3">Create New Attribute</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Attribute Name</th>
+            <th>Display Name</th>
+            <th>Is Comparable</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var attr in Model)
+        {
+            <tr>
+                <td>@attr.AttributeName</td>
+                <td>@attr.DisplayName</td>
+                <td>@attr.IsComparable</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@attr.AttributeId" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Details" asp-route-id="@attr.AttributeId" class="btn btn-info btn-sm">Details</a>
+                    <form asp-action="Delete" asp-route-id="@attr.AttributeId" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this attribute?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
