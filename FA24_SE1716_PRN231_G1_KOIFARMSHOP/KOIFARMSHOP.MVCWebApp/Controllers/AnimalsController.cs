@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Org.BouncyCastle.Tls;
 using System.Drawing;
+using Attribute = KOIFARMSHOP.Data.Models.Attribute;
 
 namespace KOIFARMSHOP.MVCWebApp.Controllers
 {
@@ -41,11 +42,21 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
 
         public async Task<IActionResult> Compare()
         {
-            // Lấy danh sách các cá Koi từ API
+            // Lấy danh sách các cá Koi
             var animals = await GetAnimals();
 
-            // Trả về View với ViewModel chứa danh sách cá
-            return View(animals);
+            // Lấy danh sách các thuộc tính từ API
+            var attributes = await GetAttributes();
+
+            // Khởi tạo ViewModel với danh sách cá và thuộc tính
+            var viewModel = new CompareAnimalsViewModel
+            {
+                Animals = animals,
+                Attributes = attributes
+            };
+
+            // Trả về View với ViewModel chứa danh sách cá và thuộc tính
+            return View(viewModel);
         }
 
 
@@ -197,7 +208,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                 {
                     var comparisonData = JsonConvert.DeserializeObject<ComparisonData>(apiResponse.Data.ToString());
 
-                    // Prepare comparison results
                     var comparisonResults = new List<ComparisonResult>();
                     foreach (var attribute in selectedAttributes)
                     {
@@ -210,7 +220,6 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         comparisonResults.Add(result);
                     }
 
-                    // Prepare the view model
                     var viewModel = new
                     {
                         ComparisonResults = comparisonResults,
@@ -218,14 +227,13 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
                         ComparisonMessages = comparisonData.ComparisonMessage
                     };
 
-                    // Return JSON result for AJAX
                     return Json(new { success = true, data = viewModel });
                 }
             }
 
-            // Return error in case of failure
-            return Json(new { success = false, message = "Có lỗi xảy ra khi so sánh các cá koi." });
+            return Json(new { success = false, message = "Error comparing fish attributes." });
         }
+
 
 
 
@@ -247,7 +255,21 @@ namespace KOIFARMSHOP.MVCWebApp.Controllers
             }
             return animals;
         }
-
+        private async Task<List<Attribute>> GetAttributes()
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{Const.APIEndPoint}Attribute");
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                if (result?.Data != null)
+                {
+                    return JsonConvert.DeserializeObject<List<Attribute>>(result.Data.ToString()) ?? new List<Attribute>();
+                }
+            }
+            return new List<Attribute>();
+        }
 
         private async Task<Animal> GetAnimal(int id)
         {

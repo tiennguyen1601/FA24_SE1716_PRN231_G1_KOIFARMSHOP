@@ -1,0 +1,29 @@
+﻿@model KOIFARMSHOP.Data.Models.Attribute
+
+@{
+    ViewData["Title"] = "Attribute Details";
+}
+
+<h1 class="text-center my-4">Attribute Details</h1>
+
+<div class="card shadow p-4">
+    <h4>Attribute Information</h4>
+    <hr />
+    <div class="mb-3">
+        <strong>Attribute Name:</strong> @Model.AttributeName
+    </div>
+    <div class="mb-3">
+        <strong>Display Name:</strong> @Model.DisplayName
+    </div>
+    <div class="mb-3">
+        <strong>Is Comparable:</strong> @(Model.IsComparable.HasValue && Model.IsComparable.Value ? "Yes" : "No")
+    </div>
+    <div class="mb-3">
+        <strong>Is Deletable:</strong> @(Model.IsDeletable.HasValue && Model.IsDeletable.Value ? "Yes" : "No")
+    </div>
+</div>
+
+<div class="mt-4 text-center">
+    <a asp-action="Edit" asp-route-id="@Model.AttributeId" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

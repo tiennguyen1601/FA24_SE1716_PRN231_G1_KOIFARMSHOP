@@ -27,7 +27,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UnitOfWork>();
 
-
+builder.Services.AddScoped<IAttributeService, AttributeService>();
 builder.Services.AddScoped<IConsignmentService, ConsignmentService>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<IStaffService, StaffService>();

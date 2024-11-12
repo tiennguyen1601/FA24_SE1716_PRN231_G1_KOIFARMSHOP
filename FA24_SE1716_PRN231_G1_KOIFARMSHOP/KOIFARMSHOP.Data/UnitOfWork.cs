@@ -24,6 +24,7 @@ namespace KOIFARMSHOP.Data
         private ProductImageRepository productImageRepository;
         private PromotionRepository promotionRepository;
         private StaffRepository staffRepository;
+        private AttributeRepository attributeRepository;
 
         public UnitOfWork() { 
         context ??= new FA24_SE1716_PRN231_G1_KOIFARMSHOPContext();
@@ -83,6 +84,9 @@ namespace KOIFARMSHOP.Data
             get { return staffRepository ??= new StaffRepository(context); }
         }
 
-
+        public AttributeRepository AttributeRepository
+        {
+            get { return attributeRepository ??= new AttributeRepository(context); }
+        }
     }
 }
